@@ -57,24 +57,31 @@ int n = 0; //Packet ID
 unsigned long t, t_last_data_packet;
 
 // ------------------------- LIMITS DEFINITION ---------------------------------
+
+int PS_oob_max_delay = 250;  // defines the maximum duration for which a pressure sensor value can stay out of bounds in ms
+int TS_oob_max_delay = 1000; // defines the maximum duration for which a temperature sensor value can stay out of bounds in ms
+
 // Limits are defined as: LL: Lower Limit, LW: Lower Warning, N: Nominal, UW: Upper Warning, UL: Upper Limit
+// A "T" is added if the value is only checked during tests
+// A "BB" is added if the value is only checked if the bang-bang pressurization of the concered tank is active
+// If a warning is reached, a message is sent to the computer
+// If a limit is reached, the microcontroller takes action to solve the problem or to put the testbench in a safe position
+
 // Pressure sensors:
-float PS11_LL, PS11_LW = 15, PS11_N = 16 PS11_UW = 17, PS11_UL;
-float PS12_LL, PS12_LW = 9, PS12_N = 10 PS12_UW = 13, PS12_UL;
-float PS21_LL, PS21_LW = 15, PS21_N = 16, PS21_UW = 17, PS21_UL;
-float PS22_LL, PS22_LW = 9, PS22_N = 10, PS22_UW = 13, PS22_UL;
-float PS31_LL, PS31_LW = 20, PS31_N = 45, PS31_UW = 50, PS31_UL;
-float PS41_LL = 6, PS41_LW = 7, PS41_N = 10, PS41_UW = 13, PS41_UL = 14;
-float PS42_LL = 6, PS42_LW = 7, PS42_N = 10, PS42_UW = 13, PS42_UL = 14;
-float PS51_LL, PS51_LW = 40, PS51_N = 200, PS51_UW = 210, PS51_UL;
-float PS61_LL = 6, PS61_LW = 8, PS61_N = 10, PS61_UW = 11, PS61_UL = 14;
-float PS62_LL = 6, PS62_LW = 8, PS62_N = 10, PS62_UW = 11, PS62_UL = 14;
-float PS63_LL, PS63_LW, PS63_N = 10, PS63_UW, PS63_UL;
-float PS64_LL, PS64_LW, PS64_N = 1, PS64_UW, PS64_UL;
+float PS11_BBLW = 15, PS11_N = 16,  PS11_BBUW = 17, PS11_UL = 25;
+float PS12_TLW = 9,  PS12_N = 10,  PS12_TUW = 13;
+float PS21_BBLW = 15, PS21_N = 16,  PS21_BBUW = 17, PS21_UL = 25;
+float PS22_TLW = 9,  PS22_N = 10,  PS22_TUW = 13;
+float PS31_LW = 20, PS31_N = 45,  PS31_UW = 50, PS31_UL = 55;
+float PS41_TLL = 6,  PS41_TLW = 7,  PS41_N = 10,  PS41_TUW = 13, PS41_TUL = 14;
+float PS42_TLL = 6,  PS42_TLW = 7,  PS42_N = 10,  PS42_TUW = 13, PS42_TUL = 14;
+float PS51_TLL = 10, PS51_LW = 40, PS51_N = 200, PS51_UW = 210;
+float PS61_TLL = 6,  PS61_BBLW = 8,  PS61_N = 10,  PS61_BBUW = 11, PS61_UL = 14;
+float PS62_TLL = 6,  PS62_BBLW = 8,  PS62_N = 10,  PS62_BBUW = 11, PS62_UL = 14;
 
 // Thermocouples:
-float TS31_N = 25, TS31_UW = 45, TS31_UL;
-float TS62_N = 70, TS62_UW = 85, TS62_UL = 95;
+float TS31_N = 25, TS31_UW = 45;
+float TS62_N = 70, TS62_UW = 85, TS62_TUL = 95;
 
 // ------------------------------ SETUP ----------------------------------------
 void setup(){
@@ -202,6 +209,9 @@ float LC_reading(pin){
 }
 
 void values_check(){
-    // check if values are in warning or danger zone:
-
+    // check if values reached a warning or a limit
+    // if so, start a timer (conrresponding to the last time the value was in the bounds)
+    // each time the sensors are read, check is the value is back in bounds (set the timer to zero) or is it is still out of bounds (let the timer run)
+    // once the timer value is over the time limit: PS_oob_max_delay or TS_oob_max_delay
+    // send a message, solve the problem (vent) or abort the test if necessary
 }
