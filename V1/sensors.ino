@@ -117,6 +117,14 @@ void setup(){
     thermo_11.setConversionMode(MAX31856_ONESHOT_NOWAIT);
 }
 
+void PS_for_BB{
+    // Reading the pressure sensors used for the Bang-Bang pressurization
+    PS11 = PS_25bar_reading(PS11_pin);
+    PS21 = PS_25bar_reading(PS21_pin);
+    PS61 = PS_25bar_reading(PS61_pin);
+    PS62 = PS_25bar_reading(PS62_pin);
+}
+
 void data{
 
     // requesting data from the thermocouples if not waiting for a conversion
@@ -175,6 +183,7 @@ void data{
     }
 
     values_check();                             //check if values are within limits
+    pressurization();                           //bang-bang pressurization of the tanks if enabled
     send_data();                                //send data to the ground station
     save_data();                                //save data to the SD card
     n++;                                        //increment the packet ID
