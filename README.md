@@ -4,7 +4,7 @@ Currently focusing on builing the bricks that will compose the final code, to te
 
 ------------SOUS PROGRAMMES------------------
 
-- Ethernet UDP communication: transmission et lecture de message, récuperation de paramètres par Ethernet
+- Ethernet UDP communication: transmission et lecture de message, récuperation de paramètres par Ethernet fait 
 
 - TVC: controller la position des vérins avec le potentiomètre numérique TPL0202
 TODO
@@ -22,7 +22,7 @@ TODO:
 
 - emergency state : mettre le banc en sécurité tout en lisant les capteurs en cas d'erreur majeure
 
-- valves: ajouter l'envoi de confirmations de reception de commande (Ethernet)
+- valves: ajouter l'envoi de confirmations de reception de commande (Ethernet) fait
 
 - pressurization: implementer une pressurisation bang-bang sur le réservoir choisi à une valeur donnée (automatiquement déterminer les marges)
 
