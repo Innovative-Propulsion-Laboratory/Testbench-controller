@@ -117,14 +117,6 @@ void setup(){
     thermo_11.setConversionMode(MAX31856_ONESHOT_NOWAIT);
 }
 
-void PS_for_BB{
-    // Reading the pressure sensors used for the Bang-Bang pressurization
-    PS11 = PS_25bar_reading(PS11_pin);
-    PS21 = PS_25bar_reading(PS21_pin);
-    PS61 = PS_25bar_reading(PS61_pin);
-    PS62 = PS_25bar_reading(PS62_pin);
-}
-
 void data{
 
     // requesting data from the thermocouples if not waiting for a conversion
@@ -183,7 +175,6 @@ void data{
     }
 
     values_check();                             //check if values are within limits
-    pressurization();                           //bang-bang pressurization of the tanks if enabled
     send_data();                                //send data to the ground station
     save_data();                                //save data to the SD card
     n++;                                        //increment the packet ID
@@ -218,9 +209,235 @@ float LC_reading(pin){
 }
 
 void values_check(){
+    if (PS11 => PS11_UL){
+      if (PS11_Limit_active == True && (millis(()-PS11_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS11_Limit_active == False) {
+        PS11_Limit_active == True; 
+        PS11_time_limit = millis();}
+    }
+    if (bangbang_active == True && (PS11_UL > PS11 => PS11_BBUW)) {
+      if PS11_Limit_active == True {PS11_Limit_active == False}
+      reply("warning PS11 trop haut");
+    }
+    else if (bangbang_active == True && PS11 <= PS11_BBLW) {
+      if PS11_Limit_active == True {PS11_Limit_active == False}
+      reply("warning PS11 trop bas");
+    }
+
+    if (test_active == True && PS12 => PS12_TUW) {
+      // veirf abort
+      reply("warning PS12 trop haut");
+    }
+    else if (test_active == True && PS12 <= PS12_TLW) {
+      // verif abort
+      reply("warning PS12 trop bas");
+    }
+
+    if (PS21 => PS21_UL){
+      if (PS21_Limit_active == True && (millis(()-PS21_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS21_Limit_active == False) {
+        PS21_Limit_active == True; 
+        PS21_time_limit = millis();}
+    }
+    if (bangbang_active == True && PS21 => PS21_BBUW) {
+      if PS21_Limit_active == True {PS21_Limit_active == False}
+      reply("warning PS21 trop haut");
+    }
+    else if (bangbang_active == True && PS21 <= PS21_BBLW) {
+      if PS21_Limit_active == True {PS21_Limit_active == False}
+      reply("warning PS21 trop bas");
+    }
+
+    if (test_active == True && PS22 => PS22_BBUW) {
+      reply("warning PS22 trop haut");
+    }
+    else if (test_active == True && PS22 <= PS22_BBLW) {
+      reply("warning PS22 trop bas");
+    }
+
+    if (PS31 => PS31_UL){
+      if (PS31_Limit_active == True && (millis(()-PS31_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS31_Limit_active == False) {
+        PS31_Limit_active == True; 
+        PS31_time_limit = millis();}
+    }
+    else if (PS31 => PS31_UW){
+      // warning
+    }
+    else if (PS31 <= PS31_LW){
+      // warning
+    }
+
+    if (test_active == True && PS41 => PS41_UL){
+      if (PS41_Limit_active == True && (millis(()-PS41_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS41_Limit_active == False) {
+        PS41_Limit_active == True; 
+        PS41_time_limit = millis();}
+    }
+    if (test_active == True && PS41 => PS41_BBUW) {
+      reply("warning PS41 trop haut");
+    }
+    else if (test == True && PS41 <= PS41_BBLW) {
+      reply("warning PS41 trop bas");
+    }
+    else if (test_active == True && PS41 <= PS41_LL){
+      if (PS41_Limit_active == True && (millis(()-PS41_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS41_Limit_active == False) {
+        PS41_Limit_active == True; 
+        PS41_time_limit = millis();}
+    }
+
+    if (test_active == True && PS42 => PS42_UL){
+      if (PS42_Limit_active == True && (millis(()-PS42_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS41_Limit_active == False) {
+        PS42_Limit_active == True; 
+        PS42_time_limit = millis();}
+    }
+    if (test_active == True && PS42 => PS42_BBUW) {
+      reply("warning PS42 trop haut");
+    }
+    else if (test_active == True && PS42 <= PS42_BBLW) {
+      reply("warning PS42 trop bas");
+    }
+    else if (test_active == True && PS42 <= PS42_LL){
+      if (PS42_Limit_active == True && (millis(()-PS42_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS41_Limit_active == False) {
+        PS42_Limit_active == True; 
+        PS42_time_limit = millis();}
+    }
+
+    if (PS51 => PS51_UW) {
+      // warning
+    }
+    else if (PS51 <= PS51_LW) {
+      reply("warning PS51 trop bas");
+    }
+    else if (test_active == True && PS51 <= PS51_LL){
+      if (PS51_Limit_active == True && (millis(()-PS51_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS41_Limit_active == False) {
+        PS51_Limit_active == True; 
+        PS51_time_limit = millis();}
+    }
+
+    if (PS61 => PS61_UL){
+      if (PS61_Limit_active == True && (millis(()-PS61_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS41_Limit_active == False) {
+        PS61_Limit_active == True; 
+        PS61_time_limit = millis();}
+    }
+    if (test_active == True && PS61 => PS61_BBUW) {
+      reply("warning PS61 trop haut");
+    }
+    else if (test_active == True && PS61 <= PS61_BBLW) {
+      reply("warning PS51 trop bas");
+    }
+    if (test_active == True && PS61 <= PS61_LL){
+      if (PS61_Limit_active == True && (millis(()-PS61_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS41_Limit_active == False) {
+        PS61_Limit_active == True; 
+        PS61_time_limit = millis();}
+    }
+    if (PS62 => PS62_UL){
+      if (PS62_Limit_active == True && (millis(()-PS62_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS41_Limit_active == False) {
+        PS62_Limit_active == True; 
+        PS62_time_limit = millis();}
+    }
+    if (test_active == True && PS62 => PS62_BBUW) {
+      reply("warning PS52 trop haut");
+    }
+    else if (test_active == True && PS62 <= PS62_BBLW) {
+      reply("warning PS62 trop bas");
+    }
+    if (test_active == True && PS62 <= PS62_UL){
+      if (PS62_Limit_active == True && (millis(()-PS62_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS41_Limit_active == False) {
+        PS62_Limit_active == True; 
+        PS62_time_limit = millis();}
+    }
+
+    if (TS31 => TS31_UW) {
+      reply("warning TS52 trop haut");
+    }
+
+    if (TS62_UL > TS62 => TS62_BBUW) {
+      // warning
+    }
+    else if (test_active == True && TS62 >= TS62_UL) {
+      if (PS62_Limit_active == True && (millis(()-PS62_time_limit)) == PS_limit_time{
+          // ouvrir 
+          abort_test();
+          // reply(PS11 a merder)
+        }
+      else if(PS41_Limit_active == False) {
+        PS62_Limit_active == True; 
+        PS62_time_limit = millis();}
+    }
+
+
+
     // check if values reached a warning or a limit
     // if so, start a timer (conrresponding to the last time the value was in the bounds)
     // each time the sensors are read, check is the value is back in bounds (set the timer to zero) or is it is still out of bounds (let the timer run)
     // once the timer value is over the time limit: PS_oob_max_delay or TS_oob_max_delay
     // send a message, solve the problem (vent) or abort the test if necessary
 }
+
+// float PS11_BBLW = 15, PS11_N = 16,  PS11_BBUW = 17, PS11_UL = 25;
+// float PS12_TLW = 9,  PS12_N = 10,  PS12_TUW = 13;
+// float PS21_BBLW = 15, PS21_N = 16,  PS21_BBUW = 17, PS21_UL = 25;
+// float PS22_TLW = 9,  PS22_N = 10,  PS22_TUW = 13;
+// float PS31_LW = 20, PS31_N = 45,  PS31_UW = 50, PS31_UL = 55;
+// float PS41_TLL = 6,  PS41_TLW = 7,  PS41_N = 10,  PS41_TUW = 13, PS41_TUL = 14;
+// float PS42_TLL = 6,  PS42_TLW = 7,  PS42_N = 10,  PS42_TUW = 13, PS42_TUL = 14;
+// float PS51_TLL = 10, PS51_LW = 40, PS51_N = 200, PS51_UW = 210;
+// float PS61_TLL = 6,  PS61_BBLW = 8,  PS61_N = 10,  PS61_BBUW = 11, PS61_UL = 14;
+// float PS62_TLL = 6,  PS62_BBLW = 8,  PS62_N = 10,  PS62_BBUW = 11, PS62_UL = 14;
