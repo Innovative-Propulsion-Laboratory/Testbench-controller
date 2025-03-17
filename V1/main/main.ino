@@ -1,6 +1,7 @@
 #include "Valves.h"
 #include "Pressurization.h"
 #include "Sensors.h"
+#include "UDP.h"
 
 unsigned long t_last_data_packet = 0, data_send_rate = 1000;
 
@@ -11,10 +12,13 @@ void setup() {
 
     setupSensors();
     setupValves();
+    setupUDP();
 }
 
 void loop() {
     // listen to commands
+    void receivePacket();
+
     if ((millis() - t_last_data_packet) >= data_send_rate){
         data();
     }

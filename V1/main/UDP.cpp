@@ -1,19 +1,12 @@
-#include <QNEthernet.h>
+#include "UDP.h"
 
-using namespace qindesign::network;
-constexpr uint32_t kDHCPTimeout = 15'000;  //waiting time 15 seconds
-constexpr uint16_t kPort = 5190;  // Chat port
-uint16_t senderPort;
-IPAddress senderIP;
+uint32_t kDHCPTimeout = 15'000;  //waiting time 15 seconds
+uint16_t kPort = 5190;  // Chat port
 
-
-EthernetUDP udp;
 int t;
 
-void setup() {
-  Serial.begin(11500);
-
-
+void setupUDP() {
+  // Serial.begin(11500);
   /////////////////////////////////////////////////////
   // Initilisation and setup //
   Ethernet.begin();
@@ -29,11 +22,6 @@ void setup() {
   udp.begin(kPort);
   /////////////////////////////////////////////////////
 
-}
-
-
-void loop() {
-  receivePacket();
 }
 
 void reply(int tracker, byte* index, int size) {
@@ -129,6 +117,4 @@ void receivePacket() {
   if (instructions[0] == 0xCC  && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC){ // Abort test
 
   } 
-
-  printf("\n\r");
 }
