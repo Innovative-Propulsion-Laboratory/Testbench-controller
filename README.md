@@ -32,4 +32,4 @@ TODO:
 	- pas besoin de prendre en consideration l'eau si test du battleship
 
 - idle: lien entre les états et réponses aux commandes
-db
+hello
