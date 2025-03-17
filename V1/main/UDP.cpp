@@ -1,19 +1,12 @@
-#include <QNEthernet.h>
+#include "UDP.h"
 
-using namespace qindesign::network;
-constexpr uint32_t kDHCPTimeout = 15'000;  //waiting time 15 seconds
-constexpr uint16_t kPort = 5190;  // Chat port
-uint16_t senderPort;
-IPAddress senderIP;
+uint32_t kDHCPTimeout = 15'000;  //waiting time 15 seconds
+uint16_t kPort = 5190;  // Chat port
 
-
-EthernetUDP udp;
 int t;
 
-void setup() {
-  Serial.begin(11500);
-
-
+void setupUDP() {
+  // Serial.begin(11500);
   /////////////////////////////////////////////////////
   // Initilisation and setup //
   Ethernet.begin();
@@ -31,19 +24,14 @@ void setup() {
 
 }
 
-
-void loop() {
-  receivePacket();
-}
-
 void reply(int tracker, byte* index, int size) {
-    if (tracker == 0){
+    if (tracker == 0){ // valve
       byte message[size+4];
       message[0] = 0xEE;
       message[1] = 0xEE;
       message[2] = 0xEE;
       message[3] = 0xEE;
-      for (int j = 0; j < size; j++) { // copy data
+      for (int j = 0; j < size; j++) {
       message[j+4] = index[j]; } 
       udp.send(senderIP, senderPort, message, sizeof(message));}
     else if(tracker == 1) { // data
@@ -105,11 +93,10 @@ void receivePacket() {
   if (instructions[0] == 0xFF  && instructions[1] == 0xFF && instructions[2] == 0xFF && instructions[3] == 0xFF){ // Valve
     if (instructions[6] == 0x00 || instructions[6] == 0x01) {
       setValve(instruction[5], instruction[6]);  // Activer ou dÃ©sactiver la valve
-      reply(0,instructions,sizeof(instructions));
     }
   }
   if (instructions[0] == 0xFF  && instructions[1] == 0xFF && instructions[2] == 0xEE && instructions[3] == 0xEE){ // bang-bang
-    reply(1,instructions,sizeof(instructions));
+  
   }
   if (instructions[0] == 0xEE  && instructions[1] == 0xEE && instructions[2] == 0xEE && instructions[3] == 0xEE){ // Actuators
 
@@ -129,6 +116,4 @@ void receivePacket() {
   if (instructions[0] == 0xCC  && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC){ // Abort test
 
   } 
-
-  printf("\n\r");
 }

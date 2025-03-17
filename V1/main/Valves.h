@@ -4,6 +4,7 @@
 #include "MCP23S17.h" // Include MCP23S17 library
 #include <SPI.h>
 #include <Arduino.h>
+#include "UDP.h"
 
 #define NUM_VALVES 18  // Define before using it
 

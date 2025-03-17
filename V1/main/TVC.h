@@ -10,3 +10,4 @@ void setNonVolatileWiper(byte wiper, float percentage = 50);
 void setWiper(byte wiper, float percentage = 50);
 void WipertoNV(byte wiper);
 void NVtoWiper(byte wiper);
+#endif
