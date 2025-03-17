@@ -18,7 +18,7 @@ Adafruit_MAX31856 thermo_62 = Adafruit_MAX31856(TS62_pin);
 Adafruit_MAX31856 thermo_11 = Adafruit_MAX31856(TS11_pin); //initialized last since it may return negative values
 
 int n = 0; //Packet ID
-unsigned long t;
+unsigned long t, t_since_save;
 
 // ------------------------- LIMITS DEFINITION ---------------------------------
 
@@ -596,4 +596,5 @@ void send_data(){
 
 void save_data(){
     // save data to the SD card
+
 }
