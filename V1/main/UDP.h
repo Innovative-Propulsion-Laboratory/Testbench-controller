@@ -3,6 +3,8 @@
 
 #include <stdint.h>  
 #include <QNEthernet.h>
+#include "Pressurization.h" 
+#include "Sensors.h"
 
 using namespace qindesign::network;
 uint32_t kDHCPTimeout;  
