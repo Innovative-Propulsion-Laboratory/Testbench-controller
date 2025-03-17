@@ -58,7 +58,7 @@ extern Adafruit_MAX31856 thermo_62;
 extern Adafruit_MAX31856 thermo_11; //initialized last since it may return negative values
 
 extern int n; //Packet ID
-extern unsigned long t, t_last_data_packet;
+extern unsigned long t;
 
 // ------------------------- LIMITS DEFINITION ---------------------------------
 
@@ -87,6 +87,22 @@ extern float PS62_TLL, PS62_UL;
 extern float TS31_UW;
 extern float TS62_UW, TS62_TUL;
 
+// Pressure sensors:
+extern bool PS11_UL_active,  PS11_BBLW_active, PS11_BBUW_active;
+extern bool PS12_TLW_active, PS12_TUW_active;
+extern bool PS21_UL_active, PS21_BBLW_active, PS21_BBUW_active;
+extern bool PS22_TLW_active, PS22_TUW_active;
+extern bool PS31_LW_active,  PS31_UW_active,  PS31_UL_active;
+extern bool PS41_TLL_active, PS41_TLW_active, PS41_TUW_active, PS41_TUL_active;
+extern bool PS42_TLL_active, PS42_TLW_active, PS42_TUW_active, PS42_TUL_active;
+extern bool PS51_TLL_active, PS51_LW_active,  PS51_UW_active;
+extern bool PS_WATER_TLL_active, PS_WATER_BBLW_active, PS_WATER_BBUW_active, PS_WATER_UL_active;
+
+// Thermocouples:
+extern bool TS31_UW_active;
+extern bool TS62_UW_active, TS62_TUL_active;
+
+// Functions:
 void setupSensors();
 void PS_for_BB();
 void data();

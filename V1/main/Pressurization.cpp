@@ -66,8 +66,7 @@ void BB_pressurization(){
         if (PS21 > PS21_BB_max) {setValve(SV32, 0); setValve(SV21, 1);}
     }
     if (WATER_BB){
-        PS_WATER = (PS61 + PS62)/2;
-        if (PS_WATER < WATER_BB_min) {setValve(SV52, 1); setValve(SV53, 1), setValve(SV61, 0), setValve(SV62, 0);}
-        if (PS_WATER > WATER_BB_max) {setValve(SV52, 0); setValve(SV53, 0), setValve(SV61, 1), setValve(SV62, 1);}
+        if ((PS61 <= WATER_BB_min) || (PS62 <= WATER_BB_min)) {setValve(SV52, 1); setValve(SV53, 1), setValve(SV61, 0), setValve(SV62, 0);}
+        if ((PS61 >= WATER_BB_max) || (PS62 >= WATER_BB_max)) {setValve(SV52, 0); setValve(SV53, 0), setValve(SV61, 1), setValve(SV62, 1);}
     }
 }

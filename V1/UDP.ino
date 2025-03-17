@@ -1,9 +1,11 @@
 #include <QNEthernet.h>
+
 using namespace qindesign::network;
 constexpr uint32_t kDHCPTimeout = 15'000;  //waiting time 15 seconds
 constexpr uint16_t kPort = 5190;  // Chat port
-uint16_t senderPort; 
+uint16_t senderPort;
 IPAddress senderIP;
+
 
 EthernetUDP udp;
 int t;
@@ -14,7 +16,6 @@ void setup() {
 
   /////////////////////////////////////////////////////
   // Initilisation and setup //
-  printf("Starting...\r\n");
   Ethernet.begin();
   Ethernet.onLinkState([](bool state) {
     printf("[Ethernet] Link %s\r\n", state ? "ON" : "OFF");
@@ -103,10 +104,12 @@ void receivePacket() {
 
   if (instructions[0] == 0xFF  && instructions[1] == 0xFF && instructions[2] == 0xFF && instructions[3] == 0xFF){ // Valve
     if (instructions[6] == 0x00 || instructions[6] == 0x01) {
-      //setValve(instructions[5], instructions[6]);  // Activer ou désactiver la valve
+      setValve(instruction[5], instruction[6]);  // Activer ou dÃ©sactiver la valve
+      reply(0,instructions,sizeof(instructions));
     }
   }
   if (instructions[0] == 0xFF  && instructions[1] == 0xFF && instructions[2] == 0xEE && instructions[3] == 0xEE){ // bang-bang
+    reply(1,instructions,sizeof(instructions));
   }
   if (instructions[0] == 0xEE  && instructions[1] == 0xEE && instructions[2] == 0xEE && instructions[3] == 0xEE){ // Actuators
 
@@ -129,4 +132,3 @@ void receivePacket() {
 
   printf("\n\r");
 }
-
