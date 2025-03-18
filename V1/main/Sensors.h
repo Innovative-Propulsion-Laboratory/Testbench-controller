@@ -39,83 +39,106 @@
 #define TS61_pin 36         // Water initial temperature
 #define TS62_pin 37         // Water final temperature
 
-// --------------------- VARIABLES INITIALIZATION ------------------------------
+// Structure containing all the data sent from the Teensy to the computer
+struct data {
+    uint32_t n;                 // packet ID
+    uint32_t t;                 // Timestamp (ms)
+    
+    uint16_t PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64;    // Pressure in mbar
+    float TS11, TS31, TS41, TS42, TS61, TS62;                                           // Thermocouples in °C
+    uint16_t FM11, FM21, FM61;                                                          // Flow in mL/s
+    float LC;                                                                           // Load cell (N)
+    uint16_t ref5V;                                                                     // 5V reference (mV)
 
-extern float PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64, PSalim; //add PSextra if used
-extern float LC01;
-extern float FM11, FM21, FM61;
+    uint32_t* valveState;       // Pointer to valvePositions: 18-bit valve state
+    uint8_t actLPos, actRPos;   // Actuator positions (0-255)
+    uint8_t actLOK, actROK;     // Actuator OK flags (0 or 1)
 
-extern float TS11, TS31, TS41, TS42, TS61, TS62;
-extern bool TS41_waiting,TS42_waiting,TS61_waiting,TS62_waiting,TS11_waiting;
+    int state;                  // System state
+};
 
+// External variable declarations
+extern uint32_t n;
+extern uint32_t t, t_since_save;
+extern data Data;
+
+extern bool TS41_waiting, TS42_waiting, TS61_waiting, TS62_waiting, TS11_waiting;
 extern bool test;
 
-extern Adafruit_MAX31856 thermo_31;
-extern Adafruit_MAX31856 thermo_41;
-extern Adafruit_MAX31856 thermo_42;
-extern Adafruit_MAX31856 thermo_61;
-extern Adafruit_MAX31856 thermo_62;
-extern Adafruit_MAX31856 thermo_11; //initialized last since it may return negative values
+extern Adafruit_MAX31856 thermo31;
+extern Adafruit_MAX31856 thermo41;
+extern Adafruit_MAX31856 thermo42;
+extern Adafruit_MAX31856 thermo61;
+extern Adafruit_MAX31856 thermo62;
+extern Adafruit_MAX31856 thermo11;
 
-extern int n; //Packet ID
-extern unsigned long t;
+// Limit Definitions
+extern int PS_oob_max_delay;
+extern int TS_oob_max_delay;
 
-// ------------------------- LIMITS DEFINITION ---------------------------------
+// Pressure sensor limits
+extern uint16_t PS11_UL;
+extern uint16_t PS12_TLW, PS12_TUW;
+extern uint16_t PS21_UL;
+extern uint16_t PS22_TLW, PS22_TUW;
+extern uint16_t PS31_LW, PS31_UW, PS31_UL;
+extern uint16_t PS41_TLL, PS41_TLW, PS41_TUW, PS41_TUL;
+extern uint16_t PS42_TLL, PS42_TLW, PS42_TUW, PS42_TUL;
+extern uint16_t PS51_TLL, PS51_LW, PS51_UW;
+extern uint16_t PS61_TLL, PS61_UL;
+extern uint16_t PS62_TLL, PS62_UL;
 
-extern int PS_oob_max_delay;  // defines the maximum duration for which a pressure sensor value can stay out of bounds in ms
-extern int TS_oob_max_delay; // defines the maximum duration for which a temperature sensor value can stay out of bounds in ms
+// Thermocouple limits
+extern uint16_t TS31_UW;
+extern uint16_t TS62_UW, TS62_TUL;
 
-// Limits are defined as: LL: Lower Limit, LW: Lower Warning, N: Nominal, UW: Upper Warning, UL: Upper Limit
-// A "T" is added if the value is only checked during tests
-// A "BB" is added if the value is only checked if the bang-bang pressurization of the concered tank is active -- in the "pressurization.ino" file
-// If a warning is reached, a message is sent to the computer
-// If a limit is reached, the microcontroller takes action to solve the problem or to put the testbench in a safe position
-
-// Pressure sensors:
-extern float PS11_UL;
-extern float PS12_TLW, PS12_TUW;
-extern float PS21_UL;
-extern float PS22_TLW, PS22_TUW;
-extern float PS31_LW,  PS31_UW,  PS31_UL;
-extern float PS41_TLL, PS41_TLW, PS41_TUW, PS41_TUL;
-extern float PS42_TLL, PS42_TLW, PS42_TUW, PS42_TUL;
-extern float PS51_TLL, PS51_LW,  PS51_UW;
-extern float PS61_TLL, PS61_UL;
-extern float PS62_TLL, PS62_UL;
-
-// Thermocouples:
-extern float TS31_UW;
-extern float TS62_UW, TS62_TUL;
-
-// Pressure sensors:
-extern bool PS11_UL_active,  PS11_BBLW_active, PS11_BBUW_active;
+// Active flags for pressure sensors
+extern bool PS11_UL_active, PS11_BBLW_active, PS11_BBUW_active;
 extern bool PS12_TLW_active, PS12_TUW_active;
 extern bool PS21_UL_active, PS21_BBLW_active, PS21_BBUW_active;
 extern bool PS22_TLW_active, PS22_TUW_active;
-extern bool PS31_LW_active,  PS31_UW_active,  PS31_UL_active;
+extern bool PS31_LW_active, PS31_UW_active, PS31_UL_active;
 extern bool PS41_TLL_active, PS41_TLW_active, PS41_TUW_active, PS41_TUL_active;
 extern bool PS42_TLL_active, PS42_TLW_active, PS42_TUW_active, PS42_TUL_active;
-extern bool PS51_TLL_active, PS51_LW_active,  PS51_UW_active;
+extern bool PS51_TLL_active, PS51_LW_active, PS51_UW_active;
 extern bool PS_WATER_TLL_active, PS_WATER_BBLW_active, PS_WATER_BBUW_active, PS_WATER_UL_active;
 
-// Thermocouples:
+// Active flags for thermocouples
 extern bool TS31_UW_active;
 extern bool TS62_UW_active, TS62_TUL_active;
+
+// Timestamps for pressure sensors
+extern uint32_t PS11_UL_time, PS11_BBLW_time, PS11_BBUW_time;
+extern uint32_t PS12_TLW_time, PS12_TUW_time;
+extern uint32_t PS21_UL_time, PS21_BBLW_time, PS21_BBUW_time;
+extern uint32_t PS22_TLW_time, PS22_TUW_time;
+extern uint32_t PS31_LW_time, PS31_UW_time, PS31_UL_time;
+extern uint32_t PS41_TLL_time, PS41_TLW_time, PS41_TUW_time, PS41_TUL_time;
+extern uint32_t PS42_TLL_time, PS42_TLW_time, PS42_TUW_time, PS42_TUL_time;
+extern uint32_t PS51_TLL_time, PS51_LW_time, PS51_UW_time;
+extern uint32_t PS_WATER_TLL_time, PS_WATER_BBLW_time, PS_WATER_BBUW_time, PS_WATER_UL_time;
+
+// Timestamps for thermocouples
+extern uint32_t TS31_UW_time;
+extern uint32_t TS62_UW_time, TS62_TUL_time;
 
 // Functions:
 void setupSensors();
 void PS_for_BB();
-void data();
+void sensorsLoop();
+void trigger_TS();
+void updateData();
 void values_check();
 void send_data();
 void save_data();
 
-float PS_25bar_reading(int pin);
-float PS_70bar_reading(int pin);
-float PS_350bar_reading(int pin);
-float FM11_reading(int pin);
-float FM21_reading(int pin);
-float FM61_reading(int pin);
+uint16_t PS_25bar_reading(int pin);
+uint16_t PS_70bar_reading(int pin);
+uint16_t PS_350bar_reading(int pin);
+uint16_t FM11_reading(int pin);
+uint16_t FM21_reading(int pin);
+uint16_t FM61_reading(int pin);
 float LC_reading(int pin);
+uint16_t ref5V_reading(int pin);
 
 #endif

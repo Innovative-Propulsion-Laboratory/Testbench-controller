@@ -1,23 +1,6 @@
 #include "Sensors.h"
 
 // --------------------- VARIABLES INITIALIZATION ------------------------------
-// Structure containing all the data sent from the Teensy to the computer
-struct data {
-    uint32_t n;                 // packet ID
-    uint32_t t;                 // Timestamp (ms)
-    
-    uint16_t PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64;    // Pressure in mbar
-    float TS11, TS31, TS41, TS42, TS61, TS62;                                           // Thermocouples in °C
-    uint16_t FM11, FM21, FM61;                                                          // Flow in mL/s
-    float LC;                                                                           // Load cell (N)
-    uint16_t ref5V;                                                                     // 5V reference (mV)
-
-    uint32_t* valveState;       // Pointer to valvePositions: 18-bit valve state
-    uint8_t actLPos, actRPos;   // Actuator positions (0-255)
-    uint8_t actLOK, actROK;     // Actuator OK flags (0 or 1)
-
-    int state;                  // System state
-};
 
 uint32_t n = 0; //Packet ID
 uint32_t t, t_since_save;
@@ -46,16 +29,16 @@ int TS_oob_max_delay = 1000; // defines the maximum duration for which a tempera
 // If a limit is reached, the microcontroller takes action to solve the problem or to put the testbench in a safe position
 
 // Pressure sensors:
-uint16_t PS11_UL = 25;
-uint16_t PS12_TLW = 9,  PS12_TUW = 13;
-uint16_t PS21_UL = 25;
-uint16_t PS22_TLW = 9,  PS22_TUW = 13;
-uint16_t PS31_LW = 20,  PS31_UW = 50,  PS31_UL = 55;
-uint16_t PS41_TLL = 6,  PS41_TLW = 7,  PS41_TUW = 13, PS41_TUL = 14;
-uint16_t PS42_TLL = 6,  PS42_TLW = 7,  PS42_TUW = 13, PS42_TUL = 14;
-uint16_t PS51_TLL = 10, PS51_LW = 40,  PS51_UW = 210;
-uint16_t PS61_TLL = 6,  PS61_UL = 14;
-uint16_t PS62_TLL = 6,  PS62_UL = 14;
+uint16_t PS11_UL = 25000;
+uint16_t PS12_TLW = 9000,  PS12_TUW = 13000;
+uint16_t PS21_UL = 25000;
+uint16_t PS22_TLW = 9000,  PS22_TUW = 13000;
+uint16_t PS31_LW = 20000,  PS31_UW = 50000,  PS31_UL = 55000;
+uint16_t PS41_TLL = 6000,  PS41_TLW = 7000,  PS41_TUW = 13000, PS41_TUL = 14000;
+uint16_t PS42_TLL = 6000,  PS42_TLW = 7000,  PS42_TUW = 13000, PS42_TUL = 14000;
+uint16_t PS51_TLL = 10000, PS51_LW = 40000,  PS51_UW = 210000;
+uint16_t PS61_TLL = 6000,  PS61_UL = 14000;
+uint16_t PS62_TLL = 6000,  PS62_UL = 14000;
 
 // Thermocouples:
 uint16_t TS31_UW = 45;
@@ -171,7 +154,7 @@ void updateData(){
     Data.PS64 = PS_25bar_reading(PS64_pin);
 
     // Read 5V reference
-    Data.ref5V = PSalim_reading(PSalim_pin);
+    Data.ref5V = ref5V_reading(PSalim_pin);
 
     // Read load cell
     Data.LC = LC_reading(LC01_pin);
@@ -236,7 +219,7 @@ float LC_reading(int pin){
     return 2943*analogRead(pin)/1023.0; 
 }
 
-uint16_t PSalim_reading(int pin){
+uint16_t ref5V_reading(int pin){
     return 
 }
 
