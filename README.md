@@ -24,7 +24,7 @@ TODO:
 
 - valves: ajouter l'envoi de confirmations de reception de commande (Ethernet) fait
 
-- pressurization: implementer une pressurisation bang-bang sur le réservoir choisi à une valeur donnée (automatiquement déterminer les marges)
+- pressurization: implementer une pressurisation bang-bang sur le réservoir choisi à une valeur donnée (automatiquement déterminer les marges)fait
 
 - test: test (reception de message abort) et test preparation (vannes, vérins, pressurisation puis confirmation)
 TODO:

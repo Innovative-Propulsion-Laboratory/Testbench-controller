@@ -135,10 +135,29 @@ void receivePacket() {
     }
   }
   if (instructions[0] == 0xEE  && instructions[1] == 0xEE && instructions[2] == 0xEE && instructions[3] == 0xEE){ // Actuators
-
+    if (instructions[4] == 0 ){
+      // the obcsur TVC name + instruction[5]
+    }
+    if (instructions[4] == 1 ){
+      // the obcsur TVC name + instruction[5]
+    }
   }
   if (instructions[0] == 0xEE  && instructions[1] == 0xEE && instructions[2] == 0xDD && instructions[3] == 0xDD){ // TVC pattern
-
+    if (instructions[4] == 1 ){
+      // the obcsur TVC name
+    }
+    if (instructions[4] == 2 ){
+      // the obcsur TVC name
+    }
+    if (instructions[4] == 3 ){
+      // the obcsur TVC name
+    }
+    if (instructions[4] == 4 ){
+      // the obcsur TVC name
+    }
+    if (instructions[4] == 5){
+      // the obcsur TVC name
+    }
   }
   if (instructions[0] == 0xDD  && instructions[1] == 0xDD && instructions[2] == 0xDD && instructions[3] == 0xDD){ // IHM on/off
 
