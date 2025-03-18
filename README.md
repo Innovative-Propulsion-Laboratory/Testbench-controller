@@ -17,7 +17,7 @@ TODO
 TODO:
 	- faire lire les valeurs aux fréquences choisies -- attendre de connaitre la frequence d'envoi
 	- ajouter l'envoi des données par ethernet + construction de la byte frame
-	- ajouter la sauvegarde des données sur la carte SD
+	- ajouter la sauvegarde des données sur la carte SD fait
 	- ajouter la vérification des données reçues et l'envoi de warnings/errors et vent si necessaire
 
 - emergency state : mettre le banc en sécurité tout en lisant les capteurs en cas d'erreur majeure
