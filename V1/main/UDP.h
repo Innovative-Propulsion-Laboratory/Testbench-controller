@@ -6,14 +6,15 @@
 #include "Pressurization.h" 
 #include "Sensors.h"
 
-using namespace qindesign::network;
-uint32_t kDHCPTimeout;  
-uint16_t kPort;
-uint16_t senderPort;
-IPAddress senderIP;
-EthernetUDP udp;
+extern using namespace qindesign::network;
+extern uint32_t kDHCPTimeout;  
+extern uint16_t kPort;
+extern uint16_t senderPort;
+extern IPAddress senderIP;
+extern EthernetUDP udp;
 void setupUDP();
 void receivePacket();
 void reply(int tracker, byte* index, int size);
+uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte);
 
 #endif  

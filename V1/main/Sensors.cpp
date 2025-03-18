@@ -3,7 +3,6 @@
 // --------------------- VARIABLES INITIALIZATION ------------------------------
 
 uint32_t n = 0; //Packet ID
-uint32_t t, t_since_save;
 
 data Data;
 
@@ -580,11 +579,5 @@ void values_check(){
 }
 
 void send_data(){
-
-
-}
-
-void save_data(){
-    // save data to the SD card
 
 }
