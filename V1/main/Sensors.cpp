@@ -231,8 +231,8 @@ void values_check(){
 
     if (Data.PS11 >= PS11_UL){
         if (PS11_UL_active == 1 && (millis()-PS11_UL_time) >= PS_oob_max_delay){
-            setValve(0, 1);          // open SV11
-            setValve(8, 0);          // close SV33
+            setValve(SV11, 1);          // open SV11
+            setValve(SV33, 0);          // close SV33
 
             // reply "error: PS11 over limit"
         }
@@ -286,8 +286,8 @@ void values_check(){
 
     if (Data.PS21 >= PS21_UL){
         if (PS21_UL_active == 1 && (millis()-PS21_UL_time) >= PS_oob_max_delay){
-            setValve(3, 1);          // open SV21
-            setValve(9, 0);          // close SV34
+            setValve(SV21, 1);          // open SV21
+            setValve(SV34, 0);          // close SV34
 
             // reply "error: PS21 over limit"
         }
@@ -341,7 +341,7 @@ void values_check(){
 
     if (Data.PS31 >= PS31_UL){
         if (PS31_UL_active == 1 && (millis()-PS31_UL_time) >= PS_oob_max_delay){
-            setValve(7, 1)           //open SV32
+            setValve(SV32, 1)           //open SV32
 
             // reply "error: PS31 over limit"
         }
@@ -497,10 +497,10 @@ void values_check(){
 
     if ((Data.PS61 >= PS_WATER_UL) || (Data.PS62 >= PS_WATER_UL)){
         if (PS_WATER_UL_active == 1 && (millis()-PS_WATER_UL_time) >= PS_oob_max_delay){
-            setValve(15, 1)           //open SV61
-            setValve(16, 1)           //open SV62
-            setValve(13, 0)           //close SV52
-            setValve(14, 0)           //close SV53
+            setValve(SV61, 1)           //open SV61
+            setValve(SV62, 1)           //open SV62
+            setValve(SV52, 0)           //close SV52
+            setValve(SV52, 0)           //close SV53
 
             // reply "error: PS_WATER over limit"
         }
@@ -532,7 +532,10 @@ void values_check(){
     else {PS_WATER_BBLW_active = 0;}
     if (test == 1 && ((Data.PS61 <= PS_WATER_TLL) || (Data.PS62 <= PS_WATER_TLL))) {
         if (PS_WATER_TLL_active == 1 && (millis()-PS_WATER_TLL_time) >= PS_oob_max_delay){
-            emergency_stop();       // stops the test and puts the testbench in a safe configuration
+            setValve(SV52, 1)           //open SV52
+            setValve(SV53, 1)           //open SV53
+            setValve(SV61, 0)           //close SV61
+            setValve(SV62, 0)           //close SV62
 
             // reply "error: PS_WATER below limit - test aborted"
         }
