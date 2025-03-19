@@ -7,13 +7,11 @@ int t;
 
 void setupUDP() {
   Ethernet.begin();
-  Ethernet.onLinkState([](bool state){printf("[Ethernet] Link %s\r\n", state ? "ON" : "OFF");});
+  Ethernet.onLinkState([](bool state){});  // No debug output
   if (!Ethernet.waitForLocalIP(kDHCPTimeout)) {
-    printf("Failed to get IP address\r\n");
-    return;
+      return;  // Exit if no IP address is assigned
   }
-  IPAddress ip = Ethernet.localIP();
-  printf("    Local IP     = %u.%u.%u.%u\r\n", ip[0], ip[1], ip[2], ip[3]);
+
   udp.begin(kPort);
 }
 

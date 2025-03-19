@@ -31,6 +31,6 @@ extern uint16_t WATER_BBLW, WATER_BBUW, WATER_BB_ulim;
 
 void BB_param_set(int tank, float pressure);
 void BB_enable(int tank, bool command);
-void BB_pressurization(uint16_t PS11, uint16_t PS21, uint16_t PS61, uint16_t PS62)
+void BB_pressurization(uint16_t PS11, uint16_t PS21, uint16_t PS61, uint16_t PS62);
 
 #endif
