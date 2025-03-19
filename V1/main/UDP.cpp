@@ -1,18 +1,13 @@
 #include "UDP.h"
 
-uint32_t kDHCPTimeout = 15'000;  //waiting time 15 seconds
+uint32_t kDHCPTimeout = 15000;  //waiting time 15 seconds
 uint16_t kPort = 5190;  // Chat port
 
 int t;
 
 void setupUDP() {
-  // Serial.begin(11500);
-  /////////////////////////////////////////////////////
-  // Initilisation and setup //
   Ethernet.begin();
-  Ethernet.onLinkState([](bool state) {
-    printf("[Ethernet] Link %s\r\n", state ? "ON" : "OFF");
-  });
+  Ethernet.onLinkState([](bool state){printf("[Ethernet] Link %s\r\n", state ? "ON" : "OFF");});
   if (!Ethernet.waitForLocalIP(kDHCPTimeout)) {
     printf("Failed to get IP address\r\n");
     return;
@@ -20,8 +15,6 @@ void setupUDP() {
   IPAddress ip = Ethernet.localIP();
   printf("    Local IP     = %u.%u.%u.%u\r\n", ip[0], ip[1], ip[2], ip[3]);
   udp.begin(kPort);
-  /////////////////////////////////////////////////////
-
 }
 
 void reply(int tracker, byte* index, int size) {

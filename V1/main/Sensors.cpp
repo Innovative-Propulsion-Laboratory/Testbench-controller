@@ -117,13 +117,13 @@ void PS_for_BB(){
 }
 
 void sensorsLoop(){
-    updateData();                               //read the sensors
-    values_check();                             //check if values are within limits
-    BB_pressurization();                        //bang-bang pressurization of the tanks if enabled
-    send_data();                                //send data to the ground station
-    save_data();                                //save data to the SD card
-    n++;                                        //increment the packet ID
-    trigger_TS();                               //requesting data from the thermocouples if not waiting for a conversion
+    updateData();                                                   //read the sensors
+    values_check();                                                 //check if values are within limits
+    BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
+    send_data();                                                    //send data to the ground station
+    save_data();                                                    //save data to the SD card
+    n++;                                                            //increment the packet ID
+    trigger_TS();                                                   //requesting data from the thermocouples if not waiting for a conversion
 }
 
 void trigger_TS() {
