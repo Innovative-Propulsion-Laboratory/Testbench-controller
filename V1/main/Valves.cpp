@@ -37,6 +37,6 @@ void setValve(int ID, bool command) {
         valvePositions &= ~(1L << ID);
     Serial.println("Setting Valve");
 
-    byte instruction[2] = {ID, command};
-    reply(0,instruction,sizeof(instruction));
+    byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xFF, 0xFF, ID, command};
+    reply(message,sizeof(message));
 }

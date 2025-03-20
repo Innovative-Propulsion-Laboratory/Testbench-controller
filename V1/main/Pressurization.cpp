@@ -40,6 +40,8 @@ void BB_param_set(int tank, float pressure){ // tank: 0 = LOX, 1 = ETH, 2 = WATE
             WATER_BBUW = pressure + 1000;
         }
     }
+    byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xEE, 0xEE, tank, pressure};
+    reply(message,sizeof(message));
 }
 
 void BB_enable (int tank, bool command){ // tank: 0 = LOX, 1 = ETH, 2 = WATER

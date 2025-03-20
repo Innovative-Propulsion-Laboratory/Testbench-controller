@@ -15,16 +15,15 @@ void setupUDP() {
   udp.begin(kPort);
 }
 
+void reply (byte* message, uint16_t size){
+  udp.send(senderIP, senderPort, message, size);
+}
+
+void send_data (data* Data, uint16_t size){
+  udp.send(senderIP, senderPort, (const uint8_t*)Data, size)
+}
+
 void reply(int tracker, byte* index, int size) {
-    if (tracker == 0){ // valve
-      byte message[size+4];
-      message[0] = 0xEE;
-      message[1] = 0xEE;
-      message[2] = 0xEE;
-      message[3] = 0xEE;
-      for (int j = 0; j < size; j++) {
-      message[j+4] = index[j]; } 
-      udp.send(senderIP, senderPort, message, sizeof(message));}
     else if(tracker == 1) { // data
       byte message[size+4]; 
       message[0] = 0xFF;

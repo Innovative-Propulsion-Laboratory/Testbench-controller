@@ -4,6 +4,7 @@
 #include "Valves.h"
 #include "Pressurization.h"
 #include "SaveData.h"
+#include "UDP.h"
 #include <Adafruit_MAX31856.h>  // https://github.com/adafruit/Adafruit_MAX31856
 
 // ------------------------ PIN CONFIGURATION ----------------------------------
@@ -130,8 +131,6 @@ void sensorsLoop();
 void trigger_TS();
 void updateData();
 void values_check();
-void send_data();
-void save_data();
 
 uint16_t PS_25bar_reading(int pin);
 uint16_t PS_70bar_reading(int pin);

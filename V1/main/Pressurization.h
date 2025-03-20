@@ -2,21 +2,7 @@
 #define PRESSURIZATION_H
 
 #include "Valves.h"
-#include "Sensors.h"
-
-// Valves to control LOX pressurization
-#define SV11 0
-#define SV33 8
-
-// Valves to control ETH pressurization
-#define SV21 3
-#define SV32 7
-
-// Valves to control WATER pressurization
-#define SV61 15
-#define SV62 16
-#define SV52 13
-#define SV53 14
+#inclue "UDP.h"
 
 extern bool LOX_BB, ETH_BB, WATER_BB;
 
