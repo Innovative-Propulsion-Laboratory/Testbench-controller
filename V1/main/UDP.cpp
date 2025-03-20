@@ -71,7 +71,7 @@ byte receivePacket() {
   }
 
   const uint8_t *data = udp.data();
-  senderIP = udp.remoteIP();
+  senderIP = udp.remoteIP(); // enlever et les définir une seule fois  fct first message 
   senderPort = udp.remotePort();
   printf("[%u.%u.%u.%u][%d] ", senderIP[0], senderIP[1], senderIP[2], senderIP[3], size);
 
