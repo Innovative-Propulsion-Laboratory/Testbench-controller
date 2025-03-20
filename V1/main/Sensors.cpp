@@ -1,23 +1,6 @@
 #include "Sensors.h"
 
 // --------------------- VARIABLES INITIALIZATION ------------------------------
-// Structure containing all the data sent from the Teensy to the computer
-struct data {
-    uint32_t n;                 // packet ID
-    uint32_t t;                 // Timestamp (ms)
-    
-    uint16_t PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64;    // Pressure in mbar
-    float TS11, TS31, TS41, TS42, TS61, TS62;                                           // Thermocouples in °C
-    uint16_t FM11, FM21, FM61;                                                          // Flow in mL/s
-    float LC;                                                                           // Load cell (N)
-    uint16_t ref5V;                                                                     // 5V reference (mV)
-
-    uint32_t* valveState;       // Pointer to valvePositions: 18-bit valve state
-    uint8_t actLPos, actRPos;   // Actuator positions (0-255)
-    uint8_t actLOK, actROK;     // Actuator OK flags (0 or 1)
-
-    int state;                  // System state
-};
 
 uint32_t n = 0; //Packet ID
 
@@ -45,16 +28,16 @@ int TS_oob_max_delay = 1000; // defines the maximum duration for which a tempera
 // If a limit is reached, the microcontroller takes action to solve the problem or to put the testbench in a safe position
 
 // Pressure sensors:
-uint16_t PS11_UL = 25;
-uint16_t PS12_TLW = 9,  PS12_TUW = 13;
-uint16_t PS21_UL = 25;
-uint16_t PS22_TLW = 9,  PS22_TUW = 13;
-uint16_t PS31_LW = 20,  PS31_UW = 50,  PS31_UL = 55;
-uint16_t PS41_TLL = 6,  PS41_TLW = 7,  PS41_TUW = 13, PS41_TUL = 14;
-uint16_t PS42_TLL = 6,  PS42_TLW = 7,  PS42_TUW = 13, PS42_TUL = 14;
-uint16_t PS51_TLL = 10, PS51_LW = 40,  PS51_UW = 210;
-uint16_t PS61_TLL = 6,  PS61_UL = 14;
-uint16_t PS62_TLL = 6,  PS62_UL = 14;
+uint16_t PS11_UL = 25000;
+uint16_t PS12_TLW = 9000,  PS12_TUW = 13000;
+uint16_t PS21_UL = 25000;
+uint16_t PS22_TLW = 9000,  PS22_TUW = 13000;
+uint16_t PS31_LW = 20000,  PS31_UW = 50000,  PS31_UL = 55000;
+uint16_t PS41_TLL = 6000,  PS41_TLW = 7000,  PS41_TUW = 13000, PS41_TUL = 14000;
+uint16_t PS42_TLL = 6000,  PS42_TLW = 7000,  PS42_TUW = 13000, PS42_TUL = 14000;
+uint16_t PS51_TLL = 10000, PS51_LW = 40000,  PS51_UW = 210000;
+uint16_t PS61_TLL = 6000,  PS61_UL = 14000;
+uint16_t PS62_TLL = 6000,  PS62_UL = 14000;
 
 // Thermocouples:
 uint16_t TS31_UW = 45;
@@ -134,13 +117,13 @@ void PS_for_BB(){
 }
 
 void sensorsLoop(){
-    updateData();                               //read the sensors
-    values_check();                             //check if values are within limits
-    BB_pressurization();                        //bang-bang pressurization of the tanks if enabled
-    send_data();                                //send data to the ground station
-    save_data();                                //save data to the SD card
-    n++;                                        //increment the packet ID
-    trigger_TS();                               //requesting data from the thermocouples if not waiting for a conversion
+    updateData();                                                   //read the sensors
+    values_check();                                                 //check if values are within limits
+    BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
+    send_data();                                                    //send data to the ground station
+    save_data();                                                    //save data to the SD card
+    n++;                                                            //increment the packet ID
+    trigger_TS();                                                   //requesting data from the thermocouples if not waiting for a conversion
 }
 
 void trigger_TS() {
@@ -170,7 +153,7 @@ void updateData(){
     Data.PS64 = PS_25bar_reading(PS64_pin);
 
     // Read 5V reference
-    Data.ref5V = PSalim_reading(PSalim_pin);
+    Data.ref5V = ref5V_reading(PSalim_pin);
 
     // Read load cell
     Data.LC = LC_reading(LC01_pin);
@@ -235,7 +218,7 @@ float LC_reading(int pin){
     return 2943*analogRead(pin)/1023.0; 
 }
 
-uint16_t PSalim_reading(int pin){
+uint16_t ref5V_reading(int pin){
     return 
 }
 
@@ -248,8 +231,8 @@ void values_check(){
 
     if (Data.PS11 >= PS11_UL){
         if (PS11_UL_active == 1 && (millis()-PS11_UL_time) >= PS_oob_max_delay){
-            setValve(0, 1);          // open SV11
-            setValve(8, 0);          // close SV33
+            setValve(SV11, 1);          // open SV11
+            setValve(SV33, 0);          // close SV33
 
             // reply "error: PS11 over limit"
         }
@@ -303,8 +286,8 @@ void values_check(){
 
     if (Data.PS21 >= PS21_UL){
         if (PS21_UL_active == 1 && (millis()-PS21_UL_time) >= PS_oob_max_delay){
-            setValve(3, 1);          // open SV21
-            setValve(9, 0);          // close SV34
+            setValve(SV21, 1);          // open SV21
+            setValve(SV34, 0);          // close SV34
 
             // reply "error: PS21 over limit"
         }
@@ -358,7 +341,7 @@ void values_check(){
 
     if (Data.PS31 >= PS31_UL){
         if (PS31_UL_active == 1 && (millis()-PS31_UL_time) >= PS_oob_max_delay){
-            setValve(7, 1)           //open SV32
+            setValve(SV32, 1)           //open SV32
 
             // reply "error: PS31 over limit"
         }
@@ -514,10 +497,10 @@ void values_check(){
 
     if ((Data.PS61 >= PS_WATER_UL) || (Data.PS62 >= PS_WATER_UL)){
         if (PS_WATER_UL_active == 1 && (millis()-PS_WATER_UL_time) >= PS_oob_max_delay){
-            setValve(15, 1)           //open SV61
-            setValve(16, 1)           //open SV62
-            setValve(13, 0)           //close SV52
-            setValve(14, 0)           //close SV53
+            setValve(SV61, 1)           //open SV61
+            setValve(SV62, 1)           //open SV62
+            setValve(SV52, 0)           //close SV52
+            setValve(SV52, 0)           //close SV53
 
             // reply "error: PS_WATER over limit"
         }
@@ -549,7 +532,10 @@ void values_check(){
     else {PS_WATER_BBLW_active = 0;}
     if (test == 1 && ((Data.PS61 <= PS_WATER_TLL) || (Data.PS62 <= PS_WATER_TLL))) {
         if (PS_WATER_TLL_active == 1 && (millis()-PS_WATER_TLL_time) >= PS_oob_max_delay){
-            emergency_stop();       // stops the test and puts the testbench in a safe configuration
+            setValve(SV52, 1)           //open SV52
+            setValve(SV53, 1)           //open SV53
+            setValve(SV61, 0)           //close SV61
+            setValve(SV62, 0)           //close SV62
 
             // reply "error: PS_WATER below limit - test aborted"
         }

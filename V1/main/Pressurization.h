@@ -2,6 +2,7 @@
 #define PRESSURIZATION_H
 
 #include "Valves.h"
+#include "Sensors.h"
 
 // Valves to control LOX pressurization
 #define SV11 0
@@ -19,20 +20,17 @@
 
 extern bool LOX_BB, ETH_BB, WATER_BB;
 
-extern float PS11_BB_min, PS11_BB_max;
-extern float PS11_BBLW, PS11_BBUW, PS11_BB_ulim;
+extern uint16_t PS11_BB_min, PS11_BB_max;
+extern uint16_t PS11_BBLW, PS11_BBUW, PS11_BB_ulim;
 
-extern float PS21_BB_min, PS21_BB_max;
-extern float PS21_BBLW, PS21_BBUW, PS21_BB_ulim;
+extern uint16_t PS21_BB_min, PS21_BB_max;
+extern uint16_t PS21_BBLW, PS21_BBUW, PS21_BB_ulim;
 
-extern float WATER_BB_min, WATER_BB_max;
-extern float WATER_BBLW, WATER_BBUW, WATER_BB_ulim;
-
-extern float PS11, PS21, PS61, PS62;
-extern float PS_WATER;
+extern uint16_t WATER_BB_min, WATER_BB_max;
+extern uint16_t WATER_BBLW, WATER_BBUW, WATER_BB_ulim;
 
 void BB_param_set(int tank, float pressure);
 void BB_enable(int tank, bool command);
-void BB_pressurization();
+void BB_pressurization(uint16_t PS11, uint16_t PS21, uint16_t PS61, uint16_t PS62);
 
 #endif
