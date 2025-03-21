@@ -109,12 +109,12 @@ void Sequence(){ // TODO: add all the arguments of the function
                 //allumer allumeur
                 test_step++; 
             }
-            case 8 {
+            case 8 { // Check igner and open Bypass ETH
                 if (/* allumeur alumer*/){
                     // couper alimentation igneter 
                     test_state++;
                     T0 = millis();
-                    setValve(SV24,1);
+                    setValve(SV24,0);
                 }    
                 else if ((millis() - Igniter_check_duration) >= Igniter_max_duration){
                     // error: failed to chilldown on time
@@ -122,11 +122,11 @@ void Sequence(){ // TODO: add all the arguments of the function
                     // return to the activ_step
                 }
             }
-            case 9 {
+            case 9 { // open bypass LOX
                 if (millis() >= (T0 + ETH_to_LOX_bypass)){
-                    
+                    setValve(SV13,0);
+                    test_state++;
                 }
-
             }
             // add more cases for the next steps
             // change the variabl_step to "active" and test_step back to 0 during the last step 
