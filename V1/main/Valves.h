@@ -6,7 +6,7 @@
 #include <Arduino.h>
 #include "UDP.h"
 
-#define NUM_VALVES 18  // Define before using it
+#define NUM_VALVES 18
 
 #define SV11 0
 #define SV12 1
@@ -29,9 +29,6 @@
 #define SVXX 18
 
 extern long valvePositions;
-extern const long valveTypes;
-extern const int valvePins[NUM_VALVES];
-extern MCP23S17 MCP;
 
 void setupValves();
 void setValve(int ID, bool command);

@@ -7,7 +7,6 @@ uint32_t n = 0; //Packet ID
 data Data;
 
 bool TS41_waiting = 0,TS42_waiting = 0,TS61_waiting= 0 ,TS62_waiting = 0,TS11_waiting = 0;
-bool test = 0;
 
 Adafruit_MAX31856 thermo31 = Adafruit_MAX31856(TS31_pin);
 Adafruit_MAX31856 thermo41 = Adafruit_MAX31856(TS41_pin);
