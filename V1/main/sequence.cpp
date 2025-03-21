@@ -111,7 +111,10 @@ void Sequence(){ // TODO: add all the arguments of the function
             }
             case 8 {
                 if (/* allumeur alumer*/){
+                    // couper alimentation igneter 
                     test_state++;
+                    T0 = millis();
+                    setValve(SV24,1);
                 }    
                 else if ((millis() - Igniter_check_duration) >= Igniter_max_duration){
                     // error: failed to chilldown on time
@@ -120,7 +123,10 @@ void Sequence(){ // TODO: add all the arguments of the function
                 }
             }
             case 9 {
-                
+                if (millis() >= (T0 + ETH_to_LOX_bypass)){
+                    
+                }
+
             }
             // add more cases for the next steps
             // change the variabl_step to "active" and test_step back to 0 during the last step 
