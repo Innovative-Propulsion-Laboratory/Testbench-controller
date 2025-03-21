@@ -23,7 +23,7 @@ uint16_t PS63_max_duration;
 uint16_t  PS63_duration;
 uint16_t Igniter_check_duration;
 uint16_t Igniter_max_duration;
-bool ignter_state;
+bool ignte_step;
 uint16_t T0;
 uint16_t ETH_to_LOX_bypass;
 uint16_t ETH_open;
@@ -39,8 +39,7 @@ void Sequence(){ // TODO: add all the arguments of the function
     
     uint32_t T_confirm = millis();
     uint32_t Chilldown_duration;
-    uint32_t Chilldown_start;
-    state = "test";
+    uint32_t Chilldown_start;_step = "test";
     test_step = 1;
     do {
         sensorsLoop();
@@ -49,7 +48,7 @@ void Sequence(){ // TODO: add all the arguments of the function
             case 1 { // beginning of GN2 purge
                 if (millis() >= (T_confirm+Confirm_to_purge_delay)){
                     setValve(SV36,1);
-                    test_state++;
+                    tes_step++;
                 }
             }
             case 2 { // end of GN2 purge and beginning of LOX chilldown
@@ -57,13 +56,13 @@ void Sequence(){ // TODO: add all the arguments of the function
                     setValve(SV36,0);
                     Chilldown_start = millis();
                     setValve(SV13,1);
-                    test_state++;
+                    tes_step++;
                 }
             }
             case 3 {
                 if (millis() >= (T_confirm+Confirm_to_purge_delay+Purge_duration+Chilldown_on_duration)){
                     setValve(SV13,0);
-                    test_state++;
+                    test_setp++;
                 }
             }
             case 4 { // check of end chilldown
@@ -73,80 +72,66 @@ void Sequence(){ // TODO: add all the arguments of the function
                         Chilldown_end = millis();
                         Chilldown_duration = Chilldown_end - Chilldown_start;
                         test = 1;
-                        test_state++;
+                        test_step++;
                         // maybe send a message chilldown okay
                     } 
                     else if ((millis() - Chilldown_start) >= Max_chilldown_duration){
                         // error: failed to chilldown on time
                         state = "active";
-                        // return to the active state
+                        // return to the activ_step
                     }
                     else {
                         T_confirm = millis()+Confirm_to_purge_delay+Purge_duration;
-                        test_state = 2;
+                        test_step = 2;
                     }
+                }
+            }
+            case 5{// open water coolling
+                if ( millis() >= (Chilldown_finished+Chilldown_to_cooling)){
+                    setValve(SV63,1);
+                    PS63_duration = millis();
+                    test_setp++;
+                }
+            }
+            case 6{
+                if (Data.PS63 >= colling_pressure) { 
+                    Igniter_check_duration = millis();
+                    test_step++;
+                    // maybe send a message chilldown okay
+                } 
+                else if ((millis() - PS63_duration) >= PS63_max_duration){
+                    // error: failed to chilldown on time
+                    state = "active";
+                    // return to the activ_step
+                }
+            }
+            case 7 {
+                //allumer allumeur
+                test_step++; 
+            }
+            case 8 { // Check igner and open Bypass ETH
+                if (/* allumeur alumer*/){
+                    // couper alimentation igneter 
+                    test_state++;
+                    T0 = millis();
+                    setValve(SV24,0);
+                }    
+                else if ((millis() - Igniter_check_duration) >= Igniter_max_duration){
+                    // error: failed to chilldown on time
+                    state = "active";
+                    // return to the activ_step
+                }
+            }
+            case 9 { // open bypass LOX
+                if (millis() >= (T0 + ETH_to_LOX_bypass)){
+                    setValve(SV13,0);
+                    test_state++;
                 }
             }
             // add more cases for the next steps
-            // change the variable state to "active" and test_step back to 0 during the last step 
+            // change the variabl_step to "active" and test_step back to 0 during the last step 
         }
-    }while (state = "test")
+    }while (test_step = "test")
     // j'ai changé les conditions du coup mais je te laisse ça là au cas où(check_chill_temp == false) or (Chilldown_duration == Max_chilldown_duration);
 
-    if ((check_chill_temp == false) && (Chilldown_duration == Max_chilldown_duration)){
-        abort(); 
-        break;
-    }
-    else{
-        PS63_duration = millis();
-        do {
-            sensorsLoop();
-            Receives();
-            if ((Chilldown_finished+Chilldown_to_cooling) >= millis()){
-                setValve(SV63,1);
-            }
-        }while (Data.PS63 >= colling_pressure) or (PS63_duration >= PS63_max_duration);
-
-        if (Data.PS63 <= colling_pressure) && (PS63_duration >= PS63_max_duration){
-            abort();
-            break;
-        }
-        else{
-            test_state++;
-            Igniter_check_duration = millis();
-            ignter_state = false;
-            do {
-                sensorsLoop(); // comment check value abort un test ? 
-                Receives(); 
-                //allumer allumeur 
-                if (/* allumeur alumer*/){
-                    igneter_state = true
-                    test_state++;
-                }
-                      
-            }while (Igniter_check_duration >= Igniter_max_duration) or (/*allumeur allumé*/);
-
-            if (Igniter_check_duration >= Igniter_max_duration) && (/*allumeur pas allumé*/){
-                abort();
-            }
-            else{
-                // Arreter d'allumer l'allumeur 
-                T0 = millis();
-                test_state++;
-                do{ 
-                    swicth test_state{
-                        case 5 {
-                            setValve(SV24,1);
-                            test_state++;
-                        }
-                        case 4 {
-                            if ((T0 + ) >= millis()) {
-                                
-                            }
-                        }
-                    }
-                }while (Chilldown_finished == T) or (Chilldown_duration == Max_chilldown_duration);
-            }
-        }   
-    }
 }
