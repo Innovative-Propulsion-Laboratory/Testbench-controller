@@ -3,5 +3,6 @@
 
 #include <stdint.h>  
 
+void Sequence();
 
 #endif
