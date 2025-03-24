@@ -107,19 +107,22 @@ void setupSensors(){
     thermo11.setConversionMode(MAX31856_ONESHOT_NOWAIT);
 }
 
-void PS_for_BB(){
+void BBLoop(){
     // Reading the pressure sensors used for the Bang-Bang pressurization
     Data.PS11 = PS_25bar_reading(PS11_pin);
     Data.PS21 = PS_25bar_reading(PS21_pin);
     Data.PS61 = PS_25bar_reading(PS61_pin);
     Data.PS62 = PS_25bar_reading(PS62_pin);
+
+    BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
 }
 
 void sensorsLoop(){
     updateData();                                                   //read the sensors
     values_check();                                                 //check if values are within limits
     BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
-    send_data (Data, sizeof(data))                                  //send data to the ground station
+    Data.valvesState = valvePositions;
+    send_data(Data, sizeof(data));                                //send data to the ground station
     save_data();                                                    //save data to the SD card
     n++;                                                            //increment the packet ID
     trigger_TS();                                                   //requesting data from the thermocouples if not waiting for a conversion
