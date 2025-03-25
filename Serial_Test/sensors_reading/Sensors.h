@@ -1,7 +1,7 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-// #include "Valves.h"
+#include "Valves.h"
 // #include "Pressurization.h"
 // #include "SaveData.h"
 // #include "UDP.h"
@@ -57,7 +57,7 @@ struct data {
     // uint8_t actLPos, actRPos;   // Actuator positions (0-255)
     // uint8_t actLOK, actROK;     // Actuator OK flags (0 or 1)
 
-    // uint8_t state = 0;                  // System state
+    String state = "active";                  // System state
     // uint8_t test_step = 0;
 };
 
@@ -71,5 +71,18 @@ void sensorsLoop();
 void updateData();
 void trigger_TS();
 void serialSend();
+
+uint16_t PS_25bar_reading(int pin);
+uint16_t PS_70bar_reading(int pin);
+uint16_t PS_350bar_reading(int pin);
+uint16_t FM11_reading(int pin);
+uint16_t FM21_reading(int pin);
+uint16_t FM61_reading(int pin);
+float LC_reading(int pin);
+uint16_t ref5V_reading(int pin);
+void values_check();
+
+
+
 
 #endif
