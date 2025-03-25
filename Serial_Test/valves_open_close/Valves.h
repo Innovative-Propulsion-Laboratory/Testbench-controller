@@ -28,7 +28,7 @@
 #define SV63 17
 #define SVXX 18
 
-extern long valvePositions;
+extern uint32_t valvePositions;
 
 void setupValves();
 void setValve(int ID, bool command);
