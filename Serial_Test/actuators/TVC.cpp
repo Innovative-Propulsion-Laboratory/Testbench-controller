@@ -1,5 +1,5 @@
 // Code for the TPL0202 Digital Potentiometer
-
+#include "TVC.h"
 
 #define IOexp_pin 2  // Chip Select pin for TPL0202
 
@@ -8,7 +8,7 @@ void setupTVC() {
     digitalWrite(IOexp_pin, HIGH);  //Disable TPL0202 by default
 }
 
-void setNonVolatileWiper(uint8_t wiper, uint8_t value = 128) { // precentage from 0 to 100
+void setNonVolatileWiper(uint8_t wiper, uint8_t value) { // precentage from 0 to 100
 
     digitalWrite(IOexp_pin, LOW);
     
@@ -21,7 +21,7 @@ void setNonVolatileWiper(uint8_t wiper, uint8_t value = 128) { // precentage fro
     digitalWrite(IOexp_pin, HIGH);
 }
 
-void setWiper(uint8_t wiper, uint8_t value = 128) { // precentage from 0 to 100
+void setWiper(uint8_t wiper, uint8_t value) { // precentage from 0 to 100
 
     digitalWrite(IOexp_pin, LOW);
     
