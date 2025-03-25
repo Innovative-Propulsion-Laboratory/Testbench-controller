@@ -4,6 +4,24 @@
 void setup(){
     Serial.begin(9600);       //initialize Serial Port
     SPI.begin();              //initialize SPI
+
+    //disable other SPI devices
+    pinMode(10, OUTPUT);
+    pinMode(28, OUTPUT);
+    pinMode(29, OUTPUT);
+    pinMode(30, OUTPUT);
+    pinMode(35, OUTPUT);
+    pinMode(36, OUTPUT);
+    pinMode(37, OUTPUT);
+
+    digitalWrite(10, HIGH);
+    digitalWrite(28, HIGH);
+    digitalWrite(29, HIGH);
+    digitalWrite(30, HIGH);
+    digitalWrite(35, HIGH);
+    digitalWrite(36, HIGH);
+    digitalWrite(37, HIGH);
+
     setupTVC();
 }
 
