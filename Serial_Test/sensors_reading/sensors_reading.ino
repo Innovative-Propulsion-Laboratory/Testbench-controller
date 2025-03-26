@@ -18,4 +18,6 @@ void loop(){
     updateData();
     trigger_TS();
     serialSend();
+
+    delay(200);
 }

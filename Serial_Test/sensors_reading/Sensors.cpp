@@ -8,12 +8,12 @@ data Data;
 
 bool TS31_waiting = 0,TS41_waiting = 0,TS42_waiting = 0,TS61_waiting= 0 ,TS62_waiting = 0,TS11_waiting = 0;
 
-Adafruit_MAX31856 thermo31 = Adafruit_MAX31856(TS31_pin);
-Adafruit_MAX31856 thermo41 = Adafruit_MAX31856(TS41_pin);
-Adafruit_MAX31856 thermo42 = Adafruit_MAX31856(TS42_pin);
-Adafruit_MAX31856 thermo61 = Adafruit_MAX31856(TS61_pin);
-Adafruit_MAX31856 thermo62 = Adafruit_MAX31856(TS62_pin);
-Adafruit_MAX31856 thermo11 = Adafruit_MAX31856(TS11_pin); //initialized last since it may return negative values
+Adafruit_MAX31856 thermo31 = Adafruit_MAX31856(TS31_pin, 11, 12, 13);
+Adafruit_MAX31856 thermo41 = Adafruit_MAX31856(TS41_pin, 11, 12, 13);
+Adafruit_MAX31856 thermo42 = Adafruit_MAX31856(TS42_pin, 11, 12, 13);
+Adafruit_MAX31856 thermo61 = Adafruit_MAX31856(TS61_pin, 11, 12, 13);
+Adafruit_MAX31856 thermo62 = Adafruit_MAX31856(TS62_pin, 11, 12, 13);
+Adafruit_MAX31856 thermo11 = Adafruit_MAX31856(TS11_pin, 11, 12, 13); //initialized last since it may return negative values
 
 // ------------------------- LIMITS DEFINITION ---------------------------------
 
