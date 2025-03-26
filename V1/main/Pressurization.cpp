@@ -12,7 +12,7 @@ uint16_t PS21_BBLW = 15000, PS21_BBUW = 17000, PS21_BB_ulim = 22000;
 uint16_t WATER_BB_min = 9800, WATER_BB_max = 10200;
 uint16_t WATER_BBLW = 9000, WATER_BBUW = 11000, WATER_BB_ulim = 12000;
 
-void BB_param_set(int tank, float pressure){ // tank: 0 = LOX, 1 = ETH, 2 = WATER
+void BB_param_set(uint8_t tank, uint16_t pressure){ // tank: 0 = LOX, 1 = ETH, 2 = WATER
     if (tank == 0){
         if (pressure < PS11_BB_ulim){return;}
         else{
@@ -40,11 +40,11 @@ void BB_param_set(int tank, float pressure){ // tank: 0 = LOX, 1 = ETH, 2 = WATE
             WATER_BBUW = pressure + 1000;
         }
     }
-    byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xEE, 0xEE, tank, pressure};
+    byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xEE, 0xEE, tank, (byte)(pressure >> 8), (byte)(pressure & 0xFF)}; // encoding using the big-endian
     reply(message,sizeof(message));
 }
 
-void BB_enable (int tank, bool command){ // tank: 0 = LOX, 1 = ETH, 2 = WATER
+void BB_enable (uint8_t tank, bool command){ // tank: 0 = LOX, 1 = ETH, 2 = WATER
     if (command == 0){
         if (tank == 0) LOX_BB = 0;
         if (tank == 1) ETH_BB = 0;
@@ -55,6 +55,8 @@ void BB_enable (int tank, bool command){ // tank: 0 = LOX, 1 = ETH, 2 = WATER
         if (tank == 1) ETH_BB = 1;
         if (tank == 2) WATER_BB = 1;
     }
+    byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, tank, command};
+    reply(message,sizeof(message));
 }
 
 void BB_pressurization(uint16_t PS11, uint16_t PS21, uint16_t PS61, uint16_t PS62){

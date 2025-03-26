@@ -21,9 +21,9 @@ void loop() {
     decode(receivePacket());
 
     if ((millis() - t_last_data_packet) >= data_send_rate){
-        data();
+        sensorsLoop();
     }
-    BB_pressurization();
+    BBLoop();
 }
 
 
