@@ -1,38 +1,52 @@
 #include "sequences.h"
 #include "Valves.h"
 #include "Sensors.h"
+#include "TVC.h"
 
-T_confirm = 1000;
-Purge_duration = 1000;
-Chilldown_on_duration = 1000;
+uint16_t T_confirm = 1000;
+uint16_t Purge_duration = 1000;
+uint16_t Chilldown_on_duration = 1000;
 uint32_t Chilldown_off_duration = 1000;
 float chill_temp = 270; 
-bool check_chill_temp = false;
 uint32_t Maw_chilldown_duration = 10000;
 uint32_t Chilldown_to_cooling = 1000;
-uint32_t colling_pressure = 3000;
-uint32_t PS63_max_duration = 2000;
-
+float colling_pressure = 3000;
+uint32_t PS63_check_duration = 2000;
+uint16_t PS63_verified_duration = 2000;
+uint16_t Ign_check_duration = 2000;
+uint16_t Ign_verified_duration = 2000;
+uint16_t ETH_to_LOX_bypass = 200;
+float Bypass_pressure= 200;
+uint16_t Bypass_check_duration = 200;
+uint16_t Bypass_verifed_duration = 200;
+float Main_pressure = 200;
+uint16_t Main_check_duration = 2000;
+uint16_t Main_verified_duration = 2000;
+burn_duration = 2000;
 
 uint16_t Confirm_to_purge_delay;
 
 uint16_t Chilldown_end;
-uint16_t Chilldown_to_cooling;
-uint16_t colling_pressure;
-uint16_t PS63_max_duration;
-uint16_t  PS63_duration;
-uint16_t Igniter_check_duration;
-uint16_t Igniter_max_duration;
-bool ignte_step;
+
+uint16_t PS63_duration;
+uint16_t PS63_seems_rise;
+
+uint16_t Ign_duration;
+uint16_t Ign_seems_on;
 uint16_t T0;
-uint16_t ETH_to_LOX_bypass;
 uint16_t ETH_open;
+uint16_t Bypass_duration;
 uint16_t ETH_to_LOX_main;
+
+uint16_t Main_seems_rise ;
+uint16_t Main_duration;
+
 uint16_t Nominal_pressure_reached;
 uint16_t TVC_pattern_duration;
 uint16_t T_burn;
 uint16_t LOX_to_ETH_closing_delay;
 uint16_t Cooling_duration_after_end_burn;
+
 
 
 void Sequence(){ // TODO: add all the arguments of the function
@@ -94,44 +108,152 @@ void Sequence(){ // TODO: add all the arguments of the function
                 }
             }
             case 6{
-                if (Data.PS63 >= colling_pressure) { 
-                    Igniter_check_duration = millis();
+                if (Data.PS63 >= colling_pressure) {
+                    PS63_seems_rise = millis();
                     test_step++;
                     // maybe send a message chilldown okay
                 } 
-                else if ((millis() - PS63_duration) >= PS63_max_duration){
+                else if ((millis() - PS63_duration) >= PS63_check_duration){
                     // error: failed to chilldown on time
                     state = "active";
                     // return to the activ_step
                 }
             }
-            case 7 {
+            case 7{
+                if (Data.PS63 >= colling_pressure) && (PS63_seems_rise >= PS63_verified_duration){
+                    test_step++;
+                }
+                else if (Data.PS63 < colling_pressure){
+                    test_step = 6;
+                }
+                
+            }
+            case 8 {
+                Ign_duration = millis();
                 //allumer allumeur
                 test_step++; 
             }
-            case 8 { // Check igner and open Bypass ETH
+            case 9 { // Check igner and open Bypass ETH
                 if (/* allumeur alumer*/){
+                    Ign_seems_on = millis(); 
+                }    
+                else if ((millis() - Ign_duration) >= Ign_check_duration){
+                    // error: failed to chilldown on time
+                    state = "active";
+                    // return to the activ_step
+                }
+            }
+            case 10 {
+                if (/*allumeur alumer*/) && (Ign_seems_on >= Ign_verified_duration){
                     // couper alimentation igneter 
                     test_state++;
                     T0 = millis();
                     setValve(SV24,0);
-                }    
-                else if ((millis() - Igniter_check_duration) >= Igniter_max_duration){
-                    // error: failed to chilldown on time
+                }
+                else if (/*allumeur eteins*/){
+                    test_state = 9;
+                }
+            }
+            case 11 { // open bypass LOX
+                if (millis() >= (T0 + ETH_to_LOX_bypass)){
+                    Bypass_duration = millis();
+                    setValve(SV13,0);
+                    test_state++;
+                }
+            }
+            case 12 { // check if bypass rise the pressure
+                if (Data.PS41 >= Bypass_pressure) && (Data.PS42 >Bypass_pressure){
+                    Bypass_seems_rise = millis();
+                    test_state++;
+
+                }
+                else if ((millis() - Bypass_duration) >= Bypass_check_duration){
+                    // error: failed to rise pressure of bypass on time
                     state = "active";
                     // return to the activ_step
                 }
             }
-            case 9 { // open bypass LOX
-                if (millis() >= (T0 + ETH_to_LOX_bypass)){
-                    setValve(SV13,0);
+            case 13 { // check if ETH rise the pressure during as time
+                if (Data.PS41 >= Bypass_pressure) && (Data.PS42 >= Bypass_pressure) && (Bypass_seems_rise >= Bypass_verifed_duration){
+                    ETH_open = millis();
+                    setValve(SV22,0);
                     test_state++;
+                }
+                else if (Data.PS41 < Bypass_pressure) or (Data.PS42 < Bypass_pressure){
+                    test_state = 11;
+                }
+            }
+            case 14 {
+                if (millis()>= (T0+ETH_to_LOX_main)){
+                    Main_duration = millis();
+                    setValve(SV22,1);
+                    test_state++;
+                }
+            }
+            case 15 {
+                if (Data.PS41 >= Main_pressure) && (Data.PS42 >Main_pressure){
+                    Main_seems_rise = millis();
+                    test_state++;
+
+                }
+                else if ((millis() - Main_duration) >= Main_check_duration){
+                    // error: failed to rise pressure of bypass on time
+                    state = "active";
+                    // return to the activ_step
+                }
+
+            }
+            case 16 {
+                if (Data.PS41 >= Main_pressure) && (Data.PS42 >= Main_pressure) && (Main_seems_rise >= Main_verifed_duration){
+                    test_state++;
+                }
+                else if (Data.PS41 < Main_pressure) or (Data.PS42 < Main_pressure){
+                    test_state = 11;
+                }
+            }
+            case 17 {
+                setValve(SV24,1);
+                setValve(SV13,1);
+                Nominal_pressure_reached = millis();
+                state_state++;
+                
+            }
+            case 18 {
+                /*Begin TVC*/
+                /*TVC stop*/
+                state_state++;
+            }
+            case 19{
+                if (T0 + burn_duration){
+                    setValve(SV12,1);
+                    setValve(SV36,0);
+                    test_state++;
+                }
+            }
+            case 20{
+                if (T0 + burn_duration + LOX_to_ETH_closing_delay){
+                    setValve(SV22,1);
+                    setValve(SV35,0);
+                    test_state++;
+                }
+            }
+            case 21{
+                if (T0 + burn_duration + LOX_to_ETH_closing_delay + Purge_duration){
+                    setValve(SV36,1);
+                    setValve(SV35,1);
+                    test_state++;
+                }
+            }
+            case 22{
+                if (T0 + burn_duration + LOX_to_ETH_closing_delay + Purge_duration + Cooling_duration_after_end_burn){
+                    setValve(SV63,1);
+                    state = "active";
                 }
             }
             // add more cases for the next steps
             // change the variabl_step to "active" and test_step back to 0 during the last step 
         }
-    }while (test_step = "test")
+    }while (state = "test")
     // j'ai changé les conditions du coup mais je te laisse ça là au cas où(check_chill_temp == false) or (Chilldown_duration == Max_chilldown_duration);
 
 }
