@@ -23,6 +23,8 @@ float Main_pressure = 200;
 uint16_t Main_check_duration = 2000;
 uint16_t Main_verified_duration = 2000;
 burn_duration = 2000;
+uint16_t LOX_to_ETH_closing_delay = 2000;
+uint16_t Cooling_duration_after_end_burn = 2000;
 
 uint16_t Confirm_to_purge_delay;
 
@@ -44,8 +46,7 @@ uint16_t Main_duration;
 uint16_t Nominal_pressure_reached;
 uint16_t TVC_pattern_duration;
 uint16_t T_burn;
-uint16_t LOX_to_ETH_closing_delay;
-uint16_t Cooling_duration_after_end_burn;
+
 
 
 
