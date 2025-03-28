@@ -60,6 +60,7 @@ void Sequence() {
     do {
         sensorsLoop();
         decode(receivePacket());
+        set_offset_pressure();
 
         switch (test_step) {
             case 1: {

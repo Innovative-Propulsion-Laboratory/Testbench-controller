@@ -142,17 +142,17 @@ void updateData(){
     
     // Read pressures and convert to mbar
     Data.PS11 = PS_25bar_reading(PS11_pin);
-    Data.PS12 = PS_25bar_reading(PS12_pin);
+    Data.PS12 = PS_25bar_reading(PS12_pin) + offset_PS12;
     Data.PS21 = PS_25bar_reading(PS21_pin);
-    Data.PS22 = PS_25bar_reading(PS22_pin);
+    Data.PS22 = PS_25bar_reading(PS22_pin) + offset_PS22;
     Data.PS31 = PS_70bar_reading(PS31_pin);
-    Data.PS41 = PS_25bar_reading(PS41_pin);
-    Data.PS42 = PS_25bar_reading(PS42_pin);
+    Data.PS41 = PS_25bar_reading(PS41_pin) + offset_PS41;
+    Data.PS42 = PS_25bar_reading(PS42_pin) + offset_PS42;
     Data.PS51 = PS_350bar_reading(PS51_pin);
     Data.PS61 = PS_25bar_reading(PS61_pin);
     Data.PS62 = PS_25bar_reading(PS62_pin);
-    Data.PS63 = PS_25bar_reading(PS63_pin);
-    Data.PS64 = PS_25bar_reading(PS64_pin);
+    Data.PS63 = PS_25bar_reading(PS63_pin) + offset_PS63;
+    Data.PS64 = PS_25bar_reading(PS64_pin) + offset_PS64;
 
     // Read 5V reference
     Data.ref5V = ref5V_reading(PSalim_pin);
