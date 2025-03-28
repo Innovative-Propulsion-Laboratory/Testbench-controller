@@ -45,18 +45,21 @@ uint32_t TVC_pattern_duration;
 uint32_t T_burn;
 uint32_t Chilldown_start;
 uint32_t chill_temp_seems_ok;
+uint32_t Chilldown_duration = 0;
 
-uint8_t test_step = 1;
-String state = "test";
-String active = "test";
+uint8_t test_step ;
+String state = "active";
+String active = "active";
 
 void Sequence() {
-    T_confirm = millis();
-    uint32_t Chilldown_duration = 0;
 
+    T_confirm = millis();
+    test_step = 1;
+    sate = "test"
+    
     do {
         sensorsLoop();
-        Receives();
+        decode(receivePacket());
 
         switch (test_step) {
             case 1: {
@@ -255,4 +258,40 @@ void Sequence() {
         }
 
     } while (state == "test");
+}
+
+void set_offset_pressure() {
+    const int N = 10;
+    byte average_PS12_data[N];
+    byte average_PS22_data[N];
+    byte average_PS41_data[N];
+    byte average_PS42_data[N];
+    byte average_PS63_data[N];
+    byte average_PS64_data[N];
+
+    for (int i = 0; i < N; i++) {
+        sensorsLoop();
+        decode(receivePacket()); 
+        average_PS12_data[i] = Data.PS12;
+        average_PS22_data[i] = Data.PS22;
+        average_PS41_data[i] = Data.PS41;
+        average_PS42_data[i] = Data.PS42;
+        average_PS63_data[i] = Data.PS63;
+        average_PS64_data[i] = Data.PS64;  
+    }
+
+    offset_PS12 = average(average_PS12_data, N);
+    offset_PS22 = average(average_PS22_data, N);
+    offset_PS41 = average(average_PS41_data, N);
+    offset_PS42 = average(average_PS42_data, N);
+    offset_PS63 = average(average_PS63_data, N);
+    offset_PS64 = average(average_PS64_data, N);      
+}
+
+float average(byte* L, int length) {
+    float sum = 0;
+    for (int i = 0; i < length; i++) {
+        sum += L[i];
+    }
+    return sum / length;
 }
