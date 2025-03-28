@@ -20,7 +20,7 @@ with open(f"cooling_channel_sensor_data_{date}.csv", "w") as file:
             # Lit les valeurs renvoyées par l'ADC
             result = arduino.readline().decode().split(",")
             pressure = [int(result[0])]
-            for i in range(1, 5):
+            for i in range(1, 6):
                 # Formule pour convertir la valeur de l'ADC en pression
                 pressure.append(result[i])
 
