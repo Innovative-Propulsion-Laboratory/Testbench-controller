@@ -80,7 +80,7 @@ byte receivePacket() {
     Serial.printf("%#04x ",instructions[j]); 
   }
 
-  return instructions;
+  retrurn instructions;
 }
 
 uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {
