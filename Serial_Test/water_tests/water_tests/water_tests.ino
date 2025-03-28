@@ -40,6 +40,7 @@ void setup(){
 }
 
 void loop(){
+  //read_sensors();
   SV63_open_close();
 }
 
@@ -55,7 +56,7 @@ void SV63_open_close() {
       break;
 
     case 2:
-      if ((millis() - t_after_open) > 10000){
+      if ((millis() - t_after_open) > 8000){
         setValve(SV63, 0);
         t_after_closed = millis();
         state++;
@@ -71,7 +72,6 @@ void SV63_open_close() {
 
     case 4:
       while(true) {
-        read_sensors();
         delay(1000);
       }
       break;
@@ -79,7 +79,6 @@ void SV63_open_close() {
   read_sensors();
   delay(10);
 }
-
 
 
 
