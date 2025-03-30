@@ -4,6 +4,7 @@ uint32_t kDHCPTimeout = 15000;  //waiting time 15 seconds
 uint16_t kPort = 5190;  // Chat port
 
 int t;
+bool fisrt_message;
 
 void setupUDP() {
   Ethernet.begin();
@@ -11,6 +12,8 @@ void setupUDP() {
   if (!Ethernet.waitForLocalIP(kDHCPTimeout)) {
       return;  // Exit if no IP address is assigned
   }
+
+  fisrt_message = false;
 
   udp.begin(kPort);
 }
@@ -20,10 +23,47 @@ void reply (byte* message, uint16_t size){
 }
 
 void send_data (data* Data, uint16_t size){
-  udp.send(senderIP, senderPort, (const uint8_t*)Data, size)
+  udp.send(senderIP, senderPort, (const uint8_t*)Data, size);
 }
 
-void reply(int tracker, byte* index, int size) {
+void set_sender_info(){
+  senderIP = udp.remoteIP(); // enlever et les définir une seule fois  fct first message 
+  senderPort = udp.remotePort();
+}
+
+byte receivePacket() {
+  int size = udp.parsePacket();
+  if (size < 0) { 
+    return;
+  }
+
+  if (fisrt_message == false){set_sender_info();fisrt_message = true;}
+
+  const uint8_t *data = udp.data();
+  
+  printf("[%u.%u.%u.%u][%d] ", senderIP[0], senderIP[1], senderIP[2], senderIP[3], size);
+
+  byte instructions[size];  
+  for (int j = 0; j < size; j++) { // copy data
+    instructions[j] = data[j]; 
+    Serial.printf("%#04x ",instructions[j]); 
+  }
+
+  retrurn instructions;
+}
+
+
+
+
+
+//////Old Code ////////////
+
+
+uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) { // to assemble 2 byte
+  return (static_cast<uint16_t>(highByte) << 8) | static_cast<uint16_t>(lowByte);
+}
+
+void old_reply(int tracker, byte* index, int size) {
     else if(tracker == 1) { // data
       byte message[size+4]; 
       message[0] = 0xFF;
@@ -61,28 +101,4 @@ void reply(int tracker, byte* index, int size) {
       for (int j = 0; j < size; j++) { // copy data
       message[j+4] = index[j]; } 
       udp.send(senderIP, senderPort, message, sizeof(message));}
-}
-
-byte receivePacket() {
-  int size = udp.parsePacket();
-  if (size < 0) { 
-    return;
-  }
-
-  const uint8_t *data = udp.data();
-  senderIP = udp.remoteIP(); // enlever et les définir une seule fois  fct first message 
-  senderPort = udp.remotePort();
-  printf("[%u.%u.%u.%u][%d] ", senderIP[0], senderIP[1], senderIP[2], senderIP[3], size);
-
-  byte instructions[size];  
-  for (int j = 0; j < size; j++) { // copy data
-    instructions[j] = data[j]; 
-    Serial.printf("%#04x ",instructions[j]); 
-  }
-
-  retrurn instructions;
-}
-
-uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {
-    return (static_cast<uint16_t>(highByte) << 8) | static_cast<uint16_t>(lowByte);
 }

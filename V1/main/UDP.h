@@ -4,6 +4,9 @@
 #include <stdint.h>  
 #include <QNEthernet.h>
 
+extern IPAddress senderIP;
+extern uint16_t senderPort;
+
 void setupUDP();
 void receivePacket();
 void reply(int tracker, byte* index, int size);
