@@ -82,6 +82,10 @@ float LC_reading(int pin);
 uint16_t ref5V_reading(int pin);
 void values_check();
 
+void sendDataFromSensor(data* d) {
+    send_data((void*)d, sizeof(data));
+}
+
 
 
 

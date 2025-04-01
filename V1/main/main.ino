@@ -19,10 +19,15 @@ void setup() {
 }
 
 void loop() {
-    // listen to commands
-    if (sizeof(receivePacket()) >= 4 ){
-      decode(receivePacket());
-    }
+  // listen to commands
+  Packet p = receivePacket();
+
+  if (p.length >= 4 && p.data != nullptr) {
+  decode(p.data);
+  }
+  if (p.data != nullptr) {
+    delete[] p.data;
+  }
 
     if ((millis() - t_last_data_packet) >= data_send_rate){
         sensorsLoop();

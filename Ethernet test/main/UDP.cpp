@@ -36,8 +36,9 @@ void reply (byte* message, uint16_t size){ // send the message send
   udp.send(senderIP, senderPort, message, size);
 }
 
-void send_data (data* Data, uint16_t size){ // send the 
-  udp.send(senderIP, senderPort, (const uint8_t*)Data, size);
+
+void send_data(void* payload, uint16_t size) {
+  udp.send(senderIP, senderPort, (const uint8_t*)payload, size);
 }
 
 
