@@ -1,8 +1,6 @@
 // Code for the TPL0202 Digital Potentiometer
 #include "TVC.h"
 
-#define IOexp_pin 2  // Chip Select pin for TPL0202
-
 void setupTVC() {
     pinMode(IOexp_pin, OUTPUT);
     digitalWrite(IOexp_pin, HIGH);  //Disable TPL0202 by default
