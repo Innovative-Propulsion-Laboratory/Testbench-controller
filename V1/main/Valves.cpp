@@ -40,6 +40,6 @@ void setValve(int ID, bool command) {
     Serial.print(" set to ");
     Serial.println(command ? "open" : "closed");
 
-    // byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xFF, 0xFF, ID, command};
-    // reply(message,sizeof(message));
+    byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xFF, 0xFF, ID, command};
+    reply(message,sizeof(message));
 }

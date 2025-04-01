@@ -1,11 +1,17 @@
 #include "UDP.h"
 
+// Variable utilisé
+
+EthernetUDP udp;
+IPAddress senderIP;
+uint16_t senderPort;
 uint32_t kDHCPTimeout = 15000;  //waiting time 15 seconds
 uint16_t kPort = 5190;  // Chat port
-
 int message_size = 0;
 int t;
 bool fisrt_message;
+
+// Setup UDP
 
 void setupUDP() {
   Ethernet.begin();
@@ -19,18 +25,22 @@ void setupUDP() {
   udp.begin(kPort);
 }
 
-void reply (byte* message, uint16_t size){
-  udp.send(senderIP, senderPort, message, size);
-}
-
-// void send_data (data* Data, uint16_t size){
-//   udp.send(senderIP, senderPort, (const uint8_t*)Data, size);
-// }
-
 void set_sender_info(){
   senderIP = udp.remoteIP(); // enlever et les définir une seule fois  fct first message 
   senderPort = udp.remotePort();
 }
+
+// Communication functions
+
+void reply (byte* message, uint16_t size){ // send the message send 
+  udp.send(senderIP, senderPort, message, size);
+}
+
+void send_data (data* Data, uint16_t size){ // send the 
+  udp.send(senderIP, senderPort, (const uint8_t*)Data, size);
+}
+
+
 Packet receivePacket() {
   int size = udp.parsePacket();
 
