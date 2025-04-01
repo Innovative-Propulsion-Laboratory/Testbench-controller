@@ -26,6 +26,14 @@
 // #define PSextra_pin A15
 #define PSalim_pin A14      // Pressure sensors alimentation
 
+// define Offset
+extern float offset_PS12 = 0;
+extern float offset_PS22 = 0;
+extern float offset_PS41 = 0;
+extern float offset_PS42 = 0;
+extern float offset_PS63 = 0;
+extern float offset_PS64 = 0;
+
 // Load cell:
 #define LC01_pin A10
 
