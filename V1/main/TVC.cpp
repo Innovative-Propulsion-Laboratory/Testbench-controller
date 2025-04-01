@@ -1,5 +1,5 @@
 // Code for the TPL0202 Digital Potentiometer
-
+#include "TVC.h"
 
 #define IOexp_pin 2  // Chip Select pin for TPL0202
 
