@@ -2,12 +2,11 @@
 
 uint32_t valvePositions = 0b011001000010001001;
 const uint32_t valveTypes = 0b011001000010001001;
-const int valvePins[NUM_VALVES] = {7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+const uint8_t valvePins[NUM_VALVES] = {7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
 Adafruit_MCP23X17 mcp;
 
 void setupValves() {
-    mcp.begin_SPI(10, 13, 12, 11)
-  }
+    mcp.begin_SPI(10, 13, 12, 11);
   // configure pin for output
   for (int i=0;i<=15;i++)
   {
@@ -19,7 +18,7 @@ void setupValves() {
   pinMode(9, OUTPUT);
 }
 
-void setValve(int ID, bool command) {
+void setValve(uint8_t ID, bool command) {
     if (ID < 0 || ID >= NUM_VALVES) return;
 
     bool state = ((valveTypes >> ID) & 1) ? !command : command;
