@@ -34,14 +34,15 @@ void setup(){
     setValve(SV62, 0);
     setValve(SV52, 1);
     setValve(SV53, 1);
+    setValve(SV63, 1);
     t_after_setup = millis();
     state = 1;
 
 }
 
 void loop(){
-  //read_sensors();
-  SV63_open_close();
+  read_sensors();
+  //SV63_open_close();
 }
 
 
