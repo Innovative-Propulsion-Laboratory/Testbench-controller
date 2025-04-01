@@ -9,7 +9,7 @@ uint16_t Chilldown_on_duration = 1000;
 uint32_t Chilldown_off_duration = 1000;
 float chill_temp = 270;
 uint16_t Chilldown_verified_duration = 100;
-uint32_t Max_chilldown_duration = 10000;
+uint32_t Max_chilldown = 8;
 uint32_t Chilldown_to_cooling = 1000;
 float cooling_pressure = 3000;
 uint32_t PS63_check_duration = 2000;
@@ -65,6 +65,7 @@ void Sequence() {
         switch (test_step) {
             case 1: {
                 if (millis() >= (T_confirm + Confirm_to_purge_delay)) {
+                    Chilldown_start = 0;
                     setValve(SV36, 1);
                     test_step++;
                 }
@@ -73,7 +74,7 @@ void Sequence() {
             case 2: {
                 if (millis() >= (T_confirm + Confirm_to_purge_delay + Purge_duration)) {
                     setValve(SV36, 0);
-                    Chilldown_start = millis();
+                    Chilldown_start++;
                     setValve(SV13, 1);
                     test_step++;
                 }
@@ -91,12 +92,13 @@ void Sequence() {
                     if (Data.TS12 >= chill_temp) {
                         chill_temp_seems_ok = millis();
                         test_step = 5;  // remplace l'étape 4.5
-                    } else if ((millis() - Chilldown_start) >= Max_chilldown_duration) {
+                    } else if (Chilldown_start >= Max_chilldown) {
                         state = "active";  // Erreur chilldown
                     }
                 } else {
                     T_confirm = millis();
                     test_step = 2;
+                    Chilldown_start++;
                 }
                 break;
             }

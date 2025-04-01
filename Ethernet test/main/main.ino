@@ -14,7 +14,7 @@ void setup() {
 }
 
 void loop() {
-    // listen to commands
+  // listen to commands
   Packet p = receivePacket();
 
   if (p.length >= 4 && p.data != nullptr) {
