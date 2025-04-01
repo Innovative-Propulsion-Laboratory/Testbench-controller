@@ -1,6 +1,6 @@
 #include "SaveData.h"
 
-state_file = false;
+bool state_file = false;
 frequence_save = 200; // ms
 
 void setupSaveData()
@@ -22,7 +22,7 @@ void save_data(byte* data, int size){
         fp.write(data, sizeof(data)); 
         time_since_save = millis();
     }
-    elif(sate_file == true){
+    elif(state_file == true){
         if ((millis()-time_since_save) >= frequence_save){
             fp.write(data, sizeof(data));
             fp.close();

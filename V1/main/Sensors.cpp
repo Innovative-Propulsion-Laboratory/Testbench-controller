@@ -14,6 +14,14 @@ Adafruit_MAX31856 thermo42 = Adafruit_MAX31856(TS42_pin);
 Adafruit_MAX31856 thermo61 = Adafruit_MAX31856(TS61_pin);
 Adafruit_MAX31856 thermo62 = Adafruit_MAX31856(TS62_pin);
 Adafruit_MAX31856 thermo11 = Adafruit_MAX31856(TS11_pin); //initialized last since it may return negative values
+// Offset
+
+int offset_PS12 = 0;
+int offset_PS22 = 0;
+int offset_PS41 = 0;
+int offset_PS42 = 0;
+int offset_PS63 = 0;
+int offset_PS64 = 0;
 
 // ------------------------- LIMITS DEFINITION ---------------------------------
 
