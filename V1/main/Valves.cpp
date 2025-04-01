@@ -6,8 +6,7 @@ const int valvePins[NUM_VALVES] = {7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 Adafruit_MCP23X17 mcp;
 
 void setupValves() {
-    mcp.begin_SPI(10, 13, 12, 11)
-  }
+    mcp.begin_SPI(10, 13, 12, 11);
   // configure pin for output
   for (int i=0;i<=15;i++)
   {
