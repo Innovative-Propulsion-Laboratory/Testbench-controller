@@ -34,7 +34,8 @@ void set_sender_info(){
 byte receivePacket() {
   int size = udp.parsePacket();
   if (size < 0) { 
-    return;
+    byte instructions[1]= {0}; 
+    return instructions;
   }
 
   if (fisrt_message == false){set_sender_info();fisrt_message = true;}
@@ -49,7 +50,7 @@ byte receivePacket() {
     Serial.printf("%#04x ",instructions[j]); 
   }
 
-  retrurn instructions;
+  return instructions;
 }
 
 
