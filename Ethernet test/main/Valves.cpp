@@ -19,27 +19,27 @@ void setupValves() {
 }
 
 void setValve(uint8_t ID, bool command) {
-    if (ID < 0 || ID >= NUM_VALVES) return;
+  if (ID < 0 || ID >= NUM_VALVES) return;
 
-    bool state = ((valveTypes >> ID) & 1) ? !command : command;
+  bool state = ((valveTypes >> ID) & 1) ? !command : command;
 
-    if (ID < 3) {
-        digitalWrite(valvePins[ID], state);
-    } else {
-        mcp.digitalWrite(valvePins[ID], state);
-    }
+  if (ID < 3) {
+      digitalWrite(valvePins[ID], state);
+  } else {
+      mcp.digitalWrite(valvePins[ID], state);
+  }
 
-    if (command)
-        valvePositions |= (1L << ID);
-    else
-        valvePositions &= ~(1L << ID);
+  if (command)
+      valvePositions |= (1L << ID);
+  else
+      valvePositions &= ~(1L << ID);
 
-    Serial.print("Valve ");
-    Serial.print(ID);
-    Serial.print(" set to ");
-    Serial.println(command ? "open" : "closed");
+  Serial.print("Valve ");
+  Serial.print(ID);
+  Serial.print(" set to ");
+  Serial.println(command ? "open" : "closed");
 
-    byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xFF, 0xFF, ID, (byte)command};
-    reply(message,sizeof(message));
+  byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xFF, 0xFF, ID, (byte)command};
+  reply(message,sizeof(message));
 }
 

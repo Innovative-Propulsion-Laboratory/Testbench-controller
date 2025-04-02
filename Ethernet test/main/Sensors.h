@@ -43,22 +43,23 @@
 #define TS62_pin 37         // Water final temperature
 
 // Structure containing all the data sent from the Teensy to the computer
-struct data {
+struct __attribute__((packed)) data {
+    byte header[4] = {0xFF,0xFF,0xFF,0xFF};
     uint32_t n = 0;                 // packet ID
     uint32_t t = 0;                 // Timestamp (ms)
     
     uint16_t PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64;    // Pressure in mbar
-    float TS11, TS31, TS41, TS42, TS61, TS62;                                           // Thermocouples in °C
+    uint32_t TS11, TS31, TS41, TS42, TS61, TS62;                                           // Thermocouples in °C
     uint16_t FM11, FM21, FM61;                                                          // Flow in mL/s
-    float LC;                                                                           // Load cell (N)
+    uint32_t LC;                                                                           // Load cell (N)
     uint16_t ref5V;                                                                     // 5V reference (mV)
 
-    // uint32_t valvesState;
-    // uint8_t actLPos, actRPos;   // Actuator positions (0-255)
-    // uint8_t actLOK, actROK;     // Actuator OK flags (0 or 1)
+    uint32_t valvesState;
+    uint8_t actLPos =0 , actRPos = 0;   // Actuator positions (0-255)
+    uint8_t actLOK, actROK;     // Actuator OK flags (0 or 1)
 
-    String state = "active";                  // System state
-    // uint8_t test_step = 0;
+    uint8_t state = 1;                  // System state ;  0 = active ; 1 = test ; 2 = emergy exit
+    uint8_t test_step = 0;
 };
 
 // External variable declarations
@@ -82,9 +83,7 @@ float LC_reading(int pin);
 uint16_t ref5V_reading(int pin);
 void values_check();
 
-void sendDataFromSensor(data* d) {
-    send_data((void*)d, sizeof(data));
-}
+void sendDataFromSensor(data* d);
 
 
 

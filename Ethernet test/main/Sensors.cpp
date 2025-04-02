@@ -106,6 +106,10 @@ void setupSensors(){
     thermo11.setConversionMode(MAX31856_ONESHOT_NOWAIT);
 }
 
+void sendDataFromSensor(data* d) {
+    send_data((void*)d, sizeof(data));
+}
+
 void BBLoop(){
     // Reading the pressure sensors used for the Bang-Bang pressurization
     Data.PS11 = PS_25bar_reading(PS11_pin);
@@ -117,8 +121,9 @@ void BBLoop(){
 }
 
 void sensorsLoop(){
+  delay(1000);
     updateData();                                                   //read the sensors
-    values_check();                                                 //check if values are within limits
+    // values_check();                                                 //check if values are within limits
     // BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
     // Data.valvesState = valvePositions;
     send_data(&Data, sizeof(data));                                  //send data to the ground station
@@ -141,53 +146,53 @@ void updateData(){
     Data.n ++;
     
     // Read pressures and convert to mbar
-    Data.PS11 = PS_25bar_reading(PS11_pin);
-    Data.PS12 = PS_25bar_reading(PS12_pin);
-    Data.PS21 = PS_25bar_reading(PS21_pin);
-    Data.PS22 = PS_25bar_reading(PS22_pin);
-    Data.PS31 = PS_70bar_reading(PS31_pin);
-    Data.PS41 = PS_25bar_reading(PS41_pin);
-    Data.PS42 = PS_25bar_reading(PS42_pin);
-    Data.PS51 = PS_350bar_reading(PS51_pin);
-    Data.PS61 = PS_25bar_reading(PS61_pin);
-    Data.PS62 = PS_25bar_reading(PS62_pin);
-    Data.PS63 = PS_25bar_reading(PS63_pin);
-    Data.PS64 = PS_25bar_reading(PS64_pin);
+    Data.PS11 = 1;//PS_25bar_reading(PS11_pin);
+    Data.PS12 = 2;//PS_25bar_reading(PS12_pin);
+    Data.PS21 = 3;//PS_25bar_reading(PS21_pin);
+    Data.PS22 = 4;//PS_25bar_reading(PS22_pin);
+    Data.PS31 = 5;//PS_70bar_reading(PS31_pin);
+    Data.PS41 = 6;//PS_25bar_reading(PS41_pin);
+    Data.PS42 = 7;//PS_25bar_reading(PS42_pin);
+    Data.PS51 = 8;//PS_350bar_reading(PS51_pin);
+    Data.PS61 = 9;//PS_25bar_reading(PS61_pin);
+    Data.PS62 = 10;//PS_25bar_reading(PS62_pin);
+    Data.PS63 = 11;//PS_25bar_reading(PS63_pin);
+    Data.PS64 = 12;//PS_25bar_reading(PS64_pin);
 
     // Read 5V reference
     Data.ref5V = ref5V_reading(PSalim_pin);
 
     // Read load cell
-    Data.LC = LC_reading(LC01_pin);
+    Data.LC = LC_reading(LC01_pin)*10;
 
     // Read flow meters
-    Data.FM11 = FM11_reading(FM11_pin);
-    Data.FM21 = FM21_reading(FM21_pin);
-    Data.FM61 = FM61_reading(FM61_pin);
+    Data.FM11 = 13;//FM11_reading(FM11_pin);
+    Data.FM21 = 16;//FM21_reading(FM21_pin);
+    Data.FM61 = 17;//FM61_reading(FM61_pin);
 
     // getting data from the thermocouples if ready
     if (TS11_waiting && thermo11.conversionComplete()) {
-        Data.TS11 = thermo11.readThermocoupleTemperature();
+        Data.TS11 = 18;//(thermo11.readThermocoupleTemperature())*10;
         TS11_waiting = 0;
     }
     if (TS31_waiting && thermo31.conversionComplete()) {
-        Data.TS31 = thermo31.readThermocoupleTemperature();
+        Data.TS31 = 19;////(thermo31.readThermocoupleTemperature())*10;
         TS31_waiting = 0;
     }
     if (TS41_waiting && thermo41.conversionComplete()) {
-        Data.TS41 = thermo41.readThermocoupleTemperature();
+        Data.TS41 = 20;//(thermo41.readThermocoupleTemperature())*10;
         TS41_waiting = 0;
     }
     if (TS42_waiting && thermo42.conversionComplete()) {
-        Data.TS42 = thermo42.readThermocoupleTemperature();
+        Data.TS42 = 21;//(thermo42.readThermocoupleTemperature())*10;
         TS42_waiting = 0;
     }
     if (TS61_waiting && thermo61.conversionComplete()) {
-        Data.TS61 = thermo61.readThermocoupleTemperature();
+        Data.TS61 = 22;//(thermo61.readThermocoupleTemperature())*10;
         TS61_waiting = 0;
     }
     if (TS62_waiting && thermo62.conversionComplete()) {
-        Data.TS62 = thermo62.readThermocoupleTemperature();
+        Data.TS62 = 23;//(thermo62.readThermocoupleTemperature())*10;
         TS62_waiting = 0;
     }
 }
@@ -265,7 +270,7 @@ void values_check(){
 //    }
 //    else {PS11_BBLW_active = 0;}
 
-    if (Data.state == "test" && Data.PS12 >= PS12_TUW) {
+    if (Data.state == 1 && Data.PS12 >= PS12_TUW) {
         if (PS12_TUW_active == 1 && (millis()-PS12_TUW_time) >= PS_oob_max_delay){
             // reply "warning: PS12 too high"
         }
@@ -275,7 +280,7 @@ void values_check(){
         }
     }
     else {PS12_TUW_active = 0;}
-    if (Data.state == "test" && Data.PS12 <= PS12_TLW) {
+    if (Data.state == 1 && Data.PS12 <= PS12_TLW) {
         if (PS12_TLW_active == 1 && (millis()-PS12_TLW_time) >= PS_oob_max_delay){
             // reply "warning: PS12 too low"
         }
@@ -320,7 +325,7 @@ void values_check(){
 //    }
 //    else {PS21_BBLW_active = 0;}
 
-    if (Data.state == "test" && Data.PS22 >= PS22_TUW) {
+    if (Data.state == 1 && Data.PS22 >= PS22_TUW) {
         if (PS22_TUW_active == 1 && (millis()-PS22_TUW_time) >= PS_oob_max_delay){
             // reply "warning: PS22 too high"
         }
@@ -330,7 +335,7 @@ void values_check(){
         }
     }
     else {PS22_TUW_active = 0;}
-    if (Data.state == "test" && Data.PS22 <= PS22_TLW) {
+    if (Data.state == 1 && Data.PS22 <= PS22_TLW) {
         if (PS22_TLW_active == 1 && (millis()-PS22_TLW_time) >= PS_oob_max_delay){
             // reply "warning: PS12 too low"
         }
@@ -374,7 +379,7 @@ void values_check(){
     }
     else {PS31_LW_active = 0;}
 
-    if (Data.state == "test" && Data.PS41 >= PS41_TUL) {
+    if (Data.state == 1 && Data.PS41 >= PS41_TUL) {
         if (PS41_TUL_active == 1 && (millis()-PS41_TUL_time) >= PS_oob_max_delay){
             // emergency_stop();       // stops the test and puts the testbench in a safe configuration
 
@@ -386,7 +391,7 @@ void values_check(){
         }    
     }
     else {PS41_TUL_active = 0;}
-    if (Data.state == "test" && Data.PS41 >= PS41_TUW){
+    if (Data.state == 1 && Data.PS41 >= PS41_TUW){
         if (PS41_TUW_active == 1 && (millis()-PS41_TUW_time) >= PS_oob_max_delay){
             // reply "warning: PS41 too high"
         }
@@ -396,7 +401,7 @@ void values_check(){
         }
     }
     else {PS41_TUW_active = 0;}
-    if (Data.state == "test" && Data.PS41 <= PS41_TLW){
+    if (Data.state == 1 && Data.PS41 <= PS41_TLW){
         if (PS41_TLW_active == 1 && (millis()-PS41_TLW_time) >= PS_oob_max_delay){
             // reply "warning: PS41 too low"
         }
@@ -406,7 +411,7 @@ void values_check(){
         }
     }
     else {PS41_TLW_active = 0;}
-    if (Data.state == "test" && Data.PS41 <= PS41_TLL) {
+    if (Data.state == 1 && Data.PS41 <= PS41_TLL) {
         if (PS41_TLL_active == 1 && (millis()-PS41_TLL_time) >= PS_oob_max_delay){
             // emergency_stop();       // stops the test and puts the testbench in a safe configuration
 
@@ -419,7 +424,7 @@ void values_check(){
     }
     else {PS41_TLL_active = 0;}
 
-    if (Data.state == "test" && Data.PS42 >= PS42_TUL) {
+    if (Data.state == 1 && Data.PS42 >= PS42_TUL) {
         if (PS42_TUL_active == 1 && (millis()-PS42_TUL_time) >= PS_oob_max_delay){
             // emergency_stop();       // stops the test and puts the testbench in a safe configuration
 
@@ -431,7 +436,7 @@ void values_check(){
         }    
     }
     else {PS42_TUL_active = 0;}
-    if (Data.state == "test" && Data.PS42 >= PS42_TUW){
+    if (Data.state == 1 && Data.PS42 >= PS42_TUW){
         if (PS42_TUW_active == 1 && (millis()-PS42_TUW_time) >= PS_oob_max_delay){
             // reply "warning: PS42 too high"
         }
@@ -441,7 +446,7 @@ void values_check(){
         }
     }
     else {PS42_TUW_active = 0;}
-    if (Data.state == "test" && Data.PS42 <= PS42_TLW){
+    if (Data.state == 1 && Data.PS42 <= PS42_TLW){
         if (PS42_TLW_active == 1 && (millis()-PS42_TLW_time) >= PS_oob_max_delay){
             // reply "warning: PS42 too low"
         }
@@ -451,7 +456,7 @@ void values_check(){
         }
     }
     else {PS42_TLW_active = 0;}
-    if (Data.state == "test" && Data.PS42 <= PS42_TLL) {
+    if (Data.state == 1 && Data.PS42 <= PS42_TLL) {
         if (PS42_TLL_active == 1 && (millis()-PS42_TLL_time) >= PS_oob_max_delay){
             //emergency_stop();       // stops the test and puts the testbench in a safe configuration
 
@@ -484,7 +489,7 @@ void values_check(){
         }
     }
     else {PS51_LW_active = 0;}
-    if (Data.state == "test" && Data.PS51 <= PS51_TLL) {
+    if (Data.state == 1 && Data.PS51 <= PS51_TLL) {
         if (PS51_TLL_active == 1 && (millis()-PS51_TLL_time) >= PS_oob_max_delay){
             // emergency_stop();       // stops the test and puts the testbench in a safe configuration
 
@@ -532,7 +537,7 @@ void values_check(){
 //        }
 //    }
 //    else {PS_WATER_BBLW_active = 0;}
-    if (Data.state == "test" && ((Data.PS61 <= PS_WATER_TLL) || (Data.PS62 <= PS_WATER_TLL))) {
+    if (Data.state == 1 && ((Data.PS61 <= PS_WATER_TLL) || (Data.PS62 <= PS_WATER_TLL))) {
         if (PS_WATER_TLL_active == 1 && (millis()-PS_WATER_TLL_time) >= PS_oob_max_delay){
             setValve(SV52, 1);           //open SV52
             setValve(SV53, 1);           //open SV53
@@ -569,7 +574,7 @@ void values_check(){
         }
     }
     else {TS62_UW_active = 0;}
-    if (Data.state == "test" && Data.TS62 >= TS62_TUL) {
+    if (Data.state == 1 && Data.TS62 >= TS62_TUL) {
         if (TS62_TUL_active == 1 && (millis()-TS62_TUL_time) >= TS_oob_max_delay){
             // emergency_stop();       // stops the test and puts the testbench in a safe configuration
 
