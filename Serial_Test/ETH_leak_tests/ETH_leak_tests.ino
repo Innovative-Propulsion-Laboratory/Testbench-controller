@@ -1,7 +1,7 @@
 #include "Valves.h"
 
 unsigned int t;
-int PS31, PS11;
+int PS31, PS12;
 
 
 void setup(){
@@ -27,13 +27,13 @@ void setup(){
     digitalWrite(36, HIGH);
     digitalWrite(37, HIGH);
 
-    setValve(SV11, 0);
-    setValve(SV12, 0);
-    setValve(SV13, 0);
+    setValve(SV21, 0);
+    setValve(SV22, 0);
+    setValve(SV24, 0);
     setValve(SV31, 1);
     setValve(SV32, 0);
-    setValve(SV33, 1);
-    setValve(SV34, 0);
+    setValve(SV33, 0);
+    setValve(SV34, 1);
     t_after_setup = millis();
 }
 
@@ -46,11 +46,11 @@ void loop(){
 void read_sensors(){
   t = millis();
   PS31 = (int)(31250.0 * ((float)analogRead(A1) / 1023.0 - 0.1));
-  PS11 = (int)(31250.0 * ((float)analogRead(A0) / 1023.0 - 0.1));
+  PS12 = (int)(31250.0 * ((float)analogRead(A0) / 1023.0 - 0.1));
 
   Serial.print(t);
   Serial.print(",");
   Serial.print(PS31);
   Serial.print(",");
-  Serial.println(PS11);
+  Serial.println(PS12);
 }
