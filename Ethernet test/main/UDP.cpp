@@ -41,21 +41,21 @@ void reply (byte* message, uint16_t size){ // send the message send
 }
 
 
-void send_data(void* payload, uint16_t size) {
-  Serial.print("Payload (hex): ");
-  byte* data = (byte*)payload;
-  for (uint16_t i = 0; i < size; i++) {
-    if (data[i] < 0x10) Serial.print("0");
-    Serial.print(data[i], HEX);
-    Serial.print(" ");
-  }
-  Serial.println();
+// void send_data(void* payload, uint16_t size) {// debug
+//   Serial.print("Payload (hex): ");
+//   byte* data = (byte*)payload;
+//   for (uint16_t i = 0; i < size; i++) {
+//     if (data[i] < 0x10) Serial.print("0");
+//     Serial.print(data[i], HEX);
+//     Serial.print(" ");
+//   }
+//   Serial.println();
 
-  udp.send(senderIP, senderPort, data, size);
-}
-// void send_data(void* payload, uint16_t size) {
-//   udp.send(senderIP, senderPort, (byte*)payload, size);
+//   udp.send(senderIP, senderPort, data, size);
 // }
+void send_data(void* payload, uint16_t size) {
+  udp.send(senderIP, senderPort, (byte*)payload, size);
+}
 
 
 Packet receivePacket() {
