@@ -9,7 +9,7 @@ uint16_t Chilldown_on_duration = 1000;
 uint32_t Chilldown_off_duration = 1000;
 float chill_temp = 270;
 uint16_t Chilldown_verified_duration = 100;
-uint32_t Max_chilldown_duration = 10000;
+uint32_t Max_chilldown = 8;
 uint32_t Chilldown_to_cooling = 1000;
 float cooling_pressure = 3000;
 uint32_t PS63_check_duration = 2000;
@@ -63,8 +63,10 @@ void Sequence() {
         set_offset_pressure();
 
         switch (test_step) {
+            ////// PURGE //////
             case 1: {
                 if (millis() >= (T_confirm + Confirm_to_purge_delay)) {
+                    Chilldown_start = 0;
                     setValve(SV36, 1);
                     test_step++;
                 }
@@ -73,7 +75,9 @@ void Sequence() {
             case 2: {
                 if (millis() >= (T_confirm + Confirm_to_purge_delay + Purge_duration)) {
                     setValve(SV36, 0);
-                    Chilldown_start = millis();
+            ////// End of PURGE //////
+            ////// start chilldown //////
+                    Chilldown_start++;
                     setValve(SV13, 1);
                     test_step++;
                 }
@@ -91,12 +95,13 @@ void Sequence() {
                     if (Data.TS12 >= chill_temp) {
                         chill_temp_seems_ok = millis();
                         test_step = 5;  // remplace l'étape 4.5
-                    } else if ((millis() - Chilldown_start) >= Max_chilldown_duration) {
+                    } else if (Chilldown_start >= Max_chilldown) {
                         state = "active";  // Erreur chilldown
                     }
                 } else {
                     T_confirm = millis();
                     test_step = 2;
+                    Chilldown_start++;
                 }
                 break;
             }
@@ -113,11 +118,14 @@ void Sequence() {
             case 6: {
                 if (millis() >= (Chilldown_finished + Chilldown_to_cooling)) {
                     setValve(SV63, 1);
+            ////// end chilldown //////
+            ////// Start cooling //////
                     PS63_duration = millis();
                     test_step++;
                 }
                 break;
             }
+            ////// check cooling //////
             case 7: {
                 if (Data.PS63 >= cooling_pressure) {
                     PS63_seems_rise = millis();
@@ -135,13 +143,16 @@ void Sequence() {
                 }
                 break;
             }
+            ////// start ignite //////
             case 9: {
+            
                 Ign_duration = millis();
                 // allumer allumeur
                 test_step++;
                 break;
             }
             case 10: {
+            ////// check ignite //////
                 if (/* allumeur allumé */) {
                     Ign_seems_on = millis();
                     test_step++;
@@ -154,6 +165,8 @@ void Sequence() {
                 if (/* allumeur allumé */ && ((millis() - Ign_seems_on) >= Ign_verified_duration)) {
                     // couper allumeur
                     T0 = millis();
+            ////// stop ignite //////
+            ////// start bypass //////
                     setValve(SV24, 1);
                     test_step++;
                 } else {
@@ -170,6 +183,7 @@ void Sequence() {
                 break;
             }
             case 13: {
+            ////// check bypass //////
                 if ((Data.PS41 >= Bypass_pressure) && (Data.PS42 >= Bypass_pressure)) {
                     Bypass_duration = millis();
                     test_step++;
@@ -181,6 +195,7 @@ void Sequence() {
             case 14: {
                 if ((Data.PS41 >= Bypass_pressure) && (Data.PS42 >= Bypass_pressure) && ((millis() - Bypass_duration) >= Bypass_verified_duration)) {
                     ETH_open = millis();
+             ////// start main injection //////
                     setValve(SV22, 1);
                     test_step++;
                 } else {
@@ -206,6 +221,7 @@ void Sequence() {
                 break;
             }
             case 17: {
+            ////// check main injection //////
                 if ((Data.PS41 >= Main_pressure) && (Data.PS42 >= Main_pressure) && ((millis() - Main_seems_rise) >= Main_verified_duration)) {
                     test_step++;
                 } else {
@@ -214,6 +230,7 @@ void Sequence() {
                 break;
             }
             case 18: {
+            ////// stop bypass //////
                 setValve(SV24, 0);
                 setValve(SV13, 0);
                 Nominal_pressure_reached = millis();
@@ -226,6 +243,7 @@ void Sequence() {
                 break;
             }
             case 20: {
+            ////// stop main injection and purge //////
                 if (millis() >= (T0 + burn_duration)) {
                     setValve(SV12, 0);
                     setValve(SV36, 1);
@@ -249,6 +267,7 @@ void Sequence() {
                 }
                 break;
             }
+            ////// stop cooling //////
             case 23: {
                 if (millis() >= (T0 + burn_duration + LOX_to_ETH_closing_delay + Purge_duration + Cooling_duration_after_end_burn)) {
                     setValve(SV63, 0);
@@ -261,7 +280,7 @@ void Sequence() {
     } while (state == "test");
 }
 
-void set_offset_pressure() {
+void set_offset_pressure() { // set sensors at 0 
     const int N = 10;
     byte average_PS12_data[N];
     byte average_PS22_data[N];

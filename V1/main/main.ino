@@ -19,10 +19,15 @@ void setup() {
 }
 
 void loop() {
-    // listen to commands
-    if (sizeof(receivePacket()) >= 4 ){
-      decode(receivePacket());
-    }
+  // listen to commands
+  Packet p = receivePacket();
+
+  if (p.length >= 4 && p.data != nullptr) {
+  decode(p.data);
+  }
+  if (p.data != nullptr) {
+    delete[] p.data;
+  }
 
     if ((millis() - t_last_data_packet) >= data_send_rate){
         sensorsLoop();
@@ -52,15 +57,15 @@ void decode(byte* instrcutions){
     }
   }
   if (instructions[0] == 0xFF  && instructions[1] == 0xFF && instructions[2] == 0xDD && instructions[3] == 0xDD){ // bang-bang enable
-    if (instructions[4] == 1 ){
-      if (instructions[5]==0X00){
+    if (instructions[4] == 1 ){ // bang bang LOX
+      if (instructions[5]==0X00){ 
         BB_enable (0, 0);
       }
       elif (instructions[5]==0X01){
         BB_enable (0, 1);
       }
     }
-    elif (instructions[4] == 2 ){
+    elif (instructions[4] == 2 ){ // bang bang ETH
       if (instructions[5]==0X00){
         BB_enable (1, 0);
       }
@@ -68,7 +73,7 @@ void decode(byte* instrcutions){
         BB_enable (1, 1);
       }
     }
-    elif (instructions[4] == 6 ){
+    elif (instructions[4] == 6 ){ // bang bang H2O
       if (instructions[5]==0X00){
         BB_enable (2, 0);
       }

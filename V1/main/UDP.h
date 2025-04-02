@@ -4,13 +4,21 @@
 #include <stdint.h>  
 #include <QNEthernet.h>
 #include <Arduino.h>
+using namespace qindesign::network;
 
+extern EthernetUDP udp;
 extern IPAddress senderIP;
 extern uint16_t senderPort;
 
+struct Packet {
+  byte* data;
+  int length;
+};
+
 void setupUDP();
-void receivePacket();
+Packet receivePacket();
 void reply (byte* message, uint16_t size);
-uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte);
+// void send_data (data* Data, uint16_t size);
+// uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte);
 
 #endif
