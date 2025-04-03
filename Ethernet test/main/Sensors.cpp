@@ -85,8 +85,6 @@ void setupSensors(){
     thermo62.begin();
     thermo11.begin();
 
-    delay(1000);
-
     thermo31.setThermocoupleType(MAX31856_TCTYPE_K);
     thermo31.setConversionMode(MAX31856_ONESHOT_NOWAIT);
 
@@ -125,7 +123,8 @@ void sensorsLoop(){
     updateData();                                                   //read the sensors
     // values_check();                                                 //check if values are within limits
     // BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
-    // Data.valvesState = valvePositions;
+    Data.valvesState = valvePositions;
+    // Serial.println(Data.valvesState);
     send_data(&Data, sizeof(data));                                  //send data to the ground station
     // save_data();                                                    //save data to the SD card
     trigger_TS();                                                   //requesting data from the thermocouples if not waiting for a conversion
