@@ -12,6 +12,34 @@ void setup() {
   setupSensors();
   setupValves();
   setupUDP();
+  Set_valve_position();
+  pinMode(7, OUTPUT);
+  pinMode(8, OUTPUT);
+  pinMode(9, OUTPUT);
+
+  pinMode(2, OUTPUT);
+  pinMode(28, OUTPUT);
+  pinMode(29, OUTPUT);
+  pinMode(30, OUTPUT);
+  pinMode(35, OUTPUT);
+  pinMode(36, OUTPUT);
+  pinMode(37, OUTPUT);
+
+  digitalWrite(2, HIGH);
+  digitalWrite(28, HIGH);
+  digitalWrite(29, HIGH);
+  digitalWrite(30, HIGH);
+  digitalWrite(35, HIGH);
+  digitalWrite(36, HIGH);
+  digitalWrite(37, HIGH);
+
+  setValve(SV21, 0);
+  setValve(SV22, 0);
+  setValve(SV24, 0);
+  setValve(SV31, 1);
+  setValve(SV32, 0);
+  setValve(SV33, 0);
+  setValve(SV34, 1);
 }
 
 void loop() {
@@ -26,7 +54,7 @@ void loop() {
   }
   if (sendData == true){
     sensorsLoop();
-    serialSend();
+    // serialSend();
   }
   // BBLoop();
 }
@@ -104,9 +132,7 @@ void decode(byte* instructions){
     }
   }
   if (instructions[0] == 0xDD  && instructions[1] == 0xDD && instructions[2] == 0xDD && instructions[3] == 0xDD){ // IHM on/off
-    sendData = true;
-    byte message[8] = {0xEE, 0xEE, instructions[0], instructions[1], instructions[2], instructions[3]};
-    reply(message,sizeof(message));
+    
   }
   if (instructions[0] == 0xAA  && instructions[1] == 0xAA && instructions[2] == 0xAA && instructions[3] == 0xAA){ // Start test
     
@@ -118,6 +144,27 @@ void decode(byte* instructions){
   if (instructions[0] == 0xCC  && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC){ // Abort test
 
   } 
+}
+
+void Set_valve_position(){
+  setValve(SV11, 1);
+  setValve(SV12, 0);
+  setValve(SV13, 0);
+  setValve(SV21, 1);
+  setValve(SV22, 0);
+  setValve(SV24, 0);
+  setValve(SV31, 0);
+  setValve(SV32, 1);
+  setValve(SV33, 0);
+  setValve(SV34, 0);
+  setValve(SV35, 0);
+  setValve(SV36, 0);
+  setValve(SV51, 1);
+  setValve(SV52, 0);
+  setValve(SV53, 0);
+  setValve(SV61, 1);
+  setValve(SV62, 1);
+  setValve(SV63, 0);
 }
 
 void test(){

@@ -60,6 +60,7 @@ struct __attribute__((packed)) data {
 
     uint8_t state = 1;                  // System state ;  0 = active ; 1 = test ; 2 = emergy exit
     uint8_t test_step = 0;
+    bool test_cooling = 1; // 0 = no cooling ; 1 = cooling
 };
 
 // External variable declarations
