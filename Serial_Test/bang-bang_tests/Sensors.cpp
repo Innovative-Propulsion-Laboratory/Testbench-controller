@@ -198,7 +198,7 @@ uint16_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 an
 }
 
 uint16_t PS_70bar_reading(int pin) {  // For PS31
-    return (uint16_t)(87500.0 * ((float)analogRead(pin) / 1023.0 - 0.1)); 
+    return (uint16_t)(87500.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
 uint16_t PS_350bar_reading(int pin) {  // For PS51
