@@ -1,13 +1,10 @@
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
 
-#include "sequence.h"
-#include "Valves.h"
-#include "Sensors.h"
 #include <stdint.h>  
-#include <Arduino.h>
 
 struct __attribute__((packed)) sequence_data {
+    uint16_t Confirm_to_purge_delay;
     uint16_t Purge_duration;
     uint16_t Chilldown_on_duration;
     uint32_t Chilldown_off_duration;
@@ -32,8 +29,7 @@ struct __attribute__((packed)) sequence_data {
     uint16_t Cooling_duration_after_end_burn;
 };
 
-// void Sequence();
+void Sequence();
 void set_offset_pressure();
-float average(byte* L, int length);
 
 #endif

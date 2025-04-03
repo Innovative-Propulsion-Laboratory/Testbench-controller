@@ -4,31 +4,7 @@
 #include "TVC.h"
 
 uint16_t T_confirm;
-uint16_t Purge_duration = 1000;
-uint16_t Chilldown_on_duration = 1000;
-uint32_t Chilldown_off_duration = 1000;
-float chill_temp = 270;
-uint16_t Chilldown_verified_duration = 100;
-uint32_t Max_chilldown = 8;
-uint32_t Chilldown_to_cooling = 1000;
-float cooling_pressure = 3000;
-uint32_t PS63_check_duration = 2000;
-uint16_t PS63_verified_duration = 2000;
-uint16_t Ign_check_duration = 2000;
-uint16_t Ign_verified_duration = 2000;
-uint16_t ETH_to_LOX_bypass = 200;
-float Bypass_pressure = 200;
-uint16_t Bypass_check_duration = 200;
-uint16_t Bypass_verified_duration = 200;
-float Main_pressure = 200;
-uint16_t Main_check_duration = 2000;
-uint16_t Main_verified_duration = 2000;
-uint16_t burn_duration = 2000;
-uint16_t LOX_to_ETH_closing_delay = 2000;
-uint16_t Cooling_duration_after_end_burn = 2000;
-
 uint16_t Confirm_to_purge_delay;
-
 uint32_t Chilldown_finished;
 uint32_t PS63_duration;
 uint32_t PS63_seems_rise;
