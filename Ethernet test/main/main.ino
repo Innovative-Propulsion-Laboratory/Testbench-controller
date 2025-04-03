@@ -73,52 +73,64 @@ void decode(byte* instructions){
   }
   if (instructions[0] == 0xFF  && instructions[1] == 0xFF && instructions[2] == 0xEE && instructions[3] == 0xEE){ // set bang-bang pressurization 
     if (instructions[4] == 1 ){// tank: 0 = LOX, 1 = ETH, 2 = WATER
-      uint16_t value = assembleUInt16(instructions[5],instructions[6]);
-      Serial.print("ETH pressure bangbang set : ");
-      Serial.println(value);
+      // uint16_t value = assembleUInt16(instructions[5],instructions[6]);
+      Serial.print("LOX pressure bangbang set : ");
+      Serial.println(instructions[5]);
       // BB_param_set(0, value); 
     }
     if (instructions[4] == 2 ){
-      uint16_t value = assembleUInt16(instructions[5],instructions[6]);
-      Serial.println("LOX pressure bangbang set : ");
-      Serial.println(value);
+      // uint16_t value = assembleUInt16(instructions[5],instructions[6]);
+      Serial.println("ETH pressure bangbang set : ");
+      Serial.println(instructions[5]);
       // BB_param_set(1, value);
     }
     if (instructions[4] == 6 ){
-      uint16_t value = assembleUInt16(instructions[5],instructions[6]);
+      // uint16_t value = assembleUInt16(instructions[5],instructions[6]);
       Serial.println("H20 pressure bangbang set : ");
-      Serial.println(value);
+      Serial.println(instructions[5]);
       // BB_param_set(2, value); 
     }
   }
   if (instructions[0] == 0xFF  && instructions[1] == 0xFF && instructions[2] == 0xDD && instructions[3] == 0xDD){ // bang-bang enable
-    if (instructions[4] == 1 ){// tank: 0 = LOX, 1 = ETH, 2 = WATER
+    if (instructions[4] == 1 ){// tank: 1 = LOX, 2 = ETH, 6 = WATER
       if (instructions[5]==0X00){
-        Serial.println("ETH bangbang activate");
+        Serial.println("LOX bangbang desactivate");
+        byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, instructions[4], instructions[5]};
+        reply(message,sizeof(message));
         // BB_enable (0, 0);
       }
       else if (instructions[5]==0X01){
-        Serial.println("ETH bangbang desactivate");
+        Serial.println("LOX bangbang activate");
+        byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, instructions[4], instructions[5]};
+        reply(message,sizeof(message));
         // BB_enable (0, 1);
       }
     }
     else if (instructions[4] == 2 ){
       if (instructions[5]==0X00){
-        Serial.println("ETH bangbang activate");
+        Serial.println("ETH bangbang desactivate");
+        byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, instructions[4], instructions[5]};
+        reply(message,sizeof(message));
         // BB_enable (1, 0);
       }
       if (instructions[5]==0X01){
-        Serial.println("ETH bangbang desactivate");
+        Serial.println("ETH bangbang activate");
+        byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, instructions[4], instructions[5]};
+        reply(message,sizeof(message));
         // BB_enable (1, 1);
       }
     }
     else if (instructions[4] == 6 ){
       if (instructions[5]==0X00){
-        Serial.println("ETH bangbang activate");
+        Serial.println("H2O bangbang desactivate");
+        byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, instructions[4], instructions[5]};
+        reply(message,sizeof(message));
         // BB_enable (2, 0);
       }
       if (instructions[5]==0X01){
-        Serial.println("ETH bangbang desactivate");
+        Serial.println("H2O bangbang activate");
+        byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, instructions[4], instructions[5]};
+        reply(message,sizeof(message));
         // BB_enable (2, 1);
       }
     }
