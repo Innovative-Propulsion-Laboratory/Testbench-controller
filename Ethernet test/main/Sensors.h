@@ -70,6 +70,10 @@ extern data Data;
 void setupSensors();
 void BBLoop();
 void sensorsLoop();
+void trigger_TS();
+void values_check();
+void updateData();
+
 
 uint16_t PS_25bar_reading(int pin);
 uint16_t PS_70bar_reading(int pin);
@@ -79,7 +83,7 @@ uint16_t FM21_reading(int pin);
 uint16_t FM61_reading(int pin);
 float LC_reading(int pin);
 uint16_t ref5V_reading(int pin);
-void values_check();
+
 
 void sendDataFromSensor(data* d);
 

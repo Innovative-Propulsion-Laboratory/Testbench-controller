@@ -75,7 +75,7 @@ uint32_t TS62_UW_time = 0, TS62_TUL_time = 0;
 void setupSensors(){
 
 
-    Data.valveState = valvePositions;
+    Data.valvesState = valvePositions;
 
     // Thermocouples setup
     thermo31.begin();
