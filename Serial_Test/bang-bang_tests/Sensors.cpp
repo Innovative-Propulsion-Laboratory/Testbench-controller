@@ -85,8 +85,6 @@ void setupSensors(){
     thermo62.begin();
     thermo11.begin();
 
-    delay(1000);
-
     thermo31.setThermocoupleType(MAX31856_TCTYPE_K);
     thermo31.setConversionMode(MAX31856_ONESHOT_NOWAIT);
 
@@ -104,6 +102,10 @@ void setupSensors(){
 
     thermo11.setThermocoupleType(MAX31856_TCTYPE_K);
     thermo11.setConversionMode(MAX31856_ONESHOT_NOWAIT);
+}
+
+void sendDataFromSensor(data* d) {
+    send_data((void*)d, sizeof(data));
 }
 
 void BBLoop(){
