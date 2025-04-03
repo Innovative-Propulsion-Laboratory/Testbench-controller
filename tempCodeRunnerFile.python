@@ -1,0 +1,38 @@
+import struct
+
+def decode_teensy_message(hex_data):
+    # Convert hex string to bytes
+    binary_data = bytes.fromhex(hex_data)
+    
+    # Define struct format: < means little-endian
+    struct_format = "<2I12H6f3HfH"
+    expected_size = struct.calcsize(struct_format)
+    
+    if len(binary_data) < expected_size:
+        print(f"Error: Expected {expected_size} bytes, but got {len(binary_data)} bytes.")
+        return
+    
+    # Unpack binary data
+    unpacked_data = struct.unpack(struct_format, binary_data[:expected_size])
+    
+    # Assign values to variables
+    packet_id, timestamp = unpacked_data[:2]
+    pressure_sensors = unpacked_data[2:14]
+    thermocouples = unpacked_data[14:20]
+    flow_meters = unpacked_data[20:23]
+    load_cell = unpacked_data[23]
+    ref5V = unpacked_data[24]
+    
+    # Print extracted values
+    print(f"Packet ID: {packet_id}")
+    print(f"Timestamp (ms): {timestamp}")
+    print("Pressure Sensors (mbar):", pressure_sensors)
+    print("Thermocouples (°C):", thermocouples)
+    print("Flow Meters (mL/s):", flow_meters)
+    print(f"Load Cell (N): {load_cell}")
+    print(f"5V Reference (mV): {ref5V}")
+    
+# Example UDP hex message (replace with actual received data)
+hex_data = "b7010000c3c406000000330015000000000000000000000033001500000000000000c2410000000000309e410080a14100a0a5410050ac417f008600c1010000000000000503000048d920200600000006000000"
+
+decode_teensy_message(hex_data)

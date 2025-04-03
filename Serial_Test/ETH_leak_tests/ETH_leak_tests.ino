@@ -34,7 +34,6 @@ void setup(){
     setValve(SV32, 0);
     setValve(SV33, 0);
     setValve(SV34, 1);
-    t_after_setup = millis();
 }
 
 void loop(){
@@ -45,8 +44,8 @@ void loop(){
 
 void read_sensors(){
   t = millis();
-  PS31 = (int)(31250.0 * ((float)analogRead(A1) / 1023.0 - 0.1));
-  PS12 = (int)(31250.0 * ((float)analogRead(A0) / 1023.0 - 0.1));
+  PS31 = (int)(87500.0 * ((float)analogRead(A5) / 1023.0 - 0.1));
+  PS12 = (int)(31250.0 * ((float)analogRead(A8) / 1023.0 - 0.1));
 
   Serial.print(t);
   Serial.print(",");

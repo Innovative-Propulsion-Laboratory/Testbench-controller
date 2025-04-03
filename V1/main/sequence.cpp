@@ -3,7 +3,7 @@
 #include "Sensors.h"
 #include "TVC.h"
 
-uint16_t T_confirm = 1000;
+uint16_t T_confirm;
 uint16_t Purge_duration = 1000;
 uint16_t Chilldown_on_duration = 1000;
 uint32_t Chilldown_off_duration = 1000;
@@ -48,20 +48,18 @@ uint32_t chill_temp_seems_ok;
 uint32_t Chilldown_duration = 0;
 
 uint8_t test_step ;
-String state = "active";
-String active = "active";
 
 void Sequence() {
 
     T_confirm = millis();
-    test_step = 1;
-    sate = "test"
-    
+    Data.test_step = 1;
+    Data.state = 1;
+    set_offset_pressure();
+
     do {
         sensorsLoop();
         decode(receivePacket());
-        set_offset_pressure();
-
+        
         switch (test_step) {
             ////// PURGE //////
             case 1: {
@@ -297,7 +295,7 @@ void set_offset_pressure() { // set sensors at 0
         average_PS41_data[i] = Data.PS41;
         average_PS42_data[i] = Data.PS42;
         average_PS63_data[i] = Data.PS63;
-        average_PS64_data[i] = Data.PS64;  
+        average_PS64_data[i] = Data.PS64; 
     }
 
     offset_PS12 = average(average_PS12_data, N);

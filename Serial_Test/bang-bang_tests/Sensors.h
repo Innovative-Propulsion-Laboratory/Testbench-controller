@@ -59,6 +59,7 @@ struct data {
 
     uint8_t state = 0;                  // System state
     uint8_t test_step = 0;
+    bool test_cooling = 1;              // 1 = cooling, 0 = not cooling
 };
 
 // External variable declarations
