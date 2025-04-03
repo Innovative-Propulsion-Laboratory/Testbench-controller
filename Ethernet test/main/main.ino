@@ -1,6 +1,7 @@
 #include "Valves.h"
 #include "UDP.h"
 #include "Sensors.h"
+#include "sequence.h"
 
 bool sendData = true;
 
@@ -75,7 +76,7 @@ void decode(byte* instructions){
       uint16_t value = assembleUInt16(instructions[5],instructions[6]);
       Serial.print("ETH pressure bangbang set : ");
       Serial.println(value);
-      // BB_param_set(0, float pressure); 
+      // BB_param_set(0, value); 
     }
     if (instructions[4] == 2 ){
       uint16_t value = assembleUInt16(instructions[5],instructions[6]);
@@ -148,7 +149,132 @@ void decode(byte* instructions){
     }
   }
   if (instructions[0] == 0xAA  && instructions[1] == 0xAA && instructions[2] == 0xAA && instructions[3] == 0xAA){ // Start test
-
+    uint16_t value = assembleUInt16(instructions[4], instructions[5]);
+    Serial.print("ETH pressure bangbang set : ");
+    Serial.println(value);
+    // BB_param_set(0, value);
+    
+    Sequence_data.cooling_enable = instructions[6];
+    Serial.print("Cooling enable : ");
+    Serial.println(Sequence_data.cooling_enable);
+    
+    uint16_t value1 = assembleUInt16(instructions[7], instructions[8]);
+    Serial.print("LOX pressure bangbang set : ");
+    Serial.println(value1);
+    // BB_param_set(1, value1);
+    
+    uint16_t value2 = assembleUInt16(instructions[9], instructions[10]);
+    Serial.print("H2O pressure bangbang set : ");
+    Serial.println(value2);
+    // BB_param_set(2, value2);
+    
+    Sequence_data.tvc_pattern = assembleUInt16(instructions[11], instructions[12]);
+    Serial.print("TVC pattern : ");
+    Serial.println(Sequence_data.tvc_pattern);
+    
+    Sequence_data.Confirm_to_purge_delay = assembleUInt16(instructions[13], instructions[14]);
+    Serial.print("Confirm to purge delay : ");
+    Serial.println(Sequence_data.Confirm_to_purge_delay);
+    
+    Sequence_data.Purge_duration1 = assembleUInt16(instructions[15], instructions[16]);
+    Serial.print("Purge duration 1 : ");
+    Serial.println(Sequence_data.Purge_duration1);
+    
+    Sequence_data.Chilldown_on_duration = assembleUInt16(instructions[17], instructions[18]);
+    Serial.print("Chilldown ON duration : ");
+    Serial.println(Sequence_data.Chilldown_on_duration);
+    
+    Sequence_data.Chilldown_off_duration = assembleUInt16(instructions[19], instructions[20]);
+    Serial.print("Chilldown OFF duration : ");
+    Serial.println(Sequence_data.Chilldown_off_duration);
+    
+    Sequence_data.chill_temp = assembleUInt16(instructions[21], instructions[22]) / 10;
+    Serial.print("Chill temperature (°C) : ");
+    Serial.println(Sequence_data.chill_temp);
+    
+    Sequence_data.Chilldown_verified_duration = assembleUInt16(instructions[23], instructions[24]);
+    Serial.print("Chilldown verified duration : ");
+    Serial.println(Sequence_data.Chilldown_verified_duration);
+    
+    Sequence_data.Max_chilldown = assembleUInt16(instructions[25], instructions[26]);
+    Serial.print("Max chilldown : ");
+    Serial.println(Sequence_data.Max_chilldown);
+    
+    Sequence_data.Chilldown_to_cooling = assembleUInt16(instructions[27], instructions[28]);
+    Serial.print("Chilldown to cooling delay : ");
+    Serial.println(Sequence_data.Chilldown_to_cooling);
+    
+    Sequence_data.cooling_pressure = assembleUInt16(instructions[29], instructions[30]);
+    Serial.print("Cooling pressure : ");
+    Serial.println(Sequence_data.cooling_pressure);
+    
+    Sequence_data.PS63_check_duration = assembleUInt16(instructions[31], instructions[32]);
+    Serial.print("PS63 check duration : ");
+    Serial.println(Sequence_data.PS63_check_duration);
+    
+    Sequence_data.PS63_verified_duration = assembleUInt16(instructions[33], instructions[34]);
+    Serial.print("PS63 verified duration : ");
+    Serial.println(Sequence_data.PS63_verified_duration);
+    
+    Sequence_data.Ign_check_duration = assembleUInt16(instructions[35], instructions[36]);
+    Serial.print("Ignition check duration : ");
+    Serial.println(Sequence_data.Ign_check_duration);
+    
+    Sequence_data.Ign_verified_duration = assembleUInt16(instructions[37], instructions[38]);
+    Serial.print("Ignition verified duration : ");
+    Serial.println(Sequence_data.Ign_verified_duration);
+    
+    Sequence_data.burn_duration = assembleUInt16(instructions[39], instructions[40]);
+    Serial.print("Burn duration : ");
+    Serial.println(Sequence_data.burn_duration);
+    
+    Sequence_data.ETH_to_LOX_bypass = assembleUInt16(instructions[41], instructions[42]);
+    Serial.print("ETH to LOX bypass : ");
+    Serial.println(Sequence_data.ETH_to_LOX_bypass);
+    
+    Sequence_data.Bypass_check_duration = assembleUInt16(instructions[43], instructions[44]);
+    Serial.print("Bypass check duration : ");
+    Serial.println(Sequence_data.Bypass_check_duration);
+    
+    Sequence_data.Bypass_pressure = assembleUInt16(instructions[45], instructions[46]);
+    Serial.print("Bypass pressure : ");
+    Serial.println(Sequence_data.Bypass_pressure);
+    
+    Sequence_data.Bypass_verified_duration = assembleUInt16(instructions[47], instructions[48]);
+    Serial.print("Bypass verified duration : ");
+    Serial.println(Sequence_data.Bypass_verified_duration);
+    
+    Sequence_data.ETH_to_LOX_main = assembleUInt16(instructions[49], instructions[50]);
+    Serial.print("ETH to LOX main : ");
+    Serial.println(Sequence_data.ETH_to_LOX_main);
+    
+    Sequence_data.Main_check_duration = assembleUInt16(instructions[51], instructions[52]);
+    Serial.print("Main check duration : ");
+    Serial.println(Sequence_data.Main_check_duration);
+    
+    Sequence_data.Main_pressure = assembleUInt16(instructions[53], instructions[54]);
+    Serial.print("Main pressure : ");
+    Serial.println(Sequence_data.Main_pressure);
+    
+    Sequence_data.Main_verified_duration = assembleUInt16(instructions[55], instructions[56]);
+    Serial.print("Main verified duration : ");
+    Serial.println(Sequence_data.Main_verified_duration);
+    
+    Sequence_data.TVC_pattern_duration = assembleUInt16(instructions[57], instructions[58]);
+    Serial.print("TVC pattern duration : ");
+    Serial.println(Sequence_data.TVC_pattern_duration);
+    
+    Sequence_data.LOX_to_ETH_closing_delay = assembleUInt16(instructions[59], instructions[60]);
+    Serial.print("LOX to ETH closing delay : ");
+    Serial.println(Sequence_data.LOX_to_ETH_closing_delay);
+    
+    Sequence_data.Purge_duration2 = assembleUInt16(instructions[61], instructions[62]);
+    Serial.print("Purge duration 2 : ");
+    Serial.println(Sequence_data.Purge_duration2);
+    
+    Sequence_data.Cooling_duration_after_end_burn = assembleUInt16(instructions[63], instructions[64]);
+    Serial.print("Cooling duration after end of burn : ");
+    Serial.println(Sequence_data.Cooling_duration_after_end_burn);
   } 
   if (instructions[0] == 0xBB  && instructions[1] == 0xBB && instructions[2] == 0xBB && instructions[3] == 0xBB){ // Confirm test
 
@@ -156,27 +282,6 @@ void decode(byte* instructions){
   if (instructions[0] == 0xCC  && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC){ // Abort test
 
   } 
-}
-
-void Set_valve_position(){
-  setValve(SV11, 1);
-  setValve(SV12, 0);
-  setValve(SV13, 0);
-  setValve(SV21, 1);
-  setValve(SV22, 0);
-  setValve(SV24, 0);
-  setValve(SV31, 0);
-  setValve(SV32, 1);
-  setValve(SV33, 0);
-  setValve(SV34, 0);
-  setValve(SV35, 0);
-  setValve(SV36, 0);
-  setValve(SV51, 1);
-  setValve(SV52, 0);
-  setValve(SV53, 0);
-  setValve(SV61, 1);
-  setValve(SV62, 1);
-  setValve(SV63, 0);
 }
 
 void test(){

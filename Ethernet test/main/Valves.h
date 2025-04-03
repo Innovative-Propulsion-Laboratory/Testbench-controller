@@ -32,5 +32,6 @@ extern uint32_t valvePositions;
 
 void setupValves();
 void setValve(uint8_t ID, bool command);
+void Set_valve_position();
 
 #endif
