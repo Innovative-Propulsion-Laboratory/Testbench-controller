@@ -1,16 +1,17 @@
 #include "Valves.h"
 #include "UDP.h"
+#include "Sensors.h"
 
-
+bool sendData = true;
 
 unsigned long t_last_data_packet = 0, data_send_rate = 1000;
 
 void setup() {
-    Serial.begin(9600);       //initialize Serial Port
-    SPI.begin();              //initialize SPI
-
-    setupValves();
-    setupUDP();
+  Serial.begin(9600);       //initialize Serial Port
+  SPI.begin();              //initialize SPI
+  setupSensors();
+  setupValves();
+  setupUDP();
 }
 
 void loop() {
@@ -23,15 +24,19 @@ void loop() {
   if (p.data != nullptr) {
     delete[] p.data;
   }
+  if (sendData == true){
+    sensorsLoop();
+    serialSend();
+  }
   // BBLoop();
 }
 
 
 void decode(byte* instructions){
 
-  if (instructions[0] == 0xFF  && instructions[1] == 0xFF && instructions[2] == 0xFF && instructions[3] == 0xFF){ // Valve
-    if (instructions[6] == 0x00 || instructions[6] == 0x01) {
-      setValve(instructions[5], instructions[6]);  // Activer ou dÃ©sactiver la valve
+  if (instructions[0] == 0xff  && instructions[1] == 0xff && instructions[2] == 0xff && instructions[3] == 0xff){ // Valve
+    if (instructions[5] == 0x00 || instructions[5] == 0x01) {
+      setValve(instructions[4], instructions[5]);  // Activer ou dÃ©sactiver la valve
     }
   }
   if (instructions[0] == 0xFF  && instructions[1] == 0xFF && instructions[2] == 0xEE && instructions[3] == 0xEE){ // set bang-bang pressurization 
@@ -99,7 +104,9 @@ void decode(byte* instructions){
     }
   }
   if (instructions[0] == 0xDD  && instructions[1] == 0xDD && instructions[2] == 0xDD && instructions[3] == 0xDD){ // IHM on/off
-
+    sendData = true;
+    byte message[8] = {0xEE, 0xEE, instructions[0], instructions[1], instructions[2], instructions[3]};
+    reply(message,sizeof(message));
   }
   if (instructions[0] == 0xAA  && instructions[1] == 0xAA && instructions[2] == 0xAA && instructions[3] == 0xAA){ // Start test
     
