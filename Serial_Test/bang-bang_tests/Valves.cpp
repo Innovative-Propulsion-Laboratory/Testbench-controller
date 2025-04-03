@@ -18,8 +18,9 @@ void setupValves() {
     }
     MCP.pinMode8(0, 0x00);  // GPA
     MCP.pinMode8(1, 0x00);  // GPB
+}
 
-
+void setupValvesPosition(){
     setValve(SV11, 1);
     setValve(SV12, 0);
     setValve(SV13, 0);
