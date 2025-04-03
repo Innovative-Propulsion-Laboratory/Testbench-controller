@@ -75,7 +75,7 @@ uint32_t TS62_UW_time = 0, TS62_TUL_time = 0;
 void setupSensors(){
 
 
-    Data.valveState = valvePositions;
+    Data.valvesState = valvePositions;
 
     // Thermocouples setup
     thermo31.begin();
@@ -538,7 +538,7 @@ void values_check(){
         }
     }
     else {PS_WATER_UL_active = 0;}
-    if (WATER_BB == 1 &&((Data.PS61 >= PS_WATER_BBUW) || (Data.PS62 >= PS_WATER_BBUW))) {
+    if (WATER_BB == 1 &&((Data.PS61 >= WATER_BBUW) || (Data.PS62 >= WATER_BBUW))) {
         if (PS_WATER_BBUW_active == 1 && (millis()-PS_WATER_BBUW_time) >= PS_oob_max_delay){
             // reply "warning: PS_WATER too high in BB pressurization"
             Serial.println("warning: PS_WATER too high in BB pressurization");
@@ -549,7 +549,7 @@ void values_check(){
         }
     }
     else {PS_WATER_BBUW_active = 0;}
-    if (WATER_BB == 1 && ((Data.PS61 <= PS_WATER_BBLW) || (Data.PS62 <= PS_WATER_BBLW))) {
+    if (WATER_BB == 1 && ((Data.PS61 <= WATER_BBLW) || (Data.PS62 <= WATER_BBLW))) {
         if (PS_WATER_BBLW_active == 1 && (millis()-PS_WATER_BBLW_time) >= PS_oob_max_delay){
             // reply "warning: PS_WATER too low in BB pressurization"
             Serial.println("warning: PS_WATER too low in BB pressurization");
