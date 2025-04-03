@@ -2,7 +2,7 @@
 #define SENSORS_H
 
 #include "Valves.h"
-// #include "Pressurization.h"
+#include "Pressurization.h"
 // #include "SaveData.h"
 #include "UDP.h"
 #include <Arduino.h>
@@ -70,9 +70,6 @@ extern data Data;
 void setupSensors();
 void BBLoop();
 void sensorsLoop();
-void updateData();
-void trigger_TS();
-void serialSend();
 
 uint16_t PS_25bar_reading(int pin);
 uint16_t PS_70bar_reading(int pin);

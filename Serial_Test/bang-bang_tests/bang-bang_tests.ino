@@ -1,5 +1,7 @@
 #include "Sensors.h"
 
+uint32_t time_last_reading = 0;
+
 void setup(){
     Serial.begin(9600);
     SPI.begin();
@@ -12,12 +14,22 @@ void setup(){
     digitalWrite(10, HIGH);
     
     setupSensors();
-    BB_param_set(6, 4000)
-    
+    setupValves();
+    setupValvesPosition();
+
+    setValve(SV22, 0);
+    setValve(SV24, 0);
+    setValve(SV31, 1);
+    setValve(SV32, 0);
+
+    BB_param_set(2, 4000);
+    BB_enable (2, 1);
 }
 
 void loop(){
-    sensorsLoop();
-
-    delay(200);
+    if (millis() - time_last_reading >= 1000){
+      sensorsLoop();
+      time_last_reading = millis();
+    }
+    BBLoop(); 
 }
