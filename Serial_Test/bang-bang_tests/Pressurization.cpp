@@ -40,8 +40,8 @@ void BB_param_set(uint8_t tank, uint16_t pressure){ // tank: 0 = LOX, 1 = ETH, 2
             WATER_BBUW = pressure + 1000;
         }
     }
-    byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xEE, 0xEE, tank, (byte)(pressure >> 8), (byte)(pressure & 0xFF)}; // encoding using the big-endian
-    reply(message,sizeof(message));
+    // byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xEE, 0xEE, tank, (byte)(pressure >> 8), (byte)(pressure & 0xFF)}; // encoding using the big-endian
+    // reply(message,sizeof(message));
 }
 
 void BB_enable (uint8_t tank, bool command){ // tank: 0 = LOX, 1 = ETH, 2 = WATER
@@ -55,8 +55,8 @@ void BB_enable (uint8_t tank, bool command){ // tank: 0 = LOX, 1 = ETH, 2 = WATE
         if (tank == 1) {ETH_BB = 1; setValve(SV22, 0);}
         if (tank == 2) {WATER_BB = 1; setValve(SV61, 0); setValve(SV62, 0);}
     }
-    byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, tank, command};
-    reply(message,sizeof(message));
+    // byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, tank, command};
+    // reply(message,sizeof(message));
 }
 
 void BB_pressurization(uint16_t PS11, uint16_t PS21, uint16_t PS61, uint16_t PS62){

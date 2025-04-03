@@ -12,6 +12,8 @@ void setup(){
     digitalWrite(10, HIGH);
     
     setupSensors();
+    BB_param_set(6, 4000)
+    
 }
 
 void loop(){
