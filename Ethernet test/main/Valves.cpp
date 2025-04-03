@@ -40,3 +40,23 @@ void setValve(uint8_t ID, bool command) {
   reply(message,sizeof(message));
 }
 
+void Set_valve_position(){
+  setValve(SV11, 1);
+  setValve(SV12, 0);
+  setValve(SV13, 0);
+  setValve(SV21, 1);
+  setValve(SV22, 0);
+  setValve(SV24, 0);
+  setValve(SV31, 0);
+  setValve(SV32, 1);
+  setValve(SV33, 0);
+  setValve(SV34, 0);
+  setValve(SV35, 0);
+  setValve(SV36, 0);
+  setValve(SV51, 1);
+  setValve(SV52, 0);
+  setValve(SV53, 0);
+  setValve(SV61, 1);
+  setValve(SV62, 1);
+  setValve(SV63, 0);
+}
