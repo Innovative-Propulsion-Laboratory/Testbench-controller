@@ -75,7 +75,7 @@ uint32_t TS62_UW_time = 0, TS62_TUL_time = 0;
 void setupSensors(){
 
 
-    Data.valveState = valvePositions;
+    Data.valvesState = valvePositions;
 
     // Thermocouples setup
     thermo31.begin();
@@ -120,7 +120,7 @@ void BBLoop(){
 
 void sensorsLoop(){
     updateData();                                                   //read the sensors
-    values_check();                                                 //check if values are within limits
+    // values_check();                                                 //check if values are within limits
     BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
     Data.valvesState = valvePositions;
     // serialSend(); 

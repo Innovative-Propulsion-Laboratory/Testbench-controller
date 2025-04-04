@@ -18,6 +18,7 @@ uint32_t T_burn;
 uint32_t Chilldown_start;
 uint32_t chill_temp_seems_ok;
 uint32_t Chilldown_duration = 0;
+uint16_t Chilldown_verified_duration;
 
 sequence_data Sequence_data;
 
@@ -26,6 +27,7 @@ sequence_data Sequence_data;
 //     T_confirm = millis();
 //     Data.test_step = 1;
 //     Data.state = 1;
+//     Data.test_cooling ...
 //     set_offset_pressure();
 
 //     do {

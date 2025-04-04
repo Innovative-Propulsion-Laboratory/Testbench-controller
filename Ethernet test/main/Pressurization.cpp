@@ -29,6 +29,10 @@ void BB_param_set(uint8_t tank, uint16_t pressure){ // tank: 1 = LOX, 2 = ETH, 6
             PS21_BBLW = pressure - 1000;
             PS21_BB_max = pressure + 200;
             PS21_BBUW = pressure + 1000;
+            Serial.print(PS21_BB_min);
+            Serial.print(PS21_BBLW);
+            Serial.print(PS21_BB_max);
+            Serial.print(PS21_BBUW);
         }
     }
     if (tank == 6){
@@ -52,7 +56,7 @@ void BB_enable (uint8_t tank, bool command){ // tank: 1 = LOX, 2 = ETH, 6 = WATE
     }
     if (command == 1){
         if (tank == 1) {LOX_BB = 1; setValve(SV11, 0);}
-        if (tank == 2) {ETH_BB = 1; setValve(SV21, 0);}
+        if (tank == 2) {ETH_BB = 1; setValve(SV21, 0); Serial.print("ETH_BB actif");}
         if (tank == 6) {WATER_BB = 1; setValve(SV61, 0); setValve(SV62, 0);}
     }
     // byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, tank, command};

@@ -11,7 +11,6 @@ struct __attribute__((packed)) sequence_data {
     uint16_t Chilldown_on_duration;
     uint16_t Chilldown_off_duration;
     float chill_temp;
-    uint16_t Chilldown_verified_duration;
     uint16_t Max_chilldown;
     uint16_t Chilldown_to_cooling;
     float cooling_pressure;

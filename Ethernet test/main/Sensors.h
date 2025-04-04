@@ -58,7 +58,7 @@ struct __attribute__((packed)) data {
     uint8_t actLPos =0 , actRPos = 0;   // Actuator positions (0-255)
     uint8_t actLOK, actROK;     // Actuator OK flags (0 or 1)
 
-    uint8_t state = 1;                  // System state ;  0 = active ; 1 = test ; 2 = emergy exit
+    uint8_t state = 0;                  // System state ;  0 = active ; 1 = test ; 2 = emergy exit
     uint8_t test_step = 0;
     bool test_cooling = 1; // 0 = no cooling ; 1 = cooling
 };
@@ -70,6 +70,10 @@ extern data Data;
 void setupSensors();
 void BBLoop();
 void sensorsLoop();
+void values_check();
+void trigger_TS();
+void updateData();
+void serialSend();
 
 uint16_t PS_25bar_reading(int pin);
 uint16_t PS_70bar_reading(int pin);
@@ -79,7 +83,7 @@ uint16_t FM21_reading(int pin);
 uint16_t FM61_reading(int pin);
 float LC_reading(int pin);
 uint16_t ref5V_reading(int pin);
-void values_check();
+
 
 void sendDataFromSensor(data* d);
 
