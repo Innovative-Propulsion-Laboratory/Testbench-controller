@@ -23,6 +23,15 @@
 #define PS62_pin A0         //Water tank pressure 2
 #define PS63_pin A17        //Water pressure before regen
 #define PS64_pin A16        //Water pressure after regen
+
+//PS offset
+extern float offset_PS12;
+extern float offset_PS22;
+extern float offset_PS41;
+extern float offset_PS42;
+extern float offset_PS63;
+extern float offset_PS64;
+
 // #define PSextra_pin A15
 #define PSalim_pin A14      // Pressure sensors alimentation
 
@@ -49,7 +58,7 @@ struct __attribute__((packed)) data {
     uint32_t t = 0;                 // Timestamp (ms)
     
     uint16_t PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64;    // Pressure in mbar
-    uint32_t TS11, TS31, TS41, TS42, TS61, TS62;                                           // Thermocouples in °C
+    uint32_t TS11, TS12, TS31, TS41, TS42, TS61, TS62;                                           // Thermocouples in °C
     uint16_t FM11, FM21, FM61;                                                          // Flow in mL/s
     uint32_t LC;                                                                           // Load cell (N)
     uint16_t ref5V;                                                                     // 5V reference (mV)

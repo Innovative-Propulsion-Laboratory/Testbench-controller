@@ -3,26 +3,28 @@
 #include "Sensors.h"
 
 uint16_t T_confirm;
-uint32_t Chilldown_finished;
-uint32_t PS63_duration;
-uint32_t PS63_seems_rise;
-uint32_t Ign_duration;
-uint32_t Ign_seems_on;
-uint32_t T0;
-uint32_t ETH_open;
-uint32_t Bypass_duration;
-uint32_t Main_seems_rise;
-uint32_t Main_duration;
-uint32_t Nominal_pressure_reached;
-uint32_t T_burn;
-uint32_t Chilldown_start;
-uint32_t chill_temp_seems_ok;
-uint32_t Chilldown_duration = 0;
+uint16_t Chilldown_finished;
+uint16_t PS63_duration;
+uint16_t PS63_seems_rise;
+uint16_t Ign_duration;
+uint16_t Ign_seems_on;
+uint16_t T0;
+uint16_t ETH_open;
+uint16_t Bypass_duration;
+uint16_t Main_seems_rise;
+uint16_t Main_duration;
+uint16_t Nominal_pressure_reached;
+uint16_t T_burn;
+uint16_t Chilldown_start;
+uint16_t chill_temp_seems_ok;
+uint16_t Chilldown_duration;
 uint16_t Chilldown_verified_duration;
 
 sequence_data Sequence_data;
 
-void Sequence() { // changer state par Data.state
+void Sequence() { 
+    pinMode(IGN_pin, OUTPUT);
+    pinMode(IGN_check_pin, INPUT);
 
     T_confirm = millis();
     Data.test_step = 1;
@@ -34,45 +36,45 @@ void Sequence() { // changer state par Data.state
         sensorsLoop();
         // decode(receivePacket());
         
-        switch (Sequence_data.test_step) {
+        switch ( Data.test_step) {
             ////// PURGE //////
             case 1: {
                 if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay)) {
                     Chilldown_start = 0;
                     setValve(SV36, 1);
-                    test_step++;
+                    Data.test_step++;
                 }
                 break;
             }
             case 2: {
-                if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
+                if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
                     setValve(SV36, 0);
             ////// End of PURGE //////
             ////// start chilldown //////
                     Chilldown_start++;
                     setValve(SV13, 1);
-                    test_step++;
+                    Data.test_step++;
                 }
                 break;
             }
             case 3: {
-                if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration)) {
+                if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration)) {
                     setValve(SV13, 0);
-                    test_step++;
+                    Data.test_step++;
                 }
                 break;
             }
             case 4: {
-                if (millis() <= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
+                if (millis() <= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
                     if (Data.TS12 >= Sequence_data.chill_temp) {
                         chill_temp_seems_ok = millis();
-                        test_step = 5;  // remplace l'étape 4.5
+                        Data.test_step = 5;  // remplace l'étape 4.5
                     } else if (Chilldown_start >= Sequence_data.Max_chilldown) {
-                        state = "active";  // Erreur chilldown
+                        Data.state = 0;  // Erreur chilldown
                     }
                 } else {
                     T_confirm = millis();
-                    test_step = 2;
+                    Data.test_step = 2;
                     Chilldown_start++;
                 }
                 break;
@@ -81,9 +83,9 @@ void Sequence() { // changer state par Data.state
                 if ((Data.TS12 >= Sequence_data.chill_temp) && ((millis() - chill_temp_seems_ok) >= Chilldown_verified_duration)) {
                     Chilldown_finished = millis();
                     Chilldown_duration = Chilldown_finished - Chilldown_start;
-                    test_step++;
-                } else if (Data.TS12 < chill_temp) {
-                    test_step = 4;
+                    Data.test_step++;
+                } else if (Data.TS12 < Sequence_data.chill_temp) {
+                    Data.test_step = 4;
                 }
                 break;
             }
@@ -93,7 +95,7 @@ void Sequence() { // changer state par Data.state
             ////// end chilldown //////
             ////// Start cooling //////
                     PS63_duration = millis();
-                    test_step++;
+                    Data.test_step++;
                 }
                 break;
             }
@@ -101,17 +103,17 @@ void Sequence() { // changer state par Data.state
             case 7: {
                 if (Data.PS63 >= Sequence_data.cooling_pressure) {
                     PS63_seems_rise = millis();
-                    test_step++;
+                    Data.test_step++;
                 } else if ((millis() - PS63_duration) >= Sequence_data.PS63_check_duration) {
-                    state = "active";  // erreur
+                    Data.state = 0;  // erreur
                 }
                 break;
             }
             case 8: {
                 if ((Data.PS63 >= Sequence_data.cooling_pressure) && ((millis() - PS63_seems_rise) >= Sequence_data.PS63_verified_duration)) {
-                    test_step++;
+                    Data.test_step++;
                 } else if (Data.PS63 < Sequence_data.cooling_pressure) {
-                    test_step = 7;
+                    Data.test_step = 7;
                 }
                 break;
             }
@@ -119,30 +121,30 @@ void Sequence() { // changer state par Data.state
             case 9: {
             
                 Ign_duration = millis();
-                // allumer allumeur
-                test_step++;
+                digitalWrite(IGN_pin, HIGH);
+                Data.test_step++;
                 break;
             }
             case 10: {
             ////// check ignite //////
-                if (/* allumeur allumé */) {
+                if (digitalRead (IGN_check_pin) == HIGH) {
                     Ign_seems_on = millis();
-                    test_step++;
+                    Data.test_step++;
                 } else if ((millis() - Ign_duration) >= Sequence_data.Ign_check_duration) {
-                    state = "active";
+                    Data.state = 0;
                 }
                 break;
             }
             case 11: {
-                if (/* allumeur allumé */ && ((millis() - Ign_seems_on) >= Sequence_data.Ign_verified_duration)) {
-                    // couper allumeur
+                if ((digitalRead (IGN_check_pin) == HIGH) && ((millis() - Ign_seems_on) >= Sequence_data.Ign_verified_duration)) {
+                    digitalWrite(IGN_pin, LOW);
                     T0 = millis();
             ////// stop ignite //////
             ////// start bypass //////
                     setValve(SV24, 1);
-                    test_step++;
+                    Data.test_step++;
                 } else {
-                    test_step = 10;
+                    Data.test_step = 10;
                 }
                 break;
             }
@@ -150,7 +152,7 @@ void Sequence() { // changer state par Data.state
                 if (millis() >= (T0 + Sequence_data.ETH_to_LOX_bypass)) {
                     Bypass_duration = millis();
                     setValve(SV13, 1);
-                    test_step++;
+                    Data.test_step++;
                 }
                 break;
             }
@@ -158,9 +160,9 @@ void Sequence() { // changer state par Data.state
             ////// check bypass //////
                 if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure)) {
                     Bypass_duration = millis();
-                    test_step++;
+                    Data.test_step++;
                 } else if ((millis() - Bypass_duration) >= Sequence_data.Bypass_check_duration) {
-                    state = "active";
+                    Data.state = 0;
                 }
                 break;
             }
@@ -169,9 +171,9 @@ void Sequence() { // changer state par Data.state
                     ETH_open = millis();
              ////// start main injection //////
                     setValve(SV22, 1);
-                    test_step++;
+                    Data.test_step++;
                 } else {
-                    test_step = 12;
+                    Data.test_step = 12;
                 }
                 break;
             }
@@ -179,25 +181,25 @@ void Sequence() { // changer state par Data.state
                 if (millis() >= (T0 + Sequence_data.ETH_to_LOX_main)) {
                     Main_duration = millis();
                     setValve(SV12, 1);
-                    test_step++;
+                    Data.test_step++;
                 }
                 break;
             }
             case 16: {
                 if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure)) {
                     Main_seems_rise = millis();
-                    test_step++;
+                    Data.test_step++;
                 } else if ((millis() - Main_duration) >= Sequence_data.Main_check_duration) {
-                    state = "active";
+                    Data.state = 0;
                 }
                 break;
             }
             case 17: {
             ////// check main injection //////
                 if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure) && ((millis() - Main_seems_rise) >= Sequence_data.Main_verified_duration)) {
-                    test_step++;
+                    Data.test_step++;
                 } else {
-                    test_step = 15;
+                    Data.test_step = 15;
                 }
                 break;
             }
@@ -206,12 +208,12 @@ void Sequence() { // changer state par Data.state
                 setValve(SV24, 0);
                 setValve(SV13, 0);
                 Nominal_pressure_reached = millis();
-                test_step++;
+                Data.test_step++;
                 break;
             }
             case 19: {
                 // TVC launch, not implemented
-                test_step++;
+                Data.test_step++;
                 break;
             }
             case 20: {
@@ -219,37 +221,37 @@ void Sequence() { // changer state par Data.state
                 if (millis() >= (T0 + Sequence_data.burn_duration)) {
                     setValve(SV12, 0);
                     setValve(SV36, 1);
-                    test_step++;
+                    Data.test_step++;
                 }
                 break;
             }
             case 21: {
-                if (millis() >= (T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay)) {
+                if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay)) {
                     setValve(SV22, 0);
                     setValve(SV35, 1);
-                    test_step++;
+                    Data.test_step++;
                 }
                 break;
             }
             case 22: {
-                if (millis() >= (T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration)) {
+                if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2)) {
                     setValve(SV36, 0);
                     setValve(SV35, 0);
-                    test_step++;
+                    Data.test_step++;
                 }
                 break;
             }
             ////// stop cooling //////
             case 23: {
-                if (millis() >= (T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration + Sequence_data.Cooling_duration_after_end_burn)) {
+                if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2 + Sequence_data.Cooling_duration_after_end_burn)) {
                     setValve(SV63, 0);
-                    state = "active";
+                    Data.state = 0;
                 }
                 break;
             }
         }
 
-    } while (Data.state == "test");
+    } while (Data.state == 1);
 }
 
 float average(byte* L, int length) {
@@ -271,7 +273,7 @@ void set_offset_pressure() { // set sensors at 0
 
     for (int i = 0; i < N; i++) {
         sensorsLoop();
-        decode(receivePacket()); 
+        // decode(receivePacket()); 
         average_PS12_data[i] = Data.PS12;
         average_PS22_data[i] = Data.PS22;
         average_PS41_data[i] = Data.PS41;
