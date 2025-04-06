@@ -1,7 +1,5 @@
 #include "UDP.h"
 
-// Variable utilisé
-
 EthernetUDP udp;
 IPAddress senderIP;
 uint16_t senderPort = 12345;
@@ -57,6 +55,9 @@ void send_data(void* payload, uint16_t size) {
   udp.send(senderIP, senderPort, (byte*)payload, size);
 }
 
+void send_string(const char* message, uint16_t length) {
+  udp.send(senderIP, senderPort, (byte*)message, length);
+}
 
 Packet receivePacket() {
   int size = udp.parsePacket();
