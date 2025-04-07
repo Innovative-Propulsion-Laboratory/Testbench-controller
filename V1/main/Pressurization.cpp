@@ -13,7 +13,7 @@ uint16_t WATER_BB_min = 9800, WATER_BB_max = 10200;
 uint16_t WATER_BBLW = 9000, WATER_BBUW = 11000, WATER_BB_ulim = 12000;
 
 void BB_param_set(uint8_t tank, uint16_t pressure){ // tank: 0 = LOX, 1 = ETH, 2 = WATER
-    if (tank == 0){
+    if (tank == 1){
         if (pressure < PS11_BB_ulim){return;}
         else{
             PS11_BB_min = pressure - 200;
@@ -22,7 +22,7 @@ void BB_param_set(uint8_t tank, uint16_t pressure){ // tank: 0 = LOX, 1 = ETH, 2
             PS11_BBUW = pressure + 1000;
         }
     }
-    if (tank == 1){
+    if (tank == 2){
         if (pressure < PS21_BB_ulim){ return;}
         else{
             PS21_BB_min = pressure - 200;
@@ -31,7 +31,7 @@ void BB_param_set(uint8_t tank, uint16_t pressure){ // tank: 0 = LOX, 1 = ETH, 2
             PS21_BBUW = pressure + 1000;
         }
     }
-    if (tank == 2){
+    if (tank == 6){
         if (pressure < WATER_BB_ulim){return;}
         else{
             WATER_BB_min = pressure - 200;
