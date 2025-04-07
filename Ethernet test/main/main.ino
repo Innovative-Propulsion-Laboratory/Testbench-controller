@@ -61,6 +61,9 @@ void setup() {
   pinMode(36, OUTPUT);
   pinMode(37, OUTPUT);
 
+  pinMode(IGN_pin, OUTPUT);
+  pinMode(IGN_check_pin, INPUT); 
+
   digitalWrite(2, HIGH);
   digitalWrite(28, HIGH);
   digitalWrite(29, HIGH);
@@ -333,6 +336,8 @@ void decode(byte* instructions){
 }
 
 void Sequence() { 
+    pinMode(IGN_pin, OUTPUT);
+    pinMode(IGN_check_pin, INPUT);
 
   T_confirm = millis();
   Data.test_step = 1;
