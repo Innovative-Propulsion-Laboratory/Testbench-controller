@@ -37,6 +37,14 @@ uint16_t PS42_TLL = 6000,  PS42_TLW = 7000,  PS42_TUW = 13000, PS42_TUL = 14000;
 uint16_t PS51_TLL = 10000, PS51_LW = 40000; uint32_t PS51_UW = 210000;
 uint16_t PS_WATER_TLL = 6000,  PS_WATER_UL = 14000;
 
+// Pressure Offset
+float offset_PS12 = 0;
+float offset_PS22 = 0;
+float offset_PS41 = 0;
+float offset_PS42 = 0;
+float offset_PS63 = 0;
+float offset_PS64 = 0;
+
 // Thermocouples:
 uint16_t TS31_UW = 45;
 uint16_t TS62_UW = 85, TS62_TUL = 95;
@@ -145,17 +153,17 @@ void updateData(){
     
     // Read pressures and convert to mbar
     Data.PS11 = PS_25bar_reading(PS11_pin);
-    Data.PS12 = PS_25bar_reading(PS12_pin);
+    Data.PS12 = PS_25bar_reading(PS12_pin) + offset_PS12;
     Data.PS21 = PS_25bar_reading(PS21_pin);
-    Data.PS22 = PS_25bar_reading(PS22_pin);
+    Data.PS22 = PS_25bar_reading(PS22_pin) + offset_PS22;
     Data.PS31 = PS_70bar_reading(PS31_pin);
-    Data.PS41 = PS_25bar_reading(PS41_pin);
-    Data.PS42 = PS_25bar_reading(PS42_pin);
+    Data.PS41 = PS_25bar_reading(PS41_pin) + offset_PS41;
+    Data.PS42 = PS_25bar_reading(PS42_pin) + offset_PS42;
     Data.PS51 = PS_350bar_reading(PS51_pin);
     Data.PS61 = PS_25bar_reading(PS61_pin);
     Data.PS62 = PS_25bar_reading(PS62_pin);
-    Data.PS63 = PS_25bar_reading(PS63_pin);
-    Data.PS64 = PS_25bar_reading(PS64_pin);
+    Data.PS63 = PS_25bar_reading(PS63_pin) + offset_PS63;
+    Data.PS64 = PS_25bar_reading(PS64_pin) + offset_PS64;
 
     // Read 5V reference
     Data.ref5V = ref5V_reading(PSalim_pin);

@@ -1,16 +1,14 @@
 #include "UDP.h"
 
-// Variable utilisé
-
 EthernetUDP udp;
 IPAddress senderIP;
-uint16_t senderPort;
+uint16_t senderPort = 12345;
 uint32_t kDHCPTimeout = 15000;  //waiting time 15 seconds
 uint16_t kPort = 5190;  // Chat port
 int message_size = 0;
 int t;
 bool fisrt_message;
-
+uint8_t mac[6] = { 0x00, 0x1A, 0xB6, 0x03, 0x2B, 0x77 };
 // Setup UDP
 
 void setupUDP() {
@@ -21,13 +19,17 @@ void setupUDP() {
   }
 
   fisrt_message = false;
-
+  
+  IPAddress ip = Ethernet.localIP();
+  Serial.printf("    Local IP     = %u.%u.%u.%u\r\n", ip[0], ip[1], ip[2], ip[3]);
   udp.begin(kPort);
 }
 
 void set_sender_info(){
   senderIP = udp.remoteIP(); // enlever et les définir une seule fois  fct first message 
-  senderPort = udp.remotePort();
+  // senderPort = udp.remotePort();
+  Serial.print("Sender Port : ");
+  Serial.println(senderPort);
 }
 
 // Communication functions
@@ -36,10 +38,26 @@ void reply (byte* message, uint16_t size){ // send the message send
   udp.send(senderIP, senderPort, message, size);
 }
 
-void send_data (data* Data, uint16_t size){ // send the 
-  udp.send(senderIP, senderPort, (const uint8_t*)Data, size);
+
+// void send_data(void* payload, uint16_t size) {// debug
+//   Serial.print("Payload (hex): ");
+//   byte* data = (byte*)payload;
+//   for (uint16_t i = 0; i < size; i++) {
+//     if (data[i] < 0x10) Serial.print("0");
+//     Serial.print(data[i], HEX);
+//     Serial.print(" ");
+//   }
+//   Serial.println();
+
+//   udp.send(senderIP, senderPort, data, size);
+// }
+void send_data(void* payload, uint16_t size) {
+  udp.send(senderIP, senderPort, (byte*)payload, size);
 }
 
+void send_string(const char* message, uint16_t length) {
+  udp.send(senderIP, senderPort, (byte*)message, length);
+}
 
 Packet receivePacket() {
   int size = udp.parsePacket();
@@ -64,7 +82,7 @@ Packet receivePacket() {
     instructions[j] = data[j]; 
     Serial.printf("%#04x ", instructions[j]);
   }
-
+  Serial.println();
   return {instructions, size}; // on retourne bien {data, taille}
 }
 

@@ -59,8 +59,8 @@ void BB_enable (uint8_t tank, bool command){ // tank: 1 = LOX, 2 = ETH, 6 = WATE
         if (tank == 2) {ETH_BB = 1; setValve(SV21, 0); Serial.print("ETH_BB actif");}
         if (tank == 6) {WATER_BB = 1; setValve(SV61, 0); setValve(SV62, 0);}
     }
-    // byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, tank, command};
-    // reply(message,sizeof(message));
+    byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, tank, command};
+    reply(message,sizeof(message));
 }
 
 void BB_pressurization(uint16_t PS11, uint16_t PS21, uint16_t PS61, uint16_t PS62){
