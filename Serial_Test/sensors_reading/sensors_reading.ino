@@ -11,6 +11,8 @@ void setup(){
     digitalWrite(2, HIGH);
     digitalWrite(10, HIGH);
     
+    setupValves();
+    Set_valve_position();
     setupSensors();
 }
 

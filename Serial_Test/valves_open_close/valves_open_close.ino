@@ -5,6 +5,7 @@ void setup(){
     SPI.begin();
 
     setupValves();
+    Set_valve_position();
 
     //disable other SPI devices
     pinMode(2, OUTPUT);

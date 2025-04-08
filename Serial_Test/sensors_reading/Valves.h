@@ -1,11 +1,12 @@
 #ifndef VALVES_H
 #define VALVES_H
 
-#include "MCP23S17.h" // Include MCP23S17 library
+#include <Adafruit_MCP23X17.h> // Include MCP23S17 library
 #include <SPI.h>
 #include <Arduino.h>
-// #include "UDP.h"
+#include "UDP.h"
 
+#define IOexp_RESET 9
 #define NUM_VALVES 18
 
 #define SV11 0
@@ -31,6 +32,7 @@
 extern uint32_t valvePositions;
 
 void setupValves();
-void setValve(int ID, bool command);
+void setValve(uint8_t ID, bool command);
+void Set_valve_position();
 
 #endif
