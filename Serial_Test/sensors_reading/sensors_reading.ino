@@ -14,6 +14,11 @@ void setup(){
     setupValves();
     Set_valve_position();
     setupSensors();
+    delay(100);
+    setValve(SV31, 1);
+    delay(5000);
+    //setValve(SV31, 0);
+    setValve(SV32, 0);
 }
 
 void loop(){

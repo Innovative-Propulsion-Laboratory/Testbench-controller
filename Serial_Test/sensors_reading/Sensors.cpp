@@ -128,6 +128,7 @@ void sensorsLoop(){
 
 void trigger_TS() {
      // requesting data from the thermocouples if not waiting for a conversion
+     if (!TS12_waiting){thermo12.triggerOneShot(); TS12_waiting = 1;}
      if (!TS41_waiting){thermo41.triggerOneShot(); TS41_waiting = 1;}
      if (!TS42_waiting){thermo42.triggerOneShot(); TS42_waiting = 1;}
      if (!TS61_waiting){thermo61.triggerOneShot(); TS61_waiting = 1;}
@@ -171,7 +172,7 @@ void updateData(){
         TS11_waiting = 0;
     }
     if (TS12_waiting && thermo12.conversionComplete()) {
-        Data.TS12 = 19;////(thermo12.readThermocoupleTemperature())*10;
+        Data.TS12 = thermo12.readThermocoupleTemperature();
         TS12_waiting = 0;
     }
     if (TS41_waiting && thermo41.conversionComplete()) {
@@ -197,22 +198,27 @@ int32_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and
 }
 
 int32_t PS_70bar_reading(int pin) {  // For PS31
+    Serial.print("PS31: "); Serial.print(analogRead(pin)); Serial.print("\t");
     return (int32_t)(87500.0 * ((float)analogRead(pin) / 1023.0 - 0.1)); 
 }
 
 int32_t PS_350bar_reading(int pin) {  // For PS51
+    Serial.print("PS51: "); Serial.println(analogRead(pin));
     return (int32_t)(437500.0 * ((float)analogRead(pin) / 1023.0 - 0.1)); 
 }
 
 uint16_t FM11_reading(int pin) {
+    Serial.print("FM11: "); Serial.print(analogRead(pin)); Serial.print("\t");
     return (uint16_t)((50000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
 uint16_t FM21_reading(int pin) {
+    Serial.print("FM21: "); Serial.print(analogRead(pin)); Serial.print("\t");
     return (uint16_t)((40000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
 uint16_t FM61_reading(int pin) {
+    Serial.print("FM61: "); Serial.println(analogRead(pin));
     return (uint16_t)((150000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 

@@ -36,7 +36,7 @@
 
 // Thermocouples:
 #define TS11_pin 28         // LOX temperature
-#define TS12_pin 29         // GN2 50bar tank temperature
+#define TS12_pin 29         // 
 #define TS41_pin 30         // Main Combustion Chamber temperature 1
 #define TS42_pin 35         // Main Combustion Chamber temperature 2
 #define TS61_pin 36         // Water initial temperature

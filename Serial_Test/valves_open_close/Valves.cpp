@@ -6,12 +6,12 @@ const int valvePins[NUM_VALVES] = {6, 7, 8, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 Adafruit_MCP23X17 mcp;
 
 void setupValves() {
-  pinMode(IOexp_RESET, OUTPUT);
-  digitalWrite(IOexp_RESET, LOW);
-  delay(100);
-  digitalWrite(IOexp_RESET, HIGH);
-  
-  mcp.begin_SPI(10, 13, 12, 11);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+  pinMode(8, OUTPUT);
+  pinMode(9, OUTPUT);
+  digitalWrite(9, HIGH);
+    mcp.begin_SPI(10, 13, 12, 11);
   // configure pin for output
   for (int i=0;i<=15;i++)
   {
@@ -41,7 +41,7 @@ void setValve(uint8_t ID, bool command) {
   Serial.print(" set to ");
   Serial.println(command ? "open" : "closed");
 
-  ///byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xFF, 0xFF, ID, (byte)command};
+  //byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xFF, 0xFF, ID, (byte)command};
   //reply(message,sizeof(message));
 }
 
