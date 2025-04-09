@@ -1,65 +1,37 @@
-// Code for the TPL0202 Digital Potentiometer
+// Code for the MCP4261 Digital Potentiometer
 #include "TVC.h"
 
+MCP4261 digiPot(IOexp_pin, 32, 11, 12, 13);
+
+const uint32_t SPI_SPEED = 8000000;     //Set the SPI clock speed
+
 void setupTVC() {
-    pinMode(IOexp_pin, OUTPUT);
-    digitalWrite(IOexp_pin, HIGH);  //Disable TPL0202 by default
+    digiPot.begin();
+    digiPot.setSPIspeed(SPI_SPEED);
+
+    // Setting the wipers to a default value (50%)
+    digiPot.setValue(0, 128);
+    digiPot.setValue(1, 128);
 }
 
 void setNonVolatileWiper(uint8_t wiper, uint8_t value) {
-
-    digitalWrite(IOexp_pin, LOW);
-    
-    if (wiper == 0){
-        SPI.transfer(0b00010001);  // Write-NV command for Wiper A - left Actuator - 0
-    }
-    else if (wiper == 1){
-        SPI.transfer(0b00010010);  // Write-NV command for Wiper B - right Actuator - 1
-    }
-    SPI.transfer(value);
-
-    digitalWrite(IOexp_pin, HIGH);
+    digiPot.setValueNV(wiper, value);
 }
 
 void setWiper(uint8_t wiper, uint8_t value) {
-
-    digitalWrite(IOexp_pin, LOW);
-    
-    if (wiper == 0){
-        SPI.transfer(0b00000001);  // Write command for Wiper A - left Actuator - 0
-    }
-    else if (wiper == 1){
-        SPI.transfer(0b00000010);  // Write command for Wiper B - right Actuator - 1
-    }
-    SPI.transfer(value);
-
-    digitalWrite(IOexp_pin, HIGH);
+    digiPot.setValue(wiper, value);
 }
 
-void WipertoNV(byte wiper) { 
-
-    digitalWrite(IOexp_pin, LOW);
-    
-    if (wiper == 0){
-        SPI.transfer(0b00100001);  // Transfer Wiper A to NV memory - left Actuator - 0
-    }
-    else if (wiper == 1){
-        SPI.transfer(0b00100010);  // Transfer Wiper B to NV memory - right Actuator - 1
-    }
-
-    digitalWrite(IOexp_pin, HIGH);
+void WipertoNV(byte wiper) {
+    // Read current volatile wiper value
+    uint8_t value = digiPot.getValue(wiper);
+    // Write to non-volatile register
+    digiPot.setValueNV(wiper, value);
 }
 
 void NVtoWiper(byte wiper) {
-
-    digitalWrite(IOexp_pin, LOW);
-    
-    if (wiper == 0){
-        SPI.transfer(0b00110001);  // Transfer NV memory to Wiper A - left Actuator - 0  
-    } 
-    else if (wiper == 1){
-        SPI.transfer(0b00110010);  // Transfer NV memory to Wiper B - right Actuator - 1
-    }
-
-    digitalWrite(IOexp_pin, HIGH);
+    // Read value from non-volatile register
+    uint8_t value = digiPot.getValueNV(wiper);
+    // Write to volatile wiper
+    digiPot.setValue(wiper, value);
 }

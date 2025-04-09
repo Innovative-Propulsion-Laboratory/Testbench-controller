@@ -1,20 +1,23 @@
 #include <Arduino.h>
 #include <Adafruit_MAX31856.h>  // https://github.com/adafruit/Adafruit_MAX31856
 
+// Other SPI devices:
+#define Digipot_pin 1
+#define IOexp_pin 10
 // Thermocouples:
 #define TS11_pin 28         // LOX temperature
-#define TS31_pin 29         // GN2 50bar tank temperature
+#define TS12_pin 29         // GN2 50bar tank temperature
 #define TS41_pin 30         // Main Combustion Chamber temperature 1
 #define TS42_pin 35         // Main Combustion Chamber temperature 2
 #define TS61_pin 36         // Water initial temperature
 #define TS62_pin 37         // Water final temperature
 
 unsigned int t, n = 0;
-float TS11, TS31, TS41, TS42, TS61, TS62;
-bool TS11_waiting, TS31_waiting, TS41_waiting, TS42_waiting, TS61_waiting, TS62_waiting;
+float TS11, TS12, TS41, TS42, TS61, TS62;
+bool TS11_waiting, TS12_waiting, TS41_waiting, TS42_waiting, TS61_waiting, TS62_waiting;
 
 
-Adafruit_MAX31856 thermo31 = Adafruit_MAX31856(TS31_pin, 11, 12, 13);
+Adafruit_MAX31856 thermo12 = Adafruit_MAX31856(TS12_pin, 11, 12, 13);
 Adafruit_MAX31856 thermo41 = Adafruit_MAX31856(TS41_pin, 11, 12, 13);
 Adafruit_MAX31856 thermo42 = Adafruit_MAX31856(TS42_pin, 11, 12, 13);
 Adafruit_MAX31856 thermo61 = Adafruit_MAX31856(TS61_pin, 11, 12, 13);
@@ -23,15 +26,22 @@ Adafruit_MAX31856 thermo11 = Adafruit_MAX31856(TS11_pin, 11, 12, 13); //initiali
 
 
 void setup() {
-    thermo31.begin();
+
+    // disable other SPI devices
+    pinMode(Digipot_pin, OUTPUT);
+    pinMode(IOexp_pin, OUTPUT);
+    digitalWrite(Digipot_pin, HIGH);
+    digitalWrite(IOexp_pin, HIGH);
+
+    thermo12.begin();
     thermo41.begin();
     thermo42.begin();
     thermo61.begin();
     thermo62.begin();
     thermo11.begin();
 
-    thermo31.setThermocoupleType(MAX31856_TCTYPE_K);
-    thermo31.setConversionMode(MAX31856_ONESHOT_NOWAIT);
+    thermo12.setThermocoupleType(MAX31856_TCTYPE_K);
+    thermo12.setConversionMode(MAX31856_ONESHOT_NOWAIT);
 
     thermo41.setThermocoupleType(MAX31856_TCTYPE_K);
     thermo41.setConversionMode(MAX31856_ONESHOT_NOWAIT);
@@ -73,9 +83,9 @@ void read_TS(){
         TS11 = thermo11.readThermocoupleTemperature();
         TS11_waiting = 0;
     }
-    if (TS31_waiting && thermo31.conversionComplete()) {
-        TS31 = thermo31.readThermocoupleTemperature();
-        TS31_waiting = 0;
+    if (TS12_waiting && thermo12.conversionComplete()) {
+        TS12 = thermo12.readThermocoupleTemperature();
+        TS12_waiting = 0;
     }
     if (TS41_waiting && thermo41.conversionComplete()) {
         TS41 = thermo41.readThermocoupleTemperature();
@@ -103,7 +113,7 @@ void print_TS() {
 
     Serial.println("Thermocouples (°C):");
     Serial.print("TS11: "); Serial.print(TS11); Serial.print("\t");
-    Serial.print("TS31: "); Serial.print(TS31); Serial.print("\t");
+    Serial.print("TS12: "); Serial.print(TS12); Serial.print("\t");
     Serial.print("TS41: "); Serial.print(TS41); Serial.print("\t");
     Serial.print("TS42: "); Serial.print(TS42); Serial.print("\t");
     Serial.print("TS61: "); Serial.print(TS61); Serial.print("\t");

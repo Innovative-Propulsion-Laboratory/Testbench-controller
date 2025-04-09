@@ -4,7 +4,7 @@
 #include "Valves.h"
 // #include "Pressurization.h"
 // #include "SaveData.h"
-#include "UDP.h"
+// #include "UDP.h"
 #include <Arduino.h>
 #include <Adafruit_MAX31856.h>  // https://github.com/adafruit/Adafruit_MAX31856
 
@@ -36,53 +36,86 @@
 
 // Thermocouples:
 #define TS11_pin 28         // LOX temperature
-#define TS31_pin 29         // GN2 50bar tank temperature
+#define TS12_pin 29         // 
 #define TS41_pin 30         // Main Combustion Chamber temperature 1
 #define TS42_pin 35         // Main Combustion Chamber temperature 2
 #define TS61_pin 36         // Water initial temperature
 #define TS62_pin 37         // Water final temperature
 
 // Structure containing all the data sent from the Teensy to the computer
-struct data {
+struct __attribute__((packed)) data {
+    byte header[4] = {0xFF,0xFF,0xFF,0xFF};
     uint32_t n = 0;                 // packet ID
     uint32_t t = 0;                 // Timestamp (ms)
     
-    uint16_t PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64;    // Pressure in mbar
-    float TS11, TS31, TS41, TS42, TS61, TS62;                                           // Thermocouples in °C
+    int32_t PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64;    // Pressure in mbar
+    float TS11, TS12, TS41, TS42, TS61, TS62;                                           // Thermocouples in °C
     uint16_t FM11, FM21, FM61;                                                          // Flow in mL/s
-    float LC;                                                                           // Load cell (N)
+    int32_t LC;                                                                           // Load cell (N)
     uint16_t ref5V;                                                                     // 5V reference (mV)
 
     uint32_t valvesState;
-    // uint8_t actLPos, actRPos;   // Actuator positions (0-255)
-    // uint8_t actLOK, actROK;     // Actuator OK flags (0 or 1)
+    uint8_t actLPos =0 , actRPos = 0;   // Actuator positions (0-255)
+    uint8_t actLOK, actROK;     // Actuator OK flags (0 or 1)
 
-    uint8_t state = 0;                  // System state
+    uint8_t state = 0;                  // System state ;  0 = active ; 1 = test ; 2 = emergy exit
     uint8_t test_step = 0;
+    bool test_cooling = 1; // 0 = no cooling ; 1 = cooling
+};
+
+struct __attribute__((packed)) sequence_data {
+    bool cooling_enable;
+    uint16_t tvc_pattern;   
+    uint16_t Confirm_to_purge_delay;
+    uint16_t Purge_duration1;
+    uint16_t Chilldown_on_duration;
+    uint16_t Chilldown_off_duration;
+    float chill_temp;
+    uint16_t Max_chilldown;
+    uint16_t Chilldown_to_cooling;
+    float cooling_pressure;
+    uint16_t PS63_check_duration;
+    uint16_t PS63_verified_duration;
+    uint16_t Ign_check_duration;
+    uint16_t Ign_verified_duration;
+    uint16_t ETH_to_LOX_bypass;
+    uint16_t ETH_to_LOX_main;
+    float Bypass_pressure;
+    uint16_t Bypass_check_duration;
+    uint16_t Bypass_verified_duration;
+    float Main_pressure;
+    uint16_t Main_check_duration;
+    uint16_t Main_verified_duration;
+    uint16_t burn_duration;
+    uint16_t TVC_pattern_duration;
+    uint16_t LOX_to_ETH_closing_delay;
+    uint16_t Purge_duration2;
+    uint16_t Cooling_duration_after_end_burn;
+    bool igniter_on;
 };
 
 // External variable declarations
 extern data Data;
+extern sequence_data Sequence_data;
 
 // Functions:
 void setupSensors();
 void BBLoop();
 void sensorsLoop();
-void updateData();
+void values_check();
 void trigger_TS();
+void updateData();
 void serialSend();
 
-uint16_t PS_25bar_reading(int pin);
-uint16_t PS_70bar_reading(int pin);
-uint16_t PS_350bar_reading(int pin);
+int32_t PS_25bar_reading(int pin);
+int32_t PS_70bar_reading(int pin);
+int32_t PS_350bar_reading(int pin);
 uint16_t FM11_reading(int pin);
 uint16_t FM21_reading(int pin);
 uint16_t FM61_reading(int pin);
-float LC_reading(int pin);
+int32_t LC_reading(int pin);
 uint16_t ref5V_reading(int pin);
-void values_check();
 
-
-
+void sendDataFromSensor(data* d);
 
 #endif
