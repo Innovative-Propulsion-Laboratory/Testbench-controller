@@ -10,8 +10,10 @@ void setupValves() {
   pinMode(7, OUTPUT);
   pinMode(8, OUTPUT);
   pinMode(9, OUTPUT);
+  digitalWrite(9, LOW);
+  delay(100);
   digitalWrite(9, HIGH);
-    mcp.begin_SPI(10, 13, 12, 11);
+  mcp.begin_SPI(10, 13, 12, 11);
   // configure pin for output
   for (int i=0;i<=15;i++)
   {
