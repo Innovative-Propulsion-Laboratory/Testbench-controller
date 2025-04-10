@@ -2,6 +2,7 @@
 
 bool state_file = false;
 uint32_t time_since_save;
+SdExFat sd;
 
 void setupSaveData(){
     Serial.println("Initialisation du stockage SD...");

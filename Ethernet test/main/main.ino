@@ -44,16 +44,12 @@ void setup() {
   setupValves();
   setupUDP();
   Set_valve_position();
-  setupSaveData();
+  // setupSaveData();
 
   pinMode(IGN_pin, OUTPUT);
   pinMode(IGN_check_pin, INPUT);
   
-  pinMode(7, OUTPUT);
-  pinMode(8, OUTPUT);
-  pinMode(9, OUTPUT);
-
-  pinMode(2, OUTPUT);
+  pinMode(1, OUTPUT);
   pinMode(28, OUTPUT);
   pinMode(29, OUTPUT);
   pinMode(30, OUTPUT);
@@ -61,10 +57,7 @@ void setup() {
   pinMode(36, OUTPUT);
   pinMode(37, OUTPUT);
 
-  pinMode(IGN_pin, OUTPUT);
-  pinMode(IGN_check_pin, INPUT); 
-
-  digitalWrite(2, HIGH);
+  digitalWrite(1, HIGH);
   digitalWrite(28, HIGH);
   digitalWrite(29, HIGH);
   digitalWrite(30, HIGH);
@@ -79,27 +72,30 @@ void setup() {
   setValve(SV32, 0);
   setValve(SV33, 0);
   setValve(SV34, 1);
+
+  Serial.print(CrashReport);
 }
 
 void loop() {
   // listen to commands
-  Packet p = receivePacket();
+  // Packet p = receivePacket();
 
-  if (p.length >= 4 && p.data != nullptr) {
-  decode(p.data);
-  }
-  if (p.data != nullptr) {
-    delete[] p.data;
-  }
-  if (millis() - time_last_reading >= 5){
-    sensorsLoop();
-    time_last_reading = millis();
-    // serialSend();
-  }
-  if (Data.state==1){
-    Sequence();
-  }
-  BBLoop();
+  // if (p.length >= 4 && p.data != nullptr) {
+  // decode(p.data);
+  // }
+  // if (p.data != nullptr) {
+  //   delete[] p.data;
+  // }
+  // if (millis() - time_last_reading >= 1000){
+  //   Serial.println("ici");
+  //   sensorsLoop();
+  //   time_last_reading = millis();
+  //   // serialSend();
+  // }
+  // if (Data.state==1){
+  //   Sequence();
+  // }
+  // BBLoop();
 }
 
 uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) { // to assemble 2 byte
@@ -322,7 +318,7 @@ void decode(byte* instructions){
     Serial.print("Cooling duration after end of burn : ");
     Serial.println(Sequence_data.Cooling_duration_after_end_burn);
 
-    test_will_begin = True;
+    test_will_begin = true;
 
     byte message[8] = {0xBB, 0xBB, 0xBB, 0xBB};
     reply(message,sizeof(message));

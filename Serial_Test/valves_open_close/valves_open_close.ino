@@ -33,8 +33,8 @@ void loop(){
 
   setValve (SV12, 1);
   delay(1000);
-  //setValve (SV12, 0);
-  //delay(1000);
+  setValve (SV12, 0);
+  delay(1000);
 
   setValve (SV13, 1);
   delay(1000);

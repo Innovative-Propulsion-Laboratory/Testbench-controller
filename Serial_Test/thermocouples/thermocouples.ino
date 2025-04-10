@@ -9,7 +9,7 @@
 // Use software SPI: CS, DI, DO, CLK
 //Adafruit_MAX31856 maxthermo = Adafruit_MAX31856(10, 11, 12, 13);
 // use hardware SPI, just pass in the CS pin
-Adafruit_MAX31856 maxthermo = Adafruit_MAX31856(35, 11, 12, 13);
+Adafruit_MAX31856 maxthermo = Adafruit_MAX31856(36, 11, 12, 13);
 // use hardware SPI, pass in the CS pin and using SPI1
 //Adafruit_MAX31856 maxthermo = Adafruit_MAX31856(10, &SPI1);
 
@@ -26,7 +26,7 @@ void setup() {
     }
     maxthermo.setThermocoupleType(MAX31856_TCTYPE_K);
     maxthermo.setConversionMode(MAX31856_ONESHOT_NOWAIT);
-  }
+}
 
 void loop() {
   // trigger a conversion, returns immediately
@@ -34,7 +34,7 @@ void loop() {
   maxthermo.triggerOneShot();
   //
   // here's where you can do other things
-  delay(1);
+  delay(1000);
   //
   if (maxthermo.conversionComplete()) {
     Serial.print("N°10: ");
