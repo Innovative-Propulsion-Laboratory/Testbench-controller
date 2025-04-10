@@ -99,6 +99,7 @@ void setupSensors(){
 
     thermo11.setThermocoupleType(MAX31856_TCTYPE_K);
     thermo11.setConversionMode(MAX31856_ONESHOT_NOWAIT);
+
 }
 
 //void sendDataFromSensor(data* d) {
@@ -191,6 +192,22 @@ void updateData(){
         Data.TS62 = thermo62.readThermocoupleTemperature();
         TS62_waiting = 0;
     }
+}
+
+void printFault(uint8_t fault){
+  if (fault) {
+  if (fault & MAX31856_FAULT_CJRANGE) Serial.print("Cold Junction Range Fault");
+  if (fault & MAX31856_FAULT_TCRANGE) Serial.print("Thermocouple Range Fault");
+  if (fault & MAX31856_FAULT_CJHIGH) Serial.print("Cold Junction High Fault");
+  if (fault & MAX31856_FAULT_CJLOW) Serial.print("Cold Junction Low Fault");
+  if (fault & MAX31856_FAULT_TCHIGH) Serial.print("Thermocouple High Fault");
+  if (fault & MAX31856_FAULT_TCLOW) Serial.print("Thermocouple Low Fault");
+  if (fault & MAX31856_FAULT_OVUV) Serial.print("Over/Under Voltage Fault");
+  if (fault & MAX31856_FAULT_OPEN) Serial.print("Thermocouple Open Fault");
+  }
+  else{
+    Serial.print(fault);
+  }
 }
 
 int32_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
@@ -635,6 +652,15 @@ void serialSend() {
     Serial.print("TS42: "); Serial.print(Data.TS42); Serial.print("\t");
     Serial.print("TS61: "); Serial.print(Data.TS61); Serial.print("\t");
     Serial.print("TS62: "); Serial.println(Data.TS62);
+
+    Serial.println("Thermocouples faults:");
+    Serial.print("TS11: "); printFault(thermo11.readFault()); Serial.print("\t");
+    Serial.print("TS12: "); printFault(thermo12.readFault()); Serial.print("\t");
+    Serial.print("TS41: "); printFault(thermo41.readFault()); Serial.print("\t");
+    Serial.print("TS42: "); printFault(thermo42.readFault()); Serial.print("\t");
+    Serial.print("TS61: "); printFault(thermo61.readFault()); Serial.print("\t");
+    Serial.print("TS62: "); printFault(thermo62.readFault());
+    Serial.println("");
 
     Serial.println("Flow Meters (mL/s):");
     Serial.print("FM11: "); Serial.print(Data.FM11); Serial.print("\t");

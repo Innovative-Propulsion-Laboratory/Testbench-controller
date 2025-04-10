@@ -1,9 +1,9 @@
 // Code for the MCP4261 Digital Potentiometer
 #include "TVC.h"
 
-MCP4261 digiPot(IOexp_pin, 32, 11, 12, 13);
+MCP4261 digiPot(IOexp_pin);
 
-const uint32_t SPI_SPEED = 8000000;     //Set the SPI clock speed
+const uint32_t SPI_SPEED = 4000000;     //Set the SPI clock speed
 
 void setupTVC() {
     digiPot.begin();

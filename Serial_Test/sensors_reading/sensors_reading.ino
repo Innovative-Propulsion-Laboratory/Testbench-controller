@@ -5,10 +5,10 @@ void setup(){
     SPI.begin();
 
     //disable other SPI devices
-    pinMode(2, OUTPUT);
+    pinMode(1, OUTPUT);
     pinMode(10, OUTPUT);
 
-    digitalWrite(2, HIGH);
+    digitalWrite(1, HIGH);
     digitalWrite(10, HIGH);
     
     setupValves();
