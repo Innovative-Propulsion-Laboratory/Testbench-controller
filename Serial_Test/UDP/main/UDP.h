@@ -16,9 +16,9 @@ struct Packet {
 };
 
 void setupUDP();
-// Packet receivePacket();
-// void reply(byte* message, uint16_t size);
-// void send_data(void* payload, uint16_t size);
+Packet receivePacket();
+void reply(byte* message, uint16_t size);
+void send_data(void* payload, uint16_t size);
 // uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte);
 
 #endif

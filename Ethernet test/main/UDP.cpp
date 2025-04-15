@@ -8,7 +8,6 @@ uint16_t kPort = 5190;          // Chat port
 int message_size = 0;
 int t;
 bool fisrt_message;
-uint8_t mac[6] = { 0x00, 0x1A, 0xB6, 0x03, 0x2B, 0x77 };
 // Setup UDP
 
 void setupUDP() {

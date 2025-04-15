@@ -32,14 +32,14 @@ uint16_t chill_temp_seems_ok;
 uint16_t Chilldown_duration;
 uint16_t Chilldown_verified_duration;
 
-sequence_data Sequence_data;
+// sequence_data Sequence_data;
 
 // SaveData
 uint32_t frequence_save = 200;  // ms
 
 void setup() {
   Serial.begin(9600);  //initialize Serial Port
-  SPI.begin();         //initialize SPI
+  // SPI.begin();         //initialize SPI
   Serial.println("Start");
   pinMode(IGN_pin, OUTPUT);
   pinMode(IGN_check_pin, INPUT);
@@ -62,7 +62,7 @@ void setup() {
   digitalWrite(36, HIGH);
   digitalWrite(37, HIGH);
 
-  // Serial.println("pinmode");
+  Serial.println("pinmode");
 
   // setupValves();
   // Serial.println("setup valve");
@@ -116,9 +116,9 @@ void loop() {
   // BBLoop();
 }
 
-// // uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {  // to assemble 2 byte
-// //   return (static_cast<uint16_t>(highByte) << 8) | static_cast<uint16_t>(lowByte);
-// // }
+uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {  // to assemble 2 byte
+  return (static_cast<uint16_t>(highByte) << 8) | static_cast<uint16_t>(lowByte);
+}
 
 // void decode(byte* instructions) {
 

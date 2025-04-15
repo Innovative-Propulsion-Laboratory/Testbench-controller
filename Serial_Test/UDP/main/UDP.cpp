@@ -25,18 +25,18 @@ void setupUDP() {
   udp.begin(kPort);
 }
 
-// void set_sender_info() {
-//   senderIP = udp.remoteIP();  // enlever et les définir une seule fois  fct first message
-//   // senderPort = udp.remotePort();
-//   Serial.print("Sender Port : ");
-//   Serial.println(senderPort);
-// }
+void set_sender_info() {
+  senderIP = udp.remoteIP();  // enlever et les définir une seule fois  fct first message
+  // senderPort = udp.remotePort();
+  Serial.print("Sender Port : ");
+  Serial.println(senderPort);
+}
 
 // Communication functions
 
-// void reply(byte* message, uint16_t size) {  // send the message send
-//   udp.send(senderIP, senderPort, message, size);
-// }
+void reply(byte* message, uint16_t size) {  // send the message send
+  udp.send(senderIP, senderPort, message, size);
+}
 
 
 // void send_data(void* payload, uint16_t size) {// debug
@@ -52,39 +52,39 @@ void setupUDP() {
 //   udp.send(senderIP, senderPort, data, size);
 // }
 
-// void send_data(void* payload, uint16_t size) {
-//   udp.send(senderIP, senderPort, (byte*)payload, size);
-// }
+void send_data(void* payload, uint16_t size) {
+  udp.send(senderIP, senderPort, (byte*)payload, size);
+}
 
-// void send_string(const char* message, uint16_t length) {
-//   udp.send(senderIP, senderPort, (byte*)message, length);
-// }
+void send_string(const char* message, uint16_t length) {
+  udp.send(senderIP, senderPort, (byte*)message, length);
+}
 
-// Packet receivePacket() {
-//   int size = udp.parsePacket();
+Packet receivePacket() {
+  int size = udp.parsePacket();
 
-//   if (size <= 0) {
-//     // Pas de paquet reçu → on retourne un buffer avec une seule valeur nulle
-//     byte* instructions = new byte[1]{ 0 };
-//     return { instructions, 1 };
-//   }
+  if (size <= 0) {
+    // Pas de paquet reçu → on retourne un buffer avec une seule valeur nulle
+    byte* instructions = new byte[1]{ 0 };
+    return { instructions, 1 };
+  }
 
-//   if (!fisrt_message) {
-//     set_sender_info();
-//     fisrt_message = true;
-//   }
+  if (!fisrt_message) {
+    set_sender_info();
+    fisrt_message = true;
+  }
 
-//   const uint8_t* data = udp.data();
+  const uint8_t* data = udp.data();
 
-//   printf("[%u.%u.%u.%u][%d] ", senderIP[0], senderIP[1], senderIP[2], senderIP[3], size);
+  printf("[%u.%u.%u.%u][%d] ", senderIP[0], senderIP[1], senderIP[2], senderIP[3], size);
 
-//   byte* instructions = new byte[size];
-//   for (int j = 0; j < size; j++) {
-//     instructions[j] = data[j];
-//     Serial.printf("%#04x ", instructions[j]);
-//   }
-//   Serial.println();
-//   return { instructions, size };  // on retourne bien {data, taille}
+  byte* instructions = new byte[size];
+  for (int j = 0; j < size; j++) {
+    instructions[j] = data[j];
+    Serial.printf("%#04x ", instructions[j]);
+  }
+  Serial.println();
+  return { instructions, size };  // on retourne bien {data, taille}
 }
 
 
