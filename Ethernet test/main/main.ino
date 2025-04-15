@@ -1,5 +1,3 @@
-#include "Valves.h"
-#include "UDP.h"
 #include "Sensors.h"
 #include "SaveData.h"
 
@@ -16,6 +14,8 @@ bool test_will_begin = false;
 
 uint16_t T_confirm;
 uint16_t Chilldown_finished;
+uint16_t last_send;
+uint16_t count_down_time;
 uint16_t PS63_duration;
 uint16_t PS63_seems_rise;
 uint16_t Ign_duration;
@@ -35,49 +35,61 @@ uint16_t Chilldown_verified_duration;
 sequence_data Sequence_data;
 
 // SaveData
-uint32_t frequence_save = 200; // ms
+uint32_t frequence_save = 200;  // ms
 
 void setup() {
-  Serial.begin(9600);       //initialize Serial Port
-  SPI.begin();              //initialize SPI
-  setupSensors();
-  setupValves();
-  setupUDP();
-  Set_valve_position();
-  // setupSaveData();
+  Serial.begin(9600);  //initialize Serial Port
+  SPI.begin();         //initialize SPI
+  Serial.println("Start");
+  // pinMode(IGN_pin, OUTPUT);
+  // pinMode(IGN_check_pin, INPUT);
 
-  pinMode(IGN_pin, OUTPUT);
-  pinMode(IGN_check_pin, INPUT);
-  
   pinMode(1, OUTPUT);
-  pinMode(28, OUTPUT);
-  pinMode(29, OUTPUT);
-  pinMode(30, OUTPUT);
-  pinMode(35, OUTPUT);
-  pinMode(36, OUTPUT);
-  pinMode(37, OUTPUT);
+  pinMode(10, OUTPUT);
+  // pinMode(28, OUTPUT);
+  // pinMode(29, OUTPUT);
+  // pinMode(30, OUTPUT);
+  // pinMode(35, OUTPUT);
+  // pinMode(36, OUTPUT);
+  // pinMode(37, OUTPUT);
 
   digitalWrite(1, HIGH);
-  digitalWrite(28, HIGH);
-  digitalWrite(29, HIGH);
-  digitalWrite(30, HIGH);
-  digitalWrite(35, HIGH);
-  digitalWrite(36, HIGH);
-  digitalWrite(37, HIGH);
+  digitalWrite(10, HIGH);
+  // digitalWrite(28, HIGH);
+  // digitalWrite(29, HIGH);
+  // digitalWrite(30, HIGH);
+  // digitalWrite(35, HIGH);
+  // digitalWrite(36, HIGH);
+  // digitalWrite(37, HIGH);
 
-  setValve(SV21, 0);
-  setValve(SV22, 0);
-  setValve(SV24, 0);
-  setValve(SV31, 1);
-  setValve(SV32, 0);
-  setValve(SV33, 0);
-  setValve(SV34, 1);
+  Serial.println("pinmode");
 
-  Serial.print(CrashReport);
+  setupValves();
+  Serial.println("setup valve");
+
+  Set_valve_position();
+  Serial.println("set valve");
+
+  setupSensors();
+  Serial.println("setup sensor");
+
+  // setupUDP();
+
+  // setupSaveData();
+
+  // setValve(SV21, 0);
+  // setValve(SV22, 0);
+  // setValve(SV24, 0);
+  // setValve(SV31, 1);
+  // setValve(SV32, 0);
+  // setValve(SV33, 0);
+  // setValve(SV34, 1);
 }
 
 void loop() {
-  // listen to commands
+  Serial.println(millis());
+  delay(200);
+  // // listen to commands
   // Packet p = receivePacket();
 
   // if (p.length >= 4 && p.data != nullptr) {
@@ -86,120 +98,112 @@ void loop() {
   // if (p.data != nullptr) {
   //   delete[] p.data;
   // }
-  // if (millis() - time_last_reading >= 1000){
-  //   Serial.println("ici");
+  // if (millis() - time_last_reading >= 50){
   //   sensorsLoop();
   //   time_last_reading = millis();
   //   // serialSend();
   // }
-  // if (Data.state==1){
-  //   Sequence();
+  // if (test_will_begin){
+  //   // vérifier que les valeurs sont bonne
+  //   byte message[4] = {0xBB, 0xBB, 0xBB, 0xBB};
+  //   reply(message,sizeof(message));
   // }
   // BBLoop();
 }
 
-uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) { // to assemble 2 byte
+uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {  // to assemble 2 byte
   return (static_cast<uint16_t>(highByte) << 8) | static_cast<uint16_t>(lowByte);
 }
 
-void decode(byte* instructions){
+void decode(byte* instructions) {
 
-  if (instructions[0] == 0xff  && instructions[1] == 0xff && instructions[2] == 0xff && instructions[3] == 0xff){ // Valve
+  if (instructions[0] == 0xff && instructions[1] == 0xff && instructions[2] == 0xff && instructions[3] == 0xff) {  // Valve
     if (instructions[5] == 0x00 || instructions[5] == 0x01) {
       setValve(instructions[4], instructions[5]);  // Activer ou dÃ©sactiver la valve
+      byte message[8] = { 0xEE, 0xEE, 0xFF, 0xFF, 0xFF, 0xFF, instructions[4], instructions[5] };
+      reply(message, sizeof(message));
     }
   }
-  if (instructions[0] == 0xFF  && instructions[1] == 0xFF && instructions[2] == 0xEE && instructions[3] == 0xEE){ // set bang-bang pressurization 
-    if (instructions[4] == 1 ){// tank: 0 = LOX, 1 = ETH, 2 = WATER
-      uint16_t value = assembleUInt16(instructions[6],instructions[5]);
+  if (instructions[0] == 0xFF && instructions[1] == 0xFF && instructions[2] == 0xEE && instructions[3] == 0xEE) {  // set bang-bang pressurization
+    if (instructions[4] == 1) {                                                                                    // tank: 0 = LOX, 1 = ETH, 2 = WATER
+      uint16_t value = assembleUInt16(instructions[6], instructions[5]);
       Serial.print("LOX pressure bangbang set : ");
       Serial.println(value);
-      BB_param_set(1, value); 
+      BB_param_set(1, value);
     }
-    if (instructions[4] == 2 ){
-      uint16_t value = assembleUInt16(instructions[6],instructions[5]);
+    if (instructions[4] == 2) {
+      uint16_t value = assembleUInt16(instructions[6], instructions[5]);
       Serial.println("ETH pressure bangbang set : ");
       Serial.println(value);
       BB_param_set(2, value);
     }
-    if (instructions[4] == 6 ){
-      uint16_t value = assembleUInt16(instructions[6],instructions[5]);
+    if (instructions[4] == 6) {
+      uint16_t value = assembleUInt16(instructions[6], instructions[5]);
       Serial.println("H20 pressure bangbang set : ");
       Serial.println(value);
-      BB_param_set(6, value); 
+      BB_param_set(6, value);
     }
   }
-  if (instructions[0] == 0xFF  && instructions[1] == 0xFF && instructions[2] == 0xDD && instructions[3] == 0xDD){ // bang-bang enable
-    if (instructions[4] == 1 ){// tank: 1 = LOX, 2 = ETH, 6 = WATER
-      if (instructions[5]==0X00){
+  if (instructions[0] == 0xFF && instructions[1] == 0xFF && instructions[2] == 0xDD && instructions[3] == 0xDD) {  // bang-bang enable
+    if (instructions[4] == 1) {                                                                                    // tank: 1 = LOX, 2 = ETH, 6 = WATER
+      if (instructions[5] == 0X00) {
         Serial.println("LOX bangbang desactivate");
-        byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, instructions[4], instructions[5]};
-        reply(message,sizeof(message));
-        BB_enable (1, 0);
-      }
-      else if (instructions[5]==0X01){
+        BB_enable(1, 0);
+      } else if (instructions[5] == 0X01) {
         Serial.println("LOX bangbang activate");
-        byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, instructions[4], instructions[5]};
-        reply(message,sizeof(message));
-        BB_enable (1, 1);
+        BB_enable(1, 1);
       }
-    }
-    else if (instructions[4] == 2 ){
-      if (instructions[5]==0X00){
+    } else if (instructions[4] == 2) {
+      if (instructions[5] == 0X00) {
         Serial.println("ETH bangbang desactivate");
-        byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, instructions[4], instructions[5]};
-        reply(message,sizeof(message));
-        BB_enable (2, 0);
+        BB_enable(2, 0);
       }
-      if (instructions[5]==0X01){
+      if (instructions[5] == 0X01) {
         Serial.println("ETH bangbang activate");
-        byte message[8] = {0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, instructions[4], instructions[5]};
-        reply(message,sizeof(message));
-        BB_enable (2, 1);
+        BB_enable(2, 1);
       }
-    }
-    else if (instructions[4] == 6 ){
-      if (instructions[5]==0X00){
+    } else if (instructions[4] == 6) {
+      if (instructions[5] == 0X00) {
         Serial.println("H2O bangbang desactivate");
-        BB_enable (6, 0);
+        BB_enable(6, 0);
       }
-      if (instructions[5]==0X01){
+      if (instructions[5] == 0X01) {
         Serial.println("H2O bangbang activate");
-        BB_enable (6, 1);
+        BB_enable(6, 1);
       }
     }
   }
-  if (instructions[0] == 0xEE  && instructions[1] == 0xEE && instructions[2] == 0xEE && instructions[3] == 0xEE){ // Actuators
-    if (instructions[4] == 0 ){
+  if (instructions[0] == 0xEE && instructions[1] == 0xEE && instructions[2] == 0xEE && instructions[3] == 0xEE) {  // Actuators
+    if (instructions[4] == 0) {
       // the obcsur TVC name + instruction[5]
     }
-    if (instructions[4] == 1 ){
+    if (instructions[4] == 1) {
       // the obcsur TVC name + instruction[5]
     }
   }
-  if (instructions[0] == 0xEE  && instructions[1] == 0xEE && instructions[2] == 0xDD && instructions[3] == 0xDD){ // TVC pattern
-    if (instructions[4] == 1 ){
+  if (instructions[0] == 0xEE && instructions[1] == 0xEE && instructions[2] == 0xDD && instructions[3] == 0xDD) {  // TVC pattern
+    if (instructions[4] == 1) {
       // the obcsur TVC name
     }
-    if (instructions[4] == 2 ){
+    if (instructions[4] == 2) {
       // the obcsur TVC name
     }
-    if (instructions[4] == 3 ){
+    if (instructions[4] == 3) {
       // the obcsur TVC name
     }
-    if (instructions[4] == 4 ){
+    if (instructions[4] == 4) {
       // the obcsur TVC name
     }
-    if (instructions[4] == 5){
+    if (instructions[4] == 5) {
       // the obcsur TVC name
     }
   }
-  if (instructions[0] == 0xAA  && instructions[1] == 0xAA && instructions[2] == 0xAA && instructions[3] == 0xAA){ // Start test
+  if (instructions[0] == 0xAA && instructions[1] == 0xAA && instructions[2] == 0xAA && instructions[3] == 0xAA) {  // Start test
     uint16_t value1 = assembleUInt16(instructions[5], instructions[4]);
     Serial.print("LOX pressure bangbang set : ");
     Serial.println(value1);
     BB_param_set(1, value1);
-    
+
     uint16_t value = assembleUInt16(instructions[7], instructions[6]);
     Serial.print("ETH pressure bangbang set : ");
     Serial.println(value);
@@ -318,22 +322,35 @@ void decode(byte* instructions){
     Serial.print("Cooling duration after end of burn : ");
     Serial.println(Sequence_data.Cooling_duration_after_end_burn);
 
+    BB_enable(2, 1);
+    BB_enable(6, 0);
+    BB_enable(6, 1);
+
     test_will_begin = true;
 
-    byte message[8] = {0xBB, 0xBB, 0xBB, 0xBB};
-    reply(message,sizeof(message));
-  } 
-  if (instructions[0] == 0xBB  && instructions[1] == 0xBB && instructions[2] == 0xBB && instructions[3] == 0xBB){ // Confirm test
-
-  } 
-  if (instructions[0] == 0xCC  && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC){ // Abort test
-
-  } 
+    byte message[6] = { 0xEE, 0xEE, 0xAA, 0xAA, 0xAA, 0xAA };
+    reply(message, sizeof(message));
+  }
+  if (instructions[0] == 0xBB && instructions[1] == 0xBB && instructions[2] == 0xBB && instructions[3] == 0xBB) {  // Confirm test
+    Data.state = 1;
+    Sequence();
+  }
+  if (instructions[0] == 0xCC && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC) {  // Abort test
+  }
 }
 
-void Sequence() { 
-    pinMode(IGN_pin, OUTPUT);
-    pinMode(IGN_check_pin, INPUT);
+void count_down() {
+  if (millis() - last_send >= 200) {
+    last_send = millis();
+    count_down_time += 200;
+    byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF) };
+    reply(message, sizeof(message));
+  }
+}
+
+void Sequence() {
+  pinMode(IGN_pin, OUTPUT);
+  pinMode(IGN_check_pin, INPUT);
 
   T_confirm = millis();
   Data.test_step = 1;
@@ -343,275 +360,311 @@ void Sequence() {
     sensorsLoop();
     BBLoop();
     Packet p = receivePacket();
-    if (p.length >= 4 && p.data != nullptr) {decode(p.data);}
-    if (p.data != nullptr) {delete[] p.data;}
-    
-    switch ( Data.test_step) {
+    if (p.length >= 4 && p.data != nullptr) { decode(p.data); }
+    if (p.data != nullptr) { delete[] p.data; }
+
+    switch (Data.test_step) {
       ////// PURGE //////
-      case 1: {
+      case 1:
+        {
           if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay)) {
-              Chilldown_start = 0;
-              setValve(SV36, 1);
-              Data.test_step++;
+            Chilldown_start = 0;
+            setValve(SV36, 1);
+            Data.test_step++;
           }
           break;
-      }
-      case 2: {
+        }
+      case 2:
+        {
           if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
-              setValve(SV36, 0);
-      ////// End of PURGE //////
-      ////// start chilldown //////
-              Chilldown_start++;
-              setValve(SV13, 1);
-              Data.test_step++;
+            setValve(SV36, 0);
+            ////// End of PURGE //////
+            ////// start chilldown //////
+            Chilldown_start++;
+            setValve(SV13, 1);
+            Data.test_step++;
           }
           break;
-      }
-      case 3: {
+        }
+      case 3:
+        {
           if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration)) {
-              setValve(SV13, 0);
-              Data.test_step++;
+            setValve(SV13, 0);
+            Data.test_step++;
           }
           break;
-      }
-      case 4: {
+        }
+      case 4:
+        {
           if (millis() <= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
-              if (Data.TS12 >= Sequence_data.chill_temp) {
-                  chill_temp_seems_ok = millis();
-                  Data.test_step = 5;  // remplace l'étape 4.5
-              } else if (Chilldown_start >= Sequence_data.Max_chilldown) {
-                  Data.state = 0;  // Erreur chilldown
-              }
+            if (Data.TS12 >= Sequence_data.chill_temp) {
+              chill_temp_seems_ok = millis();
+              Data.test_step = 5;  // remplace l'étape 4.5
+            } else if (Chilldown_start >= Sequence_data.Max_chilldown) {
+              Data.state = 0;  // Erreur chilldown
+            }
           } else {
-              T_confirm = millis();
-              Data.test_step = 2;
-              Chilldown_start++;
+            T_confirm = millis();
+            Data.test_step = 2;
+            Chilldown_start++;
           }
           break;
-      }
-      case 5: {
+        }
+      case 5:
+        {
           if ((Data.TS12 >= Sequence_data.chill_temp) && ((millis() - chill_temp_seems_ok) >= Chilldown_verified_duration)) {
-              Chilldown_finished = millis();
-              Chilldown_duration = Chilldown_finished - Chilldown_start;
-              Data.test_step++;
+            Chilldown_finished = millis();
+            Chilldown_duration = Chilldown_finished - Chilldown_start;
+            Data.test_step++;
+            count_down_time = -10000;
+            byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF) };
+            reply(message, sizeof(message));
           } else if (Data.TS12 < Sequence_data.chill_temp) {
-              Data.test_step = 4;
+            Data.test_step = 4;
           }
           break;
-      }
-      case 6: {
-          if (millis() >= (Chilldown_finished + Sequence_data.Chilldown_to_cooling)) {
-              setValve(SV63, 1);
+        }
       ////// end chilldown //////
       ////// Start cooling //////
-              if (Sequence_data.cooling_enable){
-                PS63_duration = millis();
-                Data.test_step++;
-              }
-              else{
-                Data.test_step = 9;
-              }
+      case 6:
+        {
+          if (Sequence_data.cooling_enable) {
+            if (millis() >= (Chilldown_finished + Sequence_data.Chilldown_to_cooling)) {
+              setValve(SV63, 1);
+              PS63_duration = millis();
+              Data.test_step++;
+            }
+          } else if (millis() >= static_cast<uint32_t>(Chilldown_finished + 10000)) {
+            Data.test_step = 9;
           }
+          count_down();
           break;
-      }
+        }
       ////// check cooling //////
-      case 7: {
+      case 7:
+        {
           if (Data.PS63 >= Sequence_data.cooling_pressure) {
-              PS63_seems_rise = millis();
-              Data.test_step++;
+            PS63_seems_rise = millis();
+            Data.test_step++;
           } else if ((millis() - PS63_duration) >= Sequence_data.PS63_check_duration) {
-              Data.state = 0;  // erreur
+            Data.state = 0;  // erreur
           }
+          count_down();
           break;
-      }
-      case 8: {
+        }
+      case 8:
+        {
           if ((Data.PS63 >= Sequence_data.cooling_pressure) && ((millis() - PS63_seems_rise) >= Sequence_data.PS63_verified_duration)) {
-              Data.test_step++;
+            Data.test_step++;
           } else if (Data.PS63 < Sequence_data.cooling_pressure) {
-              Data.test_step = 7;
+            Data.test_step = 7;
           }
+          count_down();
           break;
-      }
+        }
       ////// start ignite //////
-      case 9: {
-      
+      case 9:
+        {
           Ign_duration = millis();
           digitalWrite(IGN_pin, HIGH);
           Data.test_step++;
+          count_down();
           break;
-      }
-      case 10: {
-      ////// check ignite //////
-          if (digitalRead (IGN_check_pin) == HIGH) {
-              Ign_seems_on = millis();
-              Data.test_step++;
+        }
+      case 10:
+        {
+          ////// check ignite //////
+          if (digitalRead(IGN_check_pin) == HIGH) {
+            Ign_seems_on = millis();
+            Data.test_step++;
           } else if ((millis() - Ign_duration) >= Sequence_data.Ign_check_duration) {
-              Data.state = 0;
+            Data.state = 0;
           }
+          count_down();
           break;
-      }
-      case 11: {
-          if ((digitalRead (IGN_check_pin) == HIGH) && ((millis() - Ign_seems_on) >= Sequence_data.Ign_verified_duration)) {
-              digitalWrite(IGN_pin, LOW);
-              T0 = millis();
-      ////// stop ignite //////
-      ////// start bypass //////
-              setValve(SV24, 1);
-              Data.test_step++;
+        }
+      case 11:
+        {
+          if ((digitalRead(IGN_check_pin) == HIGH) && ((millis() - Ign_seems_on) >= Sequence_data.Ign_verified_duration)) {
+            digitalWrite(IGN_pin, LOW);
+            T0 = millis();
+            ////// stop ignite //////
+            ////// start bypass //////
+            setValve(SV24, 1);
+            Data.test_step++;
           } else {
-              Data.test_step = 10;
+            Data.test_step = 10;
           }
+          count_down();
           break;
-      }
-      case 12: {
+        }
+      case 12:
+        {
           if (millis() >= (T0 + Sequence_data.ETH_to_LOX_bypass)) {
-              Bypass_duration = millis();
-              setValve(SV13, 1);
-              Data.test_step++;
+            Bypass_duration = millis();
+            setValve(SV13, 1);
+            Data.test_step++;
           }
+          count_down();
           break;
-      }
-      case 13: {
-      ////// check bypass //////
+        }
+      case 13:
+        {
+          ////// check bypass //////
           if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure)) {
-              Bypass_duration = millis();
-              Data.test_step++;
+            Bypass_duration = millis();
+            Data.test_step++;
           } else if ((millis() - Bypass_duration) >= Sequence_data.Bypass_check_duration) {
-              Data.state = 0;
+            Data.state = 0;
           }
+          count_down();
           break;
-      }
-      case 14: {
+        }
+      case 14:
+        {
           if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure) && ((millis() - Bypass_duration) >= Sequence_data.Bypass_verified_duration)) {
-              ETH_open = millis();
-       ////// start main injection //////
-              setValve(SV22, 1);
-              Data.test_step++;
+            ETH_open = millis();
+            ////// start main injection //////
+            setValve(SV22, 1);
+            Data.test_step++;
           } else {
-              Data.test_step = 12;
+            Data.test_step = 12;
           }
+          count_down();
           break;
-      }
-      case 15: {
+        }
+      case 15:
+        {
           if (millis() >= (T0 + Sequence_data.ETH_to_LOX_main)) {
-              Main_duration = millis();
-              setValve(SV12, 1);
-              Data.test_step++;
+            Main_duration = millis();
+            setValve(SV12, 1);
+            Data.test_step++;
           }
+          count_down();
           break;
-      }
-      case 16: {
+        }
+      case 16:
+        {
           if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure)) {
-              Main_seems_rise = millis();
-              Data.test_step++;
+            Main_seems_rise = millis();
+            Data.test_step++;
           } else if ((millis() - Main_duration) >= Sequence_data.Main_check_duration) {
-              Data.state = 0;
+            Data.state = 0;
           }
+          count_down();
           break;
-      }
-      case 17: {
-      ////// check main injection //////
+        }
+      case 17:
+        {
+          ////// check main injection //////
           if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure) && ((millis() - Main_seems_rise) >= Sequence_data.Main_verified_duration)) {
-              Data.test_step++;
+            Data.test_step++;
           } else {
-              Data.test_step = 15;
+            Data.test_step = 15;
           }
+          count_down();
           break;
-      }
-      case 18: {
-      ////// stop bypass //////
+        }
+      case 18:
+        {
+          ////// stop bypass //////
           setValve(SV24, 0);
           setValve(SV13, 0);
           Nominal_pressure_reached = millis();
           Data.test_step++;
+          count_down();
           break;
-      }
-      case 19: {
+        }
+      case 19:
+        {
           // TVC launch, not implemented
           Data.test_step++;
+          count_down();
           break;
-      }
-      case 20: {
-      ////// stop main injection and purge //////
+        }
+      case 20:
+        {
+          ////// stop main injection and purge //////
           if (millis() >= (T0 + Sequence_data.burn_duration)) {
-              setValve(SV12, 0);
-              setValve(SV36, 1);
-              Data.test_step++;
+            setValve(SV12, 0);
+            setValve(SV36, 1);
+            Data.test_step++;
           }
+          count_down();
           break;
-      }
-      case 21: {
+        }
+      case 21:
+        {
           if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay)) {
-              setValve(SV22, 0);
-              setValve(SV35, 1);
-              Data.test_step++;
+            setValve(SV22, 0);
+            setValve(SV35, 1);
+            Data.test_step++;
           }
+          count_down();
           break;
-      }
-      case 22: {
+        }
+      case 22:
+        {
           if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2)) {
-              setValve(SV36, 0);
-              setValve(SV35, 0);
-              Data.test_step++;
+            setValve(SV36, 0);
+            setValve(SV35, 0);
+            Data.test_step++;
           }
+          count_down();
           break;
-      }
+        }
       ////// stop cooling //////
-      case 23: {
+      case 23:
+        {
           if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2 + Sequence_data.Cooling_duration_after_end_burn)) {
-              setValve(SV63, 0);
-              Data.state = 0;
+            setValve(SV63, 0);
+            Data.state = 0;
           }
+          count_down();
           break;
-      }
+        }
     }
   } while (Data.state == 1);
 }
 
 float average(byte* L, int length) {
-    float sum = 0;
-    for (int i = 0; i < length; i++) {
-        sum += L[i];
-    }
-    return sum / length;
-}
-
-void set_offset_pressure() { // set sensors at 0 
-    const int N = 10;
-    byte average_PS12_data[N];
-    byte average_PS22_data[N];
-    byte average_PS41_data[N];
-    byte average_PS42_data[N];
-    byte average_PS63_data[N];
-    byte average_PS64_data[N];
-
-    for (int i = 0; i < N; i++) {
-        sensorsLoop();
-        Packet p = receivePacket();
-        if (p.length >= 4 && p.data != nullptr) {
-        decode(p.data);
-        }
-        if (p.data != nullptr) {
-          delete[] p.data;
-        }
-        average_PS12_data[i] = Data.PS12;
-        average_PS22_data[i] = Data.PS22;
-        average_PS41_data[i] = Data.PS41;
-        average_PS42_data[i] = Data.PS42;
-        average_PS63_data[i] = Data.PS63;
-        average_PS64_data[i] = Data.PS64; 
-    }
-
-    offset_PS12 = average(average_PS12_data, N);
-    offset_PS22 = average(average_PS22_data, N);
-    offset_PS41 = average(average_PS41_data, N);
-    offset_PS42 = average(average_PS42_data, N);
-    offset_PS63 = average(average_PS63_data, N);
-    offset_PS64 = average(average_PS64_data, N);      
-}
-
-void test(){
-  if (Data.state == 1){
-    Sequence();
+  float sum = 0;
+  for (int i = 0; i < length; i++) {
+    sum += L[i];
   }
+  return sum / length;
+}
+
+void set_offset_pressure() {  // set sensors at 0
+  const int N = 10;
+  byte average_PS12_data[N];
+  byte average_PS22_data[N];
+  byte average_PS41_data[N];
+  byte average_PS42_data[N];
+  byte average_PS63_data[N];
+  byte average_PS64_data[N];
+
+  for (int i = 0; i < N; i++) {
+    sensorsLoop();
+    // Packet p = receivePacket();
+    // if (p.length >= 4 && p.data != nullptr) {
+    //   decode(p.data);
+    // }
+    // if (p.data != nullptr) {
+    //   delete[] p.data;
+    // }
+    average_PS12_data[i] = Data.PS12;
+    average_PS22_data[i] = Data.PS22;
+    average_PS41_data[i] = Data.PS41;
+    average_PS42_data[i] = Data.PS42;
+    average_PS63_data[i] = Data.PS63;
+    average_PS64_data[i] = Data.PS64;
+  }
+
+  offset_PS12 = average(average_PS12_data, N);
+  offset_PS22 = average(average_PS22_data, N);
+  offset_PS41 = average(average_PS41_data, N);
+  offset_PS42 = average(average_PS42_data, N);
+  offset_PS63 = average(average_PS63_data, N);
+  offset_PS64 = average(average_PS64_data, N);
 }

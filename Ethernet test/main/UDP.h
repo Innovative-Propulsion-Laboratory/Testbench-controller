@@ -1,7 +1,7 @@
 #ifndef UDP_H
 #define UDP_H
 
-#include <stdint.h>  
+#include <stdint.h>
 #include <QNEthernet.h>
 #include <Arduino.h>
 using namespace qindesign::network;
@@ -17,7 +17,7 @@ struct Packet {
 
 void setupUDP();
 Packet receivePacket();
-void reply (byte* message, uint16_t size);
+void reply(byte* message, uint16_t size);
 void send_data(void* payload, uint16_t size);
 uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte);
 
