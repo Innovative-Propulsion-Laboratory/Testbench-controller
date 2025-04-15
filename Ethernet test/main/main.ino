@@ -73,7 +73,7 @@ void setup() {
   setupSensors();
   Serial.println("setup sensor");
 
-  setupUDP();
+  // setupUDP();
 
   // setupSaveData();
 
