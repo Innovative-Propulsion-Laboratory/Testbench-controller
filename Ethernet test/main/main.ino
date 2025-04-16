@@ -45,9 +45,9 @@ void setup() {
     Serial.print(CrashReport);
   }
   pinMode(IGN_pin, OUTPUT);
-  pinMode(IGN_check_pin, INPUT);
+  // pinMode(IGN_check_pin, INPUT);
 
-  pinMode(1, OUTPUT);
+  pinMode(2, OUTPUT);
   pinMode(10, OUTPUT);
   pinMode(28, OUTPUT);
   pinMode(29, OUTPUT);
@@ -56,7 +56,7 @@ void setup() {
   pinMode(36, OUTPUT);
   pinMode(37, OUTPUT);
 
-  digitalWrite(1, HIGH);
+  digitalWrite(2, HIGH);
   digitalWrite(10, HIGH);
   digitalWrite(28, HIGH);
   digitalWrite(29, HIGH);
