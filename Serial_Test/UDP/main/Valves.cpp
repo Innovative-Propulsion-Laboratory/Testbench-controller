@@ -15,7 +15,7 @@ void setupValves() {
   digitalWrite(9, HIGH);
   delay(100);
   mcp.begin_SPI(10, 13, 12, 11);
-  // configure pin for output
+  //configure pin for output
   for (int i = 0; i <= 15; i++) {
     mcp.pinMode(i, OUTPUT);
   }
@@ -38,11 +38,11 @@ void setValve(uint8_t ID, bool command) {
     valvePositions &= ~(1 << ID);
   }
 
-  Serial.println(valvePositions);
-  Serial.print("Valve ");
-  Serial.print(ID);
-  Serial.print(" set to ");
-  Serial.println(command ? "open" : "closed");
+  // Serial.println(valvePositions);
+  // Serial.print("Valve ");
+  // Serial.print(ID);
+  // Serial.print(" set to ");
+  // Serial.println(command ? "open" : "closed");
 }
 
 void Set_valve_position() {
