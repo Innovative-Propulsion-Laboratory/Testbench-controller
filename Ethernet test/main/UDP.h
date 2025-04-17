@@ -18,6 +18,8 @@ struct Packet {
 void setupUDP();
 Packet receivePacket();
 void reply(byte* message, uint16_t size);
+void convert(const char* message, uint16_t length, int type);
+void send_string(const String& msg, int type);
 void send_data(void* payload, uint16_t size);
 uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte);
 

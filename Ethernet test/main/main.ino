@@ -94,9 +94,9 @@ void setup() {
   setupSensors();
   Serial.println("setup sensor");
 
-  // setupUDP();
+  setupUDP();
 
-  setupSaveData();
+  // setupSaveData();
 }
 
 void loop() {
