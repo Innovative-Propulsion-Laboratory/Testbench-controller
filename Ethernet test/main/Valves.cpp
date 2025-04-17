@@ -1,4 +1,4 @@
-#include "Sensors.h"
+#include "Valves.h"
 
 uint32_t valvePositions = 0b011001000010001001;    // read from right to left
 const uint32_t valveTypes = 0b011001000010001001;  // read from right to left

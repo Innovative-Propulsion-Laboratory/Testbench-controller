@@ -37,6 +37,53 @@ void reply(byte* message, uint16_t size) {  // send the message send
   udp.send(senderIP, senderPort, message, size);
 }
 
+void convert(const char* message, uint16_t length, int type) {
+  if (type == 0) {
+    const uint8_t header[4] = { 0xDD, 0xDD, 0xDD, 0xDD };
+    uint16_t totalLength = 4 + length;
+
+    // Create a buffer on the stack
+    uint8_t buffer[totalLength];
+
+    // Add the 4-byte header
+    buffer[0] = 0xDD;
+    buffer[1] = 0xDD;
+    buffer[2] = 0xDD;
+    buffer[3] = 0xDD;
+
+    // Add the message bytes (ASCII characters)
+    for (uint16_t i = 0; i < length; i++) {
+      buffer[4 + i] = static_cast<uint8_t>(message[i]);
+    }
+    // Send via UDP
+    udp.send(senderIP, senderPort, buffer, totalLength);
+  } 
+  else if (type == 1) {
+    const uint8_t header[4] = { 0xCC, 0xCC, 0xCC, 0xCC };
+    uint16_t totalLength = 4 + length;
+
+    // Create a buffer on the stack
+    uint8_t buffer[totalLength];
+
+    // Add the 4-byte header
+    buffer[0] = 0xCC;
+    buffer[1] = 0xCC;
+    buffer[2] = 0xCC;
+    buffer[3] = 0xCC;
+
+    // Add the message bytes (ASCII characters)
+    for (uint16_t i = 0; i < length; i++) {
+      buffer[4 + i] = static_cast<uint8_t>(message[i]);
+    }
+    // Send via UDP
+    udp.send(senderIP, senderPort, buffer, totalLength);
+  }
+}
+
+void send_string(const String& msg, int type) {
+  convert(msg.c_str(), msg.length(), type);
+}
+
 
 // void send_data(void* payload, uint16_t size) {// debug
 //   Serial.print("Payload (hex): ");
@@ -53,10 +100,6 @@ void reply(byte* message, uint16_t size) {  // send the message send
 
 void send_data(void* payload, uint16_t size) {
   udp.send(senderIP, senderPort, (byte*)payload, size);
-}
-
-void send_string(const char* message, uint16_t length) {
-  udp.send(senderIP, senderPort, (byte*)message, length);
 }
 
 Packet receivePacket() {
