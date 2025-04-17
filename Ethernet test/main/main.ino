@@ -1,6 +1,6 @@
 #include "Sensors.h"
-// #include "SaveData.h"
 // #include "UDP.h"
+
 // main variable
 uint32_t time_last_reading = 0;
 
@@ -35,7 +35,7 @@ uint16_t Chilldown_verified_duration;
 sequence_data Sequence_data;
 
 // SaveData
-uint32_t frequence_save = 200;  // ms
+uint32_t frequence_save = 1000;  // ms
 
 void setup() {
   Serial.begin(9600);  //initialize Serial Port
@@ -47,7 +47,7 @@ void setup() {
   pinMode(IGN_pin, OUTPUT);
   // pinMode(IGN_check_pin, INPUT);
 
-  pinMode(2, OUTPUT);
+  pinMode(1, OUTPUT);
   pinMode(10, OUTPUT);
   pinMode(28, OUTPUT);
   pinMode(29, OUTPUT);
@@ -96,34 +96,33 @@ void setup() {
   setupSensors();
   Serial.println("setup sensor");
 
-  setupUDP();
+  // setupUDP();
 
-  // // setupSaveData();
+  setupSaveData();
 }
 
 void loop() {
-  Serial.println(millis());
-  delay(50);
-  // listen to commands
-  // Packet p = receivePacket();
+  //listen to commands
+  Packet p = receivePacket();
 
-  // if (p.length >= 4 && p.data != nullptr) {
-  //   decode(p.data);
-  // }
-  // if (p.data != nullptr) {
-  //   delete[] p.data;
-  // }
-  // if (millis() - time_last_reading >= 50) {
-  //   sensorsLoop();
-  //   time_last_reading = millis();
-  //   // serialSend();
-  // }
-  // if (test_will_begin) {
-  //   // vérifier que les valeurs sont bonne
-  //   byte message[4] = { 0xBB, 0xBB, 0xBB, 0xBB };
-  //   reply(message, sizeof(message));
-  // }
-  // BBLoop();
+  if (p.length >= 4 && p.data != nullptr) {
+    decode(p.data);
+  }
+  if (p.data != nullptr) {
+    delete[] p.data;
+  }
+  if (millis() - time_last_reading >= 50) {
+    sensorsLoop();
+    time_last_reading = millis();
+    // serialSend();
+  }
+  if (test_will_begin) {
+    // vérifier que les valeurs sont bonne
+    byte message[4] = { 0xBB, 0xBB, 0xBB, 0xBB };
+    reply(message, sizeof(message));
+  }
+
+  BBLoop();
 }
 
 uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {  // to assemble 2 byte

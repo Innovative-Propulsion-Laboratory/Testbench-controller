@@ -78,6 +78,12 @@ uint32_t PS_WATER_TLL_time = 0, PS_WATER_BBLW_time = 0, PS_WATER_BBUW_time = 0, 
 // Thermocouples:
 uint32_t TS62_UW_time = 0, TS62_TUL_time = 0;
 
+// Save data 
+bool state_file = false;
+uint32_t time_since_save;
+SdExFat sd;
+ExFile fp;
+
 // ------------------------------ SETUP ----------------------------------------
 void setupSensors() {
 
@@ -130,9 +136,9 @@ void sensorsLoop() {
   //values_check();  //check if values are within limits
   //BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
   Data.valvesState = valvePositions;
-  // serialSend();
-  //send_data(&Data, sizeof(data));                                  //send data to the ground station
-  // save_data();                                                    //save data to the SD card
+  serialSend();
+  // send_data(&Data, sizeof(data));                                  //send data to the ground station
+  save_data();                                                    //save data to the SD card
   trigger_TS();  //requesting data from the thermocouples if not waiting for a conversion
 }
 
@@ -798,4 +804,31 @@ void serialSend() {
 
   Serial.println("--------------------------");
   Serial.println();
+}
+
+void setupSaveData() {
+  Serial.println("Initialisation du stockage SD...");
+  if (!sd.begin(SdioConfig(FIFO_SDIO))) {
+    Serial.println("Erreur : Carte SD non détectée !");
+    while (1);
+  }
+}
+
+void save_data() {
+  if (state_file == false) {
+    state_file = true;
+    uint32_t number = Data.n;  // check if have the good ID
+    String fileID = String(number) + ".txt";
+    fp = sd.open(fileID, FILE_WRITE);
+    fp.write((const uint8_t *)&Data, sizeof(Data));
+    time_since_save = millis();
+  } else if (state_file == true) {
+    if (static_cast<uint32_t>(millis() - time_since_save) >= frequence_save) {
+      fp.write((const uint8_t *)&Data, sizeof(Data));
+      fp.close();
+      state_file = false;
+    } else if (static_cast<uint32_t>(millis() - time_since_save) < frequence_save) {
+      fp.write((const uint8_t *)&Data, sizeof(Data));
+    }
+  }
 }

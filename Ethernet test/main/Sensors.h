@@ -2,7 +2,11 @@
 #define SENSORS_H
 
 #include "Pressurization.h"
+
+#include <SdFat.h>
+#include <Arduino.h>
 #include <Adafruit_MAX31856.h>  // https://github.com/adafruit/Adafruit_MAX31856
+
 
 // ------------------------ PIN CONFIGURATION ----------------------------------
 
@@ -102,6 +106,11 @@ struct __attribute__((packed)) sequence_data {
 extern data Data;
 extern sequence_data Sequence_data;
 
+//Save data 
+
+extern bool state_file;
+extern uint32_t frequence_save;
+
 // Functions:
 void setupSensors();
 void BBLoop();
@@ -120,11 +129,10 @@ uint16_t FM61_reading(int pin);
 uint32_t LC_reading(int pin);
 uint16_t ref5V_reading(int pin);
 
-
-
 void sendDataFromSensor(data* d);
 
-
+void setupSaveData();
+void save_data();
 
 
 #endif

@@ -1,8 +1,8 @@
-#include "Valves.h"
+#include "Sensors.h"
 
 uint32_t valvePositions = 0b011001000010001001;    // read from right to left
 const uint32_t valveTypes = 0b011001000010001001;  // read from right to left
-const int valvePins[NUM_VALVES] = { 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
+const int valvePins[NUM_VALVES] = {6, 7, 8, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
 Adafruit_MCP23X17 mcp;
 
 void setupValves() {
@@ -10,9 +10,9 @@ void setupValves() {
   pinMode(7, OUTPUT);
   pinMode(8, OUTPUT);
   pinMode(9, OUTPUT);
-  //digitalWrite(9, LOW);
-  //delay(100);
-  //digitalWrite(9, HIGH);
+  digitalWrite(9, LOW);
+  delay(100);
+  digitalWrite(9, HIGH);
   delay(100);
   mcp.begin_SPI(10, 13, 12, 11);
   // configure pin for output
