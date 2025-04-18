@@ -436,7 +436,7 @@ void Sequence() {
       ////// Start cooling //////
       case 6:
         {
-          if (Sequence_data.cooling_enable) {
+          if (Data.test_cooling) {
             if (millis() >= (Chilldown_finished + Sequence_data.Chilldown_to_cooling)) {
               setValve(SV63, 1);
               PS63_duration = millis();

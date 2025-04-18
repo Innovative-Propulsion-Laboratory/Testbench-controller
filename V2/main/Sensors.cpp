@@ -34,6 +34,7 @@ uint32_t time_since_save;
 SdExFat sd;
 ExFile fp;
 uint32_t save_freq = 1000;  // ms
+uint32_t number = 0;
 
 // ------------------------- LIMITS DEFINITION ---------------------------------
 
@@ -163,7 +164,7 @@ void sensorsLoop() {
   updateData();                                                  //read the sensors
   values_check();                                                //check if values are within limits
   BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
-  serialSend();
+  // serialSend();
   send_data(&Data, sizeof(data));                                //send data to the ground station
   if (Data.state == 1){save_data();}                                              //save data to the SD card
   trigger_TS();                                                  //requesting data from the thermocouples if not waiting for a conversion
@@ -950,26 +951,52 @@ void setupSaveData() {
   Serial.println("Initialisation du stockage SD...");
   if (!sd.begin(SdioConfig(FIFO_SDIO))) {
     Serial.println("Erreur : Carte SD non détectée !");
-    while (1);
   }
+  Serial.println("Stockage SD Initialisé");
 }
 
 void save_data() {
+  String line = String(Data.n) + "," +
+              String(Data.t) + "," +
+              String(Data.PS11) + "," + String(Data.PS12) + "," + String(Data.PS21) + "," +
+              String(Data.PS22) + "," + String(Data.PS31) + "," + String(Data.PS41) + "," +
+              String(Data.PS42) + "," + String(Data.PS51) + "," + String(Data.PS61) + "," +
+              String(Data.PS62) + "," + String(Data.PS63) + "," + String(Data.PS64) + "," +
+
+              String(Data.TS11) + "," + String(Data.TS12) + "," + String(Data.TS41) + "," +
+              String(Data.TS42) + "," + String(Data.TS61) + "," + String(Data.TS62) + "," +
+
+              String(Data.FM11) + "," + String(Data.FM21) + "," + String(Data.FM61) + "," +
+
+              String(Data.LC) + "," +
+              String(Data.ref5V) + "," +
+
+              String(Data.valvesState) + "," +
+              String(Data.actLPos) + "," + String(Data.actRPos) + "," +
+              String(Data.actLOK) + "," + String(Data.actROK) + "," +
+
+              String(Data.state) + "," + String(Data.test_step) + "," +
+              String(Data.test_cooling ? 1 : 0);  // bool en int
+
   if (state_file == false) {
     state_file = true;
-    uint32_t number = Data.n;  // check if have the good ID
+    if (Data.n >= (number + 1000) ){
+      number = Data.n;
+    }
+    // check if have the good ID
     String fileID = String(number) + ".txt";
     fp = sd.open(fileID, FILE_WRITE);
-    fp.write((const uint8_t *)&Data, sizeof(Data));
+    fp.println(line);
     time_since_save = millis();
   } else if (state_file == true) {
     if (static_cast<uint32_t>(millis() - time_since_save) >= save_freq) {
-      fp.write((const uint8_t *)&Data, sizeof(Data));
+      fp.println(line);
       fp.close();
       state_file = false;
     } else if (static_cast<uint32_t>(millis() - time_since_save) < save_freq) {
-      fp.write((const uint8_t *)&Data, sizeof(Data));
+      fp.println(line);
     }
   }
 }
+
 
