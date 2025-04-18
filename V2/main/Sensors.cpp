@@ -165,9 +165,9 @@ void sensorsLoop() {
   values_check();                                                //check if values are within limits
   BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
   Data.valvesState = valvePositions;
-  // serialSend();
-  // send_data(&Data, sizeof(data));                                //send data to the ground station
-  // if (Data.state == 1){save_data();}                                              //save data to the SD card
+  serialSend();
+  send_data(&Data, sizeof(data));                                //send data to the ground station
+  if (Data.state == 1){save_data();}                             //save data to the SD card during tests
   trigger_TS();                                                  //requesting data from the thermocouples if not waiting for a conversion
 }
 
@@ -248,17 +248,17 @@ void updateData() {
 
   // Read pressures and convert to mbar
   Data.PS11 = PS_25bar_reading(PS11_pin);
-  Data.PS12 = PS_25bar_reading(PS12_pin); // - offset_PS12;
+  Data.PS12 = PS_25bar_reading(PS12_pin) - offset_PS12;
   Data.PS21 = PS_25bar_reading(PS21_pin);
-  Data.PS22 = PS_25bar_reading(PS22_pin); // - offset_PS22;
+  Data.PS22 = PS_25bar_reading(PS22_pin) - offset_PS22;
   Data.PS31 = PS_70bar_reading(PS31_pin);
-  Data.PS41 = PS_25bar_reading(PS41_pin); // - offset_PS41;
-  Data.PS42 = PS_25bar_reading(PS42_pin); // - offset_PS42;
+  Data.PS41 = PS_25bar_reading(PS41_pin) - offset_PS41;
+  Data.PS42 = PS_25bar_reading(PS42_pin) - offset_PS42;
   Data.PS51 = PS_350bar_reading(PS51_pin);
   Data.PS61 = PS_25bar_reading(PS61_pin);
   Data.PS62 = PS_25bar_reading(PS62_pin);
-  Data.PS63 = PS_25bar_reading(PS63_pin); // - offset_PS63;
-  Data.PS64 = PS_25bar_reading(PS64_pin); // - offset_PS64;
+  Data.PS63 = PS_25bar_reading(PS63_pin) - offset_PS63;
+  Data.PS64 = PS_25bar_reading(PS64_pin) - offset_PS64;
 
   // Read 5V reference
   Data.ref5V = ref5V_reading(PSalim_pin);
@@ -570,7 +570,9 @@ void values_check() {
 
   if (Data.state == 1 && Data.PS41 >= PS41_TUL) {
     if (PS41_TUL_active == 1 && (millis() - PS41_TUL_time) >= PS_oob_max_delay) {
-      // emergency_stop();
+
+      abort();
+      
       if ((millis() - last_PS41_TUL_msg) >= message_delay) {
         send_string("error: PS41 over limit - test aborted", 1);
         Serial.println("error: PS41 over limit - test aborted");
@@ -616,7 +618,7 @@ void values_check() {
   
   if (Data.state == 1 && Data.PS41 <= PS41_TLL) {
     if (PS41_TLL_active == 1 && (millis() - PS41_TLL_time) >= PS_oob_max_delay) {
-      // emergency_stop();
+      abort();
       if ((millis() - last_PS41_TLL_msg) >= message_delay) {
         send_string("error: PS41 below limit - test aborted", 1);
         Serial.println("error: PS41 below limit - test aborted");
@@ -632,7 +634,7 @@ void values_check() {
   
   if (Data.state == 1 && Data.PS42 >= PS42_TUL) {
     if (PS42_TUL_active == 1 && (millis() - PS42_TUL_time) >= PS_oob_max_delay) {
-      // emergency_stop();
+      abort();
       if ((millis() - last_PS42_TUL_msg) >= message_delay) {
         send_string("error: PS42 over limit - test aborted", 1);
         Serial.println("error: PS42 over limit - test aborted");
@@ -843,6 +845,79 @@ void values_check() {
   
 }
 
+void abort() {
+    /*abort from IHM or if UL or LL during test is detected or if check in sequence not reached:
+  - before Igniter ON:
+  	close SV63 (if test_cooling is enabled)
+  - after Igniter ON:
+  	close SV12, SV13
+  	SV36 open
+  	LOX_to_ETH_closing_delay
+  	close SV22, SV24
+  	SV35 open
+  	purge_after_duration
+  	SV35 closed
+  	SV36 closed
+  	cooling_duration_after_burn
+  	SV63 closed*/
+
+  if (Data.test_step < 9) {
+    setValve(SV63, 0); // close SV63
+    Data.state = 0; // go back to active state
+    Data.test_step = 0; // go back to initial state
+  }
+  else if (Data.test_step >= 9){
+    Data.test_step = 20; // go to purge step
+    Data.state = 2; // set emergency state
+    T0 = millis(); // reset timer
+    do {
+      sensorsLoop();
+      switch (Data.test_step) {
+        ////// stop main injection and purge //////
+        case 20:
+        {
+
+          setValve(SV12, 0);
+          setValve(SV13, 0);
+          setValve(SV36, 1);
+          Data.test_step++;
+          break;
+        }
+      case 21:
+        {
+          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay)) {
+            setValve(SV22, 0);
+            setValve(SV24, 0);
+            setValve(SV35, 1);
+            Data.test_step++;
+          }
+          break;
+        }
+      case 22:
+        {
+          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2)) {
+            setValve(SV36, 0);
+            setValve(SV35, 0);
+            Data.test_step++;
+          }
+          break;
+        }
+      ////// stop cooling //////
+      case 23:
+        {
+          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2 + Sequence_data.Cooling_duration_after_end_burn)) {
+            setValve(SV63, 0);
+            Data.state = 0;
+            Data.test_step = 0;
+          }
+          break;
+        }
+      }
+    } while (Data.state == 2);
+  }
+}
+
+
 void serialSend() {
   Serial.println("------ Sensor Data ------");
 
@@ -946,13 +1021,13 @@ void serialSend() {
   Serial.println();
 }
 
-
+// ----------------------------- SD CARD ---------------------------------------
 void setupSaveData() {
-  Serial.println("Initialisation du stockage SD...");
+  Serial.println("Initializing SD card");
   if (!sd.begin(SdioConfig(FIFO_SDIO))) {
-    Serial.println("Erreur : Carte SD non détectée !");
+    Serial.println("Error: SD card not detected");
   }
-  Serial.println("Stockage SD Initialisé");
+  Serial.println("SD card initialized successfully");
 }
 
 void save_data() {
@@ -976,14 +1051,13 @@ void save_data() {
               String(Data.actLOK) + "," + String(Data.actROK) + "," +
 
               String(Data.state) + "," + String(Data.test_step) + "," +
-              String(Data.test_cooling ? 1 : 0);  // bool en int
+              String(Data.test_cooling ? 1 : 0);
 
   if (state_file == false) {
     state_file = true;
     if (Data.n >= (number + 1000) ){
       number = Data.n;
     }
-    // check if have the good ID
     String fileID = String(number) + ".txt";
     fp = sd.open(fileID, FILE_WRITE);
     fp.println(line);

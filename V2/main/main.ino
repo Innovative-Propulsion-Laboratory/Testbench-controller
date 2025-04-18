@@ -10,7 +10,7 @@ bool test_will_begin = false;
 
 // Sequence
 #define IGN_pin 33
-#define IGN_check_pin 34
+#define IGN_check_pin 39
 
 uint16_t T_confirm;
 uint16_t Chilldown_finished;
@@ -74,7 +74,7 @@ void setup() {
 
   setupUDP();
 
-  // setupSaveData();
+  setupSaveData();
 }
 
 void loop() {
@@ -347,7 +347,6 @@ void Sequence() {
 
   do {
     sensorsLoop();
-    BBLoop();
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) { decode(p.data); }
     if (p.data != nullptr) { delete[] p.data; }
@@ -367,8 +366,8 @@ void Sequence() {
         {
           if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
             setValve(SV36, 0);
-            ////// End of PURGE //////
-            ////// start chilldown //////
+      ////// End of PURGE //////
+      ////// start chilldown //////
             Chilldown_start++;
             setValve(SV13, 1);
             Data.test_step++;
