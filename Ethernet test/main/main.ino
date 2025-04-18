@@ -67,26 +67,6 @@ void setup() {
 
   setupValves();
   Serial.println("setup valve");
-  delay(50);
-  setValve(SV11, 0);
-  setValve(SV12, 1);
-  setValve(SV13, 1);
-  setValve(SV21, 0);
-  setValve(SV22, 1);
-  setValve(SV24, 1);
-  setValve(SV31, 1);
-  setValve(SV32, 0);
-  setValve(SV33, 1);
-  setValve(SV34, 1);
-  setValve(SV35, 1);
-  setValve(SV36, 1);
-  setValve(SV51, 0);
-  setValve(SV52, 1);
-  setValve(SV53, 1);
-  setValve(SV61, 0);
-  setValve(SV62, 0);
-  setValve(SV63, 1);
-  delay(1000);
 
   Set_valve_position();
   Serial.println("set valve");
@@ -96,7 +76,7 @@ void setup() {
 
   setupUDP();
 
-  // setupSaveData();
+  setupSaveData();
 }
 
 void loop() {
@@ -637,6 +617,8 @@ void Sequence() {
         }
     }
   } while (Data.state == 1);
+  byte message[4] = {0xAB, 0xCD, 0xAB, 0xCD};
+  reply(message, sizeof(message));
 }
 
 float average(byte* L, int length) {

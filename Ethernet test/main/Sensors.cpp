@@ -152,12 +152,12 @@ void BBLoop() {
 
 void sensorsLoop() {
   updateData();  //read the sensors
-  values_check();  //check if values are within limits
-  //BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
+  // values_check();  //check if values are within limits
+  BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
   Data.valvesState = valvePositions;
   serialSend();
   send_data(&Data,sizeof(data));   //send data to the ground station
-  // if (Data.state == 1){save_data();}                                                    //save data to the SD card
+  //if (Data.state == 1){save_data();}                                                    //save data to the SD card
   trigger_TS();  //requesting data from the thermocouples if not waiting for a conversion
 }
 
@@ -298,44 +298,44 @@ void printFault(uint8_t fault) {
   }
 }
 
-uint16_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
+int16_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
   return (int16_t)(31250.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
-uint32_t PS_70bar_reading(int pin) {  // For PS31
-  Serial.print("PS31: ");
-  Serial.print(analogRead(pin));
-  Serial.print("\t");
+int32_t PS_70bar_reading(int pin) {  // For PS31
+  // Serial.print("PS31: ");
+  // Serial.print(analogRead(pin));
+  // Serial.print("\t");
   return (int32_t)(87500.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
-uint32_t PS_350bar_reading(int pin) {  // For PS51
-  Serial.print("PS51: ");
-  Serial.println(analogRead(pin));
+int32_t PS_350bar_reading(int pin) {  // For PS51
+  // Serial.print("PS51: ");
+  // Serial.println(analogRead(pin));
   return (int32_t)(437500.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
 uint16_t FM11_reading(int pin) {
-  Serial.print("FM11: ");
-  Serial.print(analogRead(pin));
-  Serial.print("\t");
+  // Serial.print("FM11: ");
+  // Serial.print(analogRead(pin));
+  // Serial.print("\t");
   return (uint16_t)((50000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
 uint16_t FM21_reading(int pin) {
-  Serial.print("FM21: ");
-  Serial.print(analogRead(pin));
+  // Serial.print("FM21: ");
+  // Serial.print(analogRead(pin));
   Serial.print("\t");
   return (uint16_t)((40000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
 uint16_t FM61_reading(int pin) {
-  Serial.print("FM61: ");
-  Serial.println(analogRead(pin));
+  // Serial.print("FM61: ");
+  // Serial.println(analogRead(pin));
   return (uint16_t)((150000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
-uint32_t LC_reading(int pin) {
+int32_t LC_reading(int pin) {
   return 2943 * analogRead(pin) / 1023.0;
 }
 
@@ -793,7 +793,7 @@ void values_check() {
     PS_WATER_TLL_active = 0;
   }
   
-  if (Data.TS62 >= TS62_UW) {
+  if (Data.TS62*10 >= TS62_UW) {
     if (TS62_UW_active == 1 && (millis() - TS62_UW_time) >= PS_oob_max_delay) {
       if ((millis() - last_TS62_UW_msg) >= message_delay) {
         send_string("warning: TS62 too high", 0);
@@ -809,7 +809,7 @@ void values_check() {
     TS62_UW_active = 0;
   }
 
-  if (Data.state == 1 && Data.test_cooling == 1 && Data.TS62 >= TS62_TUL) {
+  if (Data.state == 1 && Data.test_cooling == 1 && Data.TS62*10 >= TS62_TUL) {
     if (TS62_TUL_active == 1 && (millis() - TS62_TUL_time) >= PS_oob_max_delay) {
       // emergency_stop();       // stops the test and puts the testbench in a safe configuration
       
