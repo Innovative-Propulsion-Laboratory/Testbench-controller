@@ -133,7 +133,7 @@ void sensorsLoop(){
     send_data(Data, sizeof(data));                                //send data to the ground station
     save_data();                                                    //save data to the SD card
     n++;                                                            //increment the packet ID
-    trigger_TS();                                                   //requesting data from the thermocouples if not waiting for a conversion
+    trigger_TS();                                                 //requesting data from the thermocouples if not waiting for a conversion
 }
 
 void trigger_TS() {

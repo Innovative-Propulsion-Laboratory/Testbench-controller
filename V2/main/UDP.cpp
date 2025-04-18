@@ -82,20 +82,6 @@ void send_string(const String& msg, int type) {
   convert(msg.c_str(), msg.length(), type);
 }
 
-
-// void send_data(void* payload, uint16_t size) {// debug
-//   Serial.print("Payload (hex): ");
-//   byte* data = (byte*)payload;
-//   for (uint16_t i = 0; i < size; i++) {
-//     if (data[i] < 0x10) Serial.print("0");
-//     Serial.print(data[i], HEX);
-//     Serial.print(" ");
-//   }
-//   Serial.println();
-
-//   udp.send(senderIP, senderPort, data, size);
-// }
-
 void send_data(void* payload, uint16_t size) {
   udp.send(senderIP, senderPort, (byte*)payload, size);
 }
@@ -126,53 +112,3 @@ Packet receivePacket() {
   Serial.println();
   return { instructions, size };  // on retourne bien {data, taille}
 }
-
-
-
-
-//////Old Code ////////////
-
-
-// uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) { // to assemble 2 byte
-//   return (static_cast<uint16_t>(highByte) << 8) | static_cast<uint16_t>(lowByte);
-// }
-
-// void old_reply(int tracker, byte* index, int size) {
-//     if(tracker == 1) { // data
-//       byte message[size+4];
-//       message[0] = 0xFF;
-//       message[1] = 0xFF;
-//       message[2] = 0xFF;
-//       message[3] = 0xFF;
-//       for (int j = 0; j < size; j++) {message[j+4] = index[j]; }  // copy data
-//       udp.send(senderIP, senderPort, message, sizeof(message));}
-//     else if (tracker == 2) { // Start test
-//       byte message[size+4];
-//       message[0] = 0xDD;
-//       message[1] = 0xDD;
-//       message[2] = 0xDD;
-//       message[3] = 0xDD;
-//       for (int j = 0; j < size; j++) { // copy data
-//       message[j+4] = index[j]; }
-//       udp.send(senderIP, senderPort, message, sizeof(message));}
-//     else if (tracker == 3) { // Confirm test
-//         Serial.println("Test confirmed");}
-//     else if (tracker == 4) { // Abort test
-//       byte message[size+4];
-//       message[0] = 0xCC;
-//       message[1] = 0xCC;
-//       message[2] = 0xCC;
-//       message[3] = 0xCC;
-//       for (int j = 0; j < size; j++) { // copy data
-//       message[j+4] = index[j]; }
-//       udp.send(senderIP, senderPort, message, sizeof(message));}
-//     else if (tracker == 5) { // Abort test
-//       byte message[size+4];
-//       message[0] = 0xBB;
-//       message[1] = 0xBB;
-//       message[2] = 0xBB;
-//       message[3] = 0xBB;
-//       for (int j = 0; j < size; j++) { // copy data
-//       message[j+4] = index[j]; }
-//       udp.send(senderIP, senderPort, message, sizeof(message));}
-// }

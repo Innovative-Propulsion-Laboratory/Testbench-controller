@@ -3,7 +3,7 @@
 // --------------------- VARIABLES INITIALIZATION ------------------------------
 
 uint32_t n = 0;  //Packet ID
-uint8_t cr0, fault11, fault12, fault41, fault42, fault61, fault62;
+uint8_t cr0, fault11, fault12, fault41, fault42, fault61, fault62; // Thermocouple faults for debug
 
 data Data;
 
@@ -17,13 +17,24 @@ Adafruit_MAX31856 thermo62 = Adafruit_MAX31856(TS62_pin, 11, 12, 13);
 Adafruit_MAX31856 thermo11 = Adafruit_MAX31856(TS11_pin, 11, 12, 13);  //initialized last since it may return negative values
 
 
-//Offset
-float offset_PS12 = 0;
-float offset_PS22 = 0;
-float offset_PS41 = 0;
-float offset_PS42 = 0;
-float offset_PS63 = 0;
-float offset_PS64 = 0;
+// Pressure sensors offset, set at the beginning each test
+int32_t offset_PS12 = 0;
+int32_t offset_PS22 = 0;
+int32_t offset_PS41 = 0;
+int32_t offset_PS42 = 0;
+int32_t offset_PS63 = 0;
+int32_t offset_PS64 = 0;
+
+// Sequence_data is used when aborts are triggered in values_check()
+sequence_data Sequence_data;
+
+// Save data 
+bool state_file = false;
+uint32_t time_since_save;
+SdExFat sd;
+ExFile fp;
+uint32_t save_freq = 1000;  // ms
+uint32_t number = 0;
 
 // ------------------------- LIMITS DEFINITION ---------------------------------
 
@@ -36,22 +47,20 @@ uint16_t TS_oob_max_delay = 1000;  // defines the maximum duration for which a t
 // If a warning is reached, a message is sent to the computer
 // If a limit is reached, the microcontroller takes action to solve the problem or to put the testbench in a safe position
 
-sequence_data Sequence_data;
-
 // Pressure sensors:
-uint16_t PS11_UL = 25000;
-uint16_t PS12_TLW = 9000, PS12_TUW = 13000;
-uint16_t PS21_UL = 25000;
-uint16_t PS22_TLW = 9000, PS22_TUW = 13000;
-uint16_t PS31_LW = 20000, PS31_UW = 50000, PS31_UL = 55000;
-uint16_t PS41_TLL = 6000, PS41_TLW = 7000, PS41_TUW = 13000, PS41_TUL = 14000;
-uint16_t PS42_TLL = 6000, PS42_TLW = 7000, PS42_TUW = 13000, PS42_TUL = 14000;
-uint16_t PS51_TLL = 10000, PS51_LW = 40000;
+int32_t PS11_UL = 25000;
+int32_t PS12_TLW = 9000, PS12_TUW = 13000;
+int32_t PS21_UL = 25000;
+int32_t PS22_TLW = 9000, PS22_TUW = 13000;
+int32_t PS31_LW = 20000, PS31_UW = 50000, PS31_UL = 55000;
+int32_t PS41_TLL = 6000, PS41_TLW = 7000, PS41_TUW = 13000, PS41_TUL = 14000;
+int32_t PS42_TLL = 6000, PS42_TLW = 7000, PS42_TUW = 13000, PS42_TUL = 14000;
+int32_t PS51_TLL = 10000, PS51_LW = 40000;
 int32_t PS51_UW = 210000;
-uint16_t PS_WATER_TLL = 6000, PS_WATER_UL = 14000;
+int32_t PS_WATER_TLL = 6000, PS_WATER_UL = 14000;
 
 // Thermocouples:
-uint16_t TS62_UW = 85, TS62_TUL = 95;
+float TS62_UW = 85, TS62_TUL = 95;
 
 // Pressure sensors:
 bool PS11_UL_active = 0, PS11_BBLW_active = 0, PS11_BBUW_active = 0;
@@ -81,6 +90,7 @@ uint32_t PS_WATER_TLL_time = 0, PS_WATER_BBLW_time = 0, PS_WATER_BBUW_time = 0, 
 // Thermocouples:
 uint32_t TS62_UW_time = 0, TS62_TUL_time = 0;
 
+
 uint16_t message_delay = 2000;
 // Pressure sensors:
 uint32_t last_PS11_UL_msg, last_PS11_BBUW_msg, last_PS11_BBLW_msg;
@@ -96,16 +106,8 @@ uint32_t last_PSWATER_UL_msg, last_PSWATER_BBUW_msg, last_PSWATER_BBLW_msg, last
 // Thermocouples:
 uint32_t last_TS62_UW_msg, last_TS62_TUL_msg;
 
-// Save data 
-bool state_file = false;
-uint32_t time_since_save;
-SdExFat sd;
-ExFile fp;
-uint32_t number = 1;
-
 // ------------------------------ SETUP ----------------------------------------
 void setupSensors() {
-
 
   Data.valvesState = valvePositions;
 
@@ -136,70 +138,40 @@ void setupSensors() {
   thermo11.setConversionMode(MAX31856_ONESHOT_NOWAIT);
 }
 
-void sendDataFromSensor(data* d) {
-  //send_data((void*)d, sizeof(data));
-}
-
 void BBLoop() {
+  /* Used to do the Bang-Bang pressurization at a sufficient rate outside
+     of the tests when sensorsLoop() is called at 20 Hz */
   // Reading the pressure sensors used for the Bang-Bang pressurization
   Data.PS11 = PS_25bar_reading(PS11_pin);
   Data.PS21 = PS_25bar_reading(PS21_pin);
   Data.PS61 = PS_25bar_reading(PS61_pin);
   Data.PS62 = PS_25bar_reading(PS62_pin);
 
-  //BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
+  // Bang-Bang pressurization of the tanks if enabled
+  BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);
 }
 
 void sensorsLoop() {
-  updateData();  //read the sensors
-  values_check();  //check if values are within limits
-  //BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
-  Data.valvesState = valvePositions;
-  serialSend();
-  send_data(&Data,sizeof(data));   //send data to the ground station
-  // if (Data.state == 1){save_data();}                                                    //save data to the SD card
-  trigger_TS();  //requesting data from the thermocouples if not waiting for a conversion
+  /* Main loop of the library: 
+     - read the sensors
+     - check the values read
+     - pressurize the tanks with Bang-Bang
+     - print in Serial
+     - send over Ethernet
+     - save the data to the SD during tests
+     - trigger thermocouples reading */
+
+  updateData();                                                  //read the sensors
+  values_check();                                                //check if values are within limits
+  BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
+  // serialSend();
+  send_data(&Data, sizeof(data));                                //send data to the ground station
+  if (Data.state == 1){save_data();}                                              //save data to the SD card
+  trigger_TS();                                                  //requesting data from the thermocouples if not waiting for a conversion
 }
 
 void trigger_TS() {
   // requesting data from the thermocouples if not waiting for a conversion
-  // fault11 = thermo11.readFault();
-  // fault12 = thermo12.readFault();
-  // fault41 = thermo41.readFault();
-  // fault42 = thermo42.readFault();
-  // fault61 = thermo61.readFault();
-  // fault62 = thermo62.readFault();
-  // if (fault11 & MAX31856_FAULT_OVUV) {
-  //   cr0 = thermo11.readRegister8(MAX31856_CR0_REG);
-  //   cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
-  //   thermo11.writeRegister8(MAX31856_CR0_REG, cr0);
-  // }
-  // if (fault12 & MAX31856_FAULT_OVUV) {
-  //   cr0 = thermo12.readRegister8(MAX31856_CR0_REG);
-  //   cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
-  //   thermo12.writeRegister8(MAX31856_CR0_REG, cr0);
-  // }
-  // if (fault41 & MAX31856_FAULT_OVUV) {
-  //   cr0 = thermo41.readRegister8(MAX31856_CR0_REG);
-  //   cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
-  //   thermo41.writeRegister8(MAX31856_CR0_REG, cr0);
-  // }
-  // if (fault42 & MAX31856_FAULT_OVUV) {
-  //   cr0 = thermo42.readRegister8(MAX31856_CR0_REG);
-  //   cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
-  //   thermo42.writeRegister8(MAX31856_CR0_REG, cr0);
-  // }
-  // if (fault61 & MAX31856_FAULT_OVUV) {
-  //   cr0 = thermo61.readRegister8(MAX31856_CR0_REG);
-  //   cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
-  //   thermo61.writeRegister8(MAX31856_CR0_REG, cr0);
-  // }
-  // if (fault62 & MAX31856_FAULT_OVUV) {
-  //   cr0 = thermo62.readRegister8(MAX31856_CR0_REG);
-  //   cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
-  //   thermo62.writeRegister8(MAX31856_CR0_REG, cr0);
-  // }
-
   if (!TS12_waiting) {
     thermo12.triggerOneShot();
     TS12_waiting = 1;
@@ -224,92 +196,120 @@ void trigger_TS() {
     thermo11.triggerOneShot();
     TS11_waiting = 1;
   }
+  
+  /* Reading and clearing OVUV faults
+  fault11 = thermo11.readFault();
+  fault12 = thermo12.readFault();
+  fault41 = thermo41.readFault();
+  fault42 = thermo42.readFault();
+  fault61 = thermo61.readFault();
+  fault62 = thermo62.readFault();
+  if (fault11 & MAX31856_FAULT_OVUV) {
+    cr0 = thermo11.readRegister8(MAX31856_CR0_REG);
+    cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
+    thermo11.writeRegister8(MAX31856_CR0_REG, cr0);
+  }
+  if (fault12 & MAX31856_FAULT_OVUV) {
+    cr0 = thermo12.readRegister8(MAX31856_CR0_REG);
+    cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
+    thermo12.writeRegister8(MAX31856_CR0_REG, cr0);
+  }
+  if (fault41 & MAX31856_FAULT_OVUV) {
+    cr0 = thermo41.readRegister8(MAX31856_CR0_REG);
+    cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
+    thermo41.writeRegister8(MAX31856_CR0_REG, cr0);
+  }
+  if (fault42 & MAX31856_FAULT_OVUV) {
+    cr0 = thermo42.readRegister8(MAX31856_CR0_REG);
+    cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
+    thermo42.writeRegister8(MAX31856_CR0_REG, cr0);
+  }
+  if (fault61 & MAX31856_FAULT_OVUV) {
+    cr0 = thermo61.readRegister8(MAX31856_CR0_REG);
+    cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
+    thermo61.writeRegister8(MAX31856_CR0_REG, cr0);
+  }
+  if (fault62 & MAX31856_FAULT_OVUV) {
+    cr0 = thermo62.readRegister8(MAX31856_CR0_REG);
+    cr0 |= (1 << 1);  // Set bit 1: FAULTCLR
+    thermo62.writeRegister8(MAX31856_CR0_REG, cr0);
+  } */
+
+  
 }
 
 void updateData() {
+  // Read data from all sensors and update the Data structure
   Data.t = millis();
+
   //increment the packet ID
   Data.n++;
 
   // Read pressures and convert to mbar
-  Data.PS11 = 26000;   //PS_25bar_reading(PS11_pin);
-  Data.PS12 = 1;   //PS_25bar_reading(PS12_pin);
-  Data.PS21 = 2;   //PS_25bar_reading(PS21_pin);
-  Data.PS22 = 3;   //PS_25bar_reading(PS22_pin);
-  Data.PS31 = 4;   //PS_70bar_reading(PS31_pin);
-  Data.PS41 = 5;   //PS_25bar_reading(PS41_pin);
-  Data.PS42 = 6;   //PS_25bar_reading(PS42_pin);
-  Data.PS51 = 7;   //PS_350bar_reading(PS51_pin);
-  Data.PS61 = 8;   //PS_25bar_reading(PS61_pin);
-  Data.PS62 = 9;   //PS_25bar_reading(PS62_pin);
-  Data.PS63 = 10;  //PS_25bar_reading(PS63_pin);
-  Data.PS64 = 11;  //PS_25bar_reading(PS64_pin);
+  Data.PS11 = PS_25bar_reading(PS11_pin);
+  Data.PS12 = PS_25bar_reading(PS12_pin) - offset_PS12;
+  Data.PS21 = PS_25bar_reading(PS21_pin);
+  Data.PS22 = PS_25bar_reading(PS22_pin) - offset_PS22;
+  Data.PS31 = PS_70bar_reading(PS31_pin);
+  Data.PS41 = PS_25bar_reading(PS41_pin) - offset_PS41;
+  Data.PS42 = PS_25bar_reading(PS42_pin) - offset_PS42;
+  Data.PS51 = PS_350bar_reading(PS51_pin);
+  Data.PS61 = PS_25bar_reading(PS61_pin);
+  Data.PS62 = PS_25bar_reading(PS62_pin);
+  Data.PS63 = PS_25bar_reading(PS63_pin) - offset_PS63;
+  Data.PS64 = PS_25bar_reading(PS64_pin) - offset_PS64;
 
   // Read 5V reference
-  Data.ref5V = 22;  //ref5V_reading(PSalim_pin);
+  Data.ref5V = ref5V_reading(PSalim_pin);
 
   // Read load cell
-  Data.LC = 21;  //LC_reading(LC01_pin);
+  Data.LC = LC_reading(LC01_pin);
 
   // Read flow meters
-  Data.FM11 = 18;  //FM11_reading(FM11_pin);
-  Data.FM21 = 19;  //FM21_reading(FM21_pin);
-  Data.FM61 = 20;  //FM61_reading(FM61_pin);
+  Data.FM11 = FM11_reading(FM11_pin);
+  Data.FM21 = FM21_reading(FM21_pin);
+  Data.FM61 = FM61_reading(FM61_pin);
 
   // getting data from the thermocouples if ready
   if (TS11_waiting && thermo11.conversionComplete()) {
-    Data.TS11 = 12;  //thermo11.readThermocoupleTemperature();
+    Data.TS11 = thermo11.readThermocoupleTemperature();
     TS11_waiting = 0;
   }
   if (TS12_waiting && thermo12.conversionComplete()) {
-    Data.TS12 = 13;  //thermo12.readThermocoupleTemperature();
+    Data.TS12 = thermo12.readThermocoupleTemperature();
     TS12_waiting = 0;
   }
   if (TS41_waiting && thermo41.conversionComplete()) {
-    Data.TS41 = 14;  //thermo41.readThermocoupleTemperature();
+    Data.TS41 = thermo41.readThermocoupleTemperature();
     TS41_waiting = 0;
   }
   if (TS42_waiting && thermo42.conversionComplete()) {
-    Data.TS42 = 15;  //thermo42.readThermocoupleTemperature();
+    Data.TS42 = thermo42.readThermocoupleTemperature();
     TS42_waiting = 0;
   }
   if (TS61_waiting && thermo61.conversionComplete()) {
-    Data.TS61 = 16;  //thermo61.readThermocoupleTemperature();
+    Data.TS61 = thermo61.readThermocoupleTemperature();
     TS61_waiting = 0;
   }
   if (TS62_waiting && thermo62.conversionComplete()) {
-    Data.TS62 = 17;  //thermo62.readThermocoupleTemperature();
+    Data.TS62 = thermo62.readThermocoupleTemperature();
     TS62_waiting = 0;
   }
+  Data.valvesState = valvePositions; // update the valves state
 }
 
-void printFault(uint8_t fault) {
-  if (fault) {
-    if (fault & MAX31856_FAULT_CJRANGE) Serial.print("Cold Junction Range Fault");
-    if (fault & MAX31856_FAULT_TCRANGE) Serial.print("Thermocouple Range Fault");
-    if (fault & MAX31856_FAULT_CJHIGH) Serial.print("Cold Junction High Fault");
-    if (fault & MAX31856_FAULT_CJLOW) Serial.print("Cold Junction Low Fault");
-    if (fault & MAX31856_FAULT_TCHIGH) Serial.print("Thermocouple High Fault");
-    if (fault & MAX31856_FAULT_TCLOW) Serial.print("Thermocouple Low Fault");
-    if (fault & MAX31856_FAULT_OVUV) Serial.print("Over/Under Voltage Fault");
-    if (fault & MAX31856_FAULT_OPEN) Serial.print("Thermocouple Open Fault");
-  } else {
-    Serial.print(fault);
-  }
-}
-
-uint16_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
+int32_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
   return (int16_t)(31250.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
-uint32_t PS_70bar_reading(int pin) {  // For PS31
+int32_t PS_70bar_reading(int pin) {  // For PS31
   Serial.print("PS31: ");
   Serial.print(analogRead(pin));
   Serial.print("\t");
   return (int32_t)(87500.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
-uint32_t PS_350bar_reading(int pin) {  // For PS51
+int32_t PS_350bar_reading(int pin) {  // For PS51
   Serial.print("PS51: ");
   Serial.println(analogRead(pin));
   return (int32_t)(437500.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
@@ -335,7 +335,7 @@ uint16_t FM61_reading(int pin) {
   return (uint16_t)((150000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
-uint32_t LC_reading(int pin) {
+int32_t LC_reading(int pin) {
   return 2943 * analogRead(pin) / 1023.0;
 }
 
@@ -828,17 +828,20 @@ void values_check() {
   
 }
 
-// void abort() {
-//   if (Data.state == 1) {
-//     if (Data.test_step < 9 && Sequence_data.cooling_enable == true){
-//       setValve(SV63, 0);  //close SV63
-//     }
-//     if (Data.test_step >= 9){
-      
-//     }
-//   }
-
-// }
+void printFault(uint8_t fault) {
+  if (fault) {
+    if (fault & MAX31856_FAULT_CJRANGE) Serial.print("Cold Junction Range Fault");
+    if (fault & MAX31856_FAULT_TCRANGE) Serial.print("Thermocouple Range Fault");
+    if (fault & MAX31856_FAULT_CJHIGH) Serial.print("Cold Junction High Fault");
+    if (fault & MAX31856_FAULT_CJLOW) Serial.print("Cold Junction Low Fault");
+    if (fault & MAX31856_FAULT_TCHIGH) Serial.print("Thermocouple High Fault");
+    if (fault & MAX31856_FAULT_TCLOW) Serial.print("Thermocouple Low Fault");
+    if (fault & MAX31856_FAULT_OVUV) Serial.print("Over/Under Voltage Fault");
+    if (fault & MAX31856_FAULT_OPEN) Serial.print("Thermocouple Open Fault");
+  } else {
+    Serial.print(fault);
+  }
+}
 
 void serialSend() {
   Serial.println("------ Sensor Data ------");
@@ -943,7 +946,7 @@ void serialSend() {
   Serial.println();
 }
 
-
+// ---------------------------- SD SAVING --------------------------------------
 void setupSaveData() {
   Serial.println("Initialisation du stockage SD...");
   if (!sd.begin(SdioConfig(FIFO_SDIO))) {
@@ -986,13 +989,14 @@ void save_data() {
     fp.println(line);
     time_since_save = millis();
   } else if (state_file == true) {
-    if (static_cast<uint32_t>(millis() - time_since_save) >= frequence_save) {
+    if (static_cast<uint32_t>(millis() - time_since_save) >= save_freq) {
       fp.println(line);
       fp.close();
       state_file = false;
-    } else if (static_cast<uint32_t>(millis() - time_since_save) < frequence_save) {
+    } else if (static_cast<uint32_t>(millis() - time_since_save) < save_freq) {
       fp.println(line);
     }
   }
 }
+
 
