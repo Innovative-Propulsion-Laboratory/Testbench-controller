@@ -117,13 +117,13 @@ void trigger_TS();
 void updateData();
 void serialSend();
 
-uint16_t PS_25bar_reading(int pin);
-uint32_t PS_70bar_reading(int pin);
-uint32_t PS_350bar_reading(int pin);
+int32_t PS_25bar_reading(int pin);
+int32_t PS_70bar_reading(int pin);
+int32_t PS_350bar_reading(int pin);
 uint16_t FM11_reading(int pin);
 uint16_t FM21_reading(int pin);
 uint16_t FM61_reading(int pin);
-uint32_t LC_reading(int pin);
+int32_t LC_reading(int pin);
 uint16_t ref5V_reading(int pin);
 
 void sendDataFromSensor(data* d);

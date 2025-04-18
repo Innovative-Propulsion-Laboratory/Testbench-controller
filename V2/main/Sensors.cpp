@@ -33,6 +33,7 @@ bool state_file = false;
 uint32_t time_since_save;
 SdExFat sd;
 ExFile fp;
+uint32_t save_freq = 1000;  // ms
 
 // ------------------------- LIMITS DEFINITION ---------------------------------
 
@@ -87,6 +88,22 @@ uint32_t PS_WATER_TLL_time = 0, PS_WATER_BBLW_time = 0, PS_WATER_BBUW_time = 0, 
 
 // Thermocouples:
 uint32_t TS62_UW_time = 0, TS62_TUL_time = 0;
+
+
+uint16_t message_delay = 2000;
+// Pressure sensors:
+uint32_t last_PS11_UL_msg, last_PS11_BBUW_msg, last_PS11_BBLW_msg;
+uint32_t last_PS12_TUW_msg, last_PS12_TLW_msg;
+uint32_t last_PS21_UL_msg, last_PS21_BBUW_msg, last_PS21_BBLW_msg;
+uint32_t last_PS22_TUW_msg, last_PS22_TLW_msg;
+uint32_t last_PS31_UL_msg, last_PS31_UW_msg, last_PS31_LW_msg;
+uint32_t last_PS41_TUL_msg, last_PS41_TUW_msg, last_PS41_TLW_msg, last_PS41_TLL_msg;
+uint32_t last_PS42_TUL_msg, last_PS42_TUW_msg, last_PS42_TLW_msg, last_PS42_TLL_msg;
+uint32_t last_PS51_UW_msg, last_PS51_LW_msg, last_PS51_TLL_msg;
+uint32_t last_PSWATER_UL_msg, last_PSWATER_BBUW_msg, last_PSWATER_BBLW_msg, last_PSWATER_TLL_msg;
+
+// Thermocouples:
+uint32_t last_TS62_UW_msg, last_TS62_TUL_msg;
 
 // ------------------------------ SETUP ----------------------------------------
 void setupSensors() {
@@ -340,7 +357,7 @@ void values_check() {
         send_string("error: PS11 over limit", 1);
         Serial.println("error: PS11 over limit");
 
-        last_PS11_error_msg_time = millis();
+        last_PS11_UL_msg = millis();
       }
     } else if (PS11_UL_active == 0) {
       PS11_UL_active = 1;
@@ -348,16 +365,15 @@ void values_check() {
     }
   } else {
     PS11_UL_active = 0;
-    last_PS11_UL_msg = 0;
   }
 
   if (LOX_BB == 1 && Data.PS11 >= PS11_BBUW) {
     if (PS11_BBUW_active == 1 && (millis() - PS11_BBUW_time) >= PS_oob_max_delay) {
-      if ((millis() - last_PS11_BBUW_UL_msg) >= message_delay) {
+      if ((millis() - last_PS11_BBUW_msg) >= message_delay) {
         send_string("warning: PS11 too high in BB pressurization", 0);
         Serial.println("warning: PS11 too high in BB pressurization");
 
-        last_PS11_BBUW_UL_msg = millis();
+        last_PS11_BBUW_msg = millis();
       }
       
     } else if (PS11_BBUW_active == 0) {
@@ -366,7 +382,6 @@ void values_check() {
     }
   } else {
     PS11_BBUW_active = 0;
-    last_PS11_BBUW_UL_msg = 0;
   }
 
   if (LOX_BB == 1 && Data.PS11 <= PS11_BBLW) {
@@ -382,7 +397,6 @@ void values_check() {
     }
   } else {
     PS11_BBLW_active = 0;
-    last_PS11_BBLW_msg = 0;
   }
 
   if (Data.state == 1 && Data.PS12 >= PS12_TUW) {
@@ -398,7 +412,6 @@ void values_check() {
     }
   } else {
     PS12_TUW_active = 0;
-    last_PS12_TUW_msg = 0;
   }
 
   if (Data.state == 1 && Data.PS12 <= PS12_TLW) {
@@ -414,7 +427,6 @@ void values_check() {
     }
   } else {
     PS12_TLW_active = 0;
-    last_PS12_TLW_msg = 0;
   }
 
   if (Data.PS21 >= PS21_UL) {
@@ -432,7 +444,6 @@ void values_check() {
     }
   } else {
     PS21_UL_active = 0;
-    last_PS21_UL_msg = 0;
   }
 
   if (ETH_BB == 1 && Data.PS21 >= PS21_BBUW) {
@@ -448,7 +459,6 @@ void values_check() {
     }
   } else {
     PS21_BBUW_active = 0;
-    last_PS21_BBUW_msg = 0;
   }
 
   if (ETH_BB == 1 && Data.PS21 <= PS21_BBLW) {
@@ -464,7 +474,6 @@ void values_check() {
     }
   } else {
     PS21_BBLW_active = 0;
-    last_PS21_BBLW_msg = 0;
   }
 
   if (Data.state == 1 && Data.PS22 >= PS22_TUW) {
@@ -480,7 +489,6 @@ void values_check() {
     }
   } else {
     PS22_TUW_active = 0;
-    last_PS22_TUW_msg = 0;
   }
 
   if (Data.state == 1 && Data.PS22 <= PS22_TLW) {
@@ -496,7 +504,6 @@ void values_check() {
     }
   } else {
     PS22_TLW_active = 0;
-    last_PS22_TLW_msg = 0;
   }
 
   if (Data.PS31 >= PS31_UL) {
@@ -513,7 +520,6 @@ void values_check() {
     }
   } else {
     PS31_UL_active = 0;
-    last_PS31_UL_msg = 0;
   }
 
   if (Data.PS31 >= PS31_UW) {
@@ -529,7 +535,6 @@ void values_check() {
     }
   } else {
     PS31_UW_active = 0;
-    last_PS31_UW_msg = 0;
   }
 
   if (Data.PS31 <= PS31_LW) {
@@ -545,7 +550,6 @@ void values_check() {
     }
   } else {
     PS31_LW_active = 0;
-    last_PS31_LW_msg = 0;
   }
 
   if (Data.state == 1 && Data.PS41 >= PS41_TUL) {
@@ -562,7 +566,6 @@ void values_check() {
     }
   } else {
     PS41_TUL_active = 0;
-    last_PS41_TUL_msg = 0;
   }
   
   if (Data.state == 1 && Data.PS41 >= PS41_TUW) {
@@ -578,7 +581,6 @@ void values_check() {
     }
   } else {
     PS41_TUW_active = 0;
-    last_PS41_TUW_msg = 0;
   }
   
   if (Data.state == 1 && Data.PS41 <= PS41_TLW) {
@@ -594,7 +596,6 @@ void values_check() {
     }
   } else {
     PS41_TLW_active = 0;
-    last_PS41_TLW_msg = 0;
   }
   
   if (Data.state == 1 && Data.PS41 <= PS41_TLL) {
@@ -611,7 +612,6 @@ void values_check() {
     }
   } else {
     PS41_TLL_active = 0;
-    last_PS41_TLL_msg = 0;
   }
   
   if (Data.state == 1 && Data.PS42 >= PS42_TUL) {
@@ -628,7 +628,6 @@ void values_check() {
     }
   } else {
     PS42_TUL_active = 0;
-    last_PS42_TUL_msg = 0;
   }
   
   if (Data.state == 1 && Data.PS42 >= PS42_TUW) {
@@ -644,7 +643,6 @@ void values_check() {
     }
   } else {
     PS42_TUW_active = 0;
-    last_PS42_TUW_msg = 0;
   }
   
   if (Data.state == 1 && Data.PS42 <= PS42_TLW) {
@@ -660,7 +658,6 @@ void values_check() {
     }
   } else {
     PS42_TLW_active = 0;
-    last_PS42_TLW_msg = 0;
   }
   
   if (Data.state == 1 && Data.PS42 <= PS42_TLL) {
@@ -677,7 +674,6 @@ void values_check() {
     }
   } else {
     PS42_TLL_active = 0;
-    last_PS42_TLL_msg = 0;
   }
   
   if (Data.PS51 >= PS51_UW) {
@@ -693,7 +689,6 @@ void values_check() {
     }
   } else {
     PS51_UW_active = 0;
-    last_PS51_UW_msg = 0;
   }
   
   if (Data.PS51 <= PS51_LW) {
@@ -709,7 +704,6 @@ void values_check() {
     }
   } else {
     PS51_LW_active = 0;
-    last_PS51_LW_msg = 0;
   }
   
   if (Data.state == 1 && Data.test_cooling == 1 && Data.PS51 <= PS51_TLL) {
@@ -726,7 +720,6 @@ void values_check() {
     }
   } else {
     PS51_TLL_active = 0;
-    last_PS51_TLL_msg = 0;
   }
   
   if ((Data.PS61 >= PS_WATER_UL) || (Data.PS62 >= PS_WATER_UL)) {
@@ -735,9 +728,11 @@ void values_check() {
       setValve(SV62, 1);  //open SV62
       setValve(SV52, 0);  //close SV52
       setValve(SV53, 0);  //close SV53
-  
-      send_string("error: PS_WATER over limit", 1);
-      Serial.println("error: PS_WATER over limit");
+      if ((millis() - last_PSWATER_UL_msg) >= message_delay) {
+        send_string("error: PS_WATER over limit", 1);
+        Serial.println("error: PS_WATER over limit");
+        last_PSWATER_UL_msg = millis();
+      }
     } else if (PS_WATER_UL_active == 0) {
       PS_WATER_UL_active = 1;
       PS_WATER_UL_time = millis();
@@ -745,10 +740,15 @@ void values_check() {
   } else {
     PS_WATER_UL_active = 0;
   }
+
   if (WATER_BB == 1 && ((Data.PS61 >= WATER_BBUW) || (Data.PS62 >= WATER_BBUW))) {
     if (PS_WATER_BBUW_active == 1 && (millis() - PS_WATER_BBUW_time) >= PS_oob_max_delay) {
-      send_string("warning: PS_WATER too high in BB pressurization", 0);
-      Serial.println("warning: PS_WATER too high in BB pressurization");
+      if ((millis() - last_PSWATER_BBUW_msg) >= message_delay) {
+        send_string("warning: PS_WATER too high in BB pressurization", 0);
+        Serial.println("warning: PS_WATER too high in BB pressurization");
+        last_PSWATER_BBUW_msg = millis();
+      }
+      
     } else if (PS_WATER_BBUW_active == 0) {
       PS_WATER_BBUW_active = 1;
       PS_WATER_BBUW_time = millis();
@@ -758,8 +758,12 @@ void values_check() {
   }
   if (WATER_BB == 1 && ((Data.PS61 <= WATER_BBLW) || (Data.PS62 <= WATER_BBLW))) {
     if (PS_WATER_BBLW_active == 1 && (millis() - PS_WATER_BBLW_time) >= PS_oob_max_delay) {
-      send_string("warning: PS_WATER too low in BB pressurization", 0);
-      Serial.println("warning: PS_WATER too low in BB pressurization");
+      if ((millis() - last_PSWATER_BBLW_msg) >= message_delay) {
+        send_string("warning: PS_WATER too low in BB pressurization", 0);
+        Serial.println("warning: PS_WATER too low in BB pressurization");
+        last_PSWATER_BBLW_msg = millis();
+      }
+      
     } else if (PS_WATER_BBLW_active == 0) {
       PS_WATER_BBLW_active = 1;
       PS_WATER_BBLW_time = millis();
@@ -774,9 +778,12 @@ void values_check() {
       setValve(SV53, 1);  //open SV53
       setValve(SV61, 0);  //close SV61
       setValve(SV62, 0);  //close SV62
-  
-      send_string("error: PS_WATER below limit", 1);
-      Serial.println("error: PS_WATER below limit");
+      if ((millis() - last_PSWATER_TLL_msg) >= message_delay) {
+        send_string("error: PS_WATER below limit", 1);
+        Serial.println("error: PS_WATER below limit");
+        last_PSWATER_TLL_msg = millis();
+      }
+      
     } else if (PS_WATER_TLL_active == 0) {
       PS_WATER_TLL_active = 1;
       PS_WATER_TLL_time = millis();
@@ -787,8 +794,12 @@ void values_check() {
   
   if (Data.TS62 >= TS62_UW) {
     if (TS62_UW_active == 1 && (millis() - TS62_UW_time) >= PS_oob_max_delay) {
-      send_string("warning: TS62 too high", 0);
-      Serial.println("warning: TS62 too high");
+      if ((millis() - last_TS62_UW_msg) >= message_delay) {
+        send_string("warning: TS62 too high", 0);
+        Serial.println("warning: TS62 too high");
+        last_TS62_UW_msg = millis();
+      }
+      
     } else if (TS62_UW_active == 0) {
       TS62_UW_active = 1;
       TS62_UW_time = millis();
@@ -796,12 +807,16 @@ void values_check() {
   } else {
     TS62_UW_active = 0;
   }
+
   if (Data.state == 1 && Data.test_cooling == 1 && Data.TS62 >= TS62_TUL) {
     if (TS62_TUL_active == 1 && (millis() - TS62_TUL_time) >= PS_oob_max_delay) {
       // emergency_stop();       // stops the test and puts the testbench in a safe configuration
-  
-      send_string("error: TS62 over limit - test aborted",1);
-      Serial.println("error: TS62 over limit - test aborted");
+      
+      if ((millis() - last_TS62_TUL_msg) >= message_delay) {
+        send_string("error: TS62 over limit - test aborted",1);
+        Serial.println("error: TS62 over limit - test aborted");
+        last_TS62_TUL_msg = millis();
+      }
     } else if (TS62_TUL_active == 0) {
       TS62_TUL_active = 1;
       TS62_TUL_time = millis();
@@ -810,6 +825,21 @@ void values_check() {
     TS62_TUL_active = 0;
   }
   
+}
+
+void printFault(uint8_t fault) {
+  if (fault) {
+    if (fault & MAX31856_FAULT_CJRANGE) Serial.print("Cold Junction Range Fault");
+    if (fault & MAX31856_FAULT_TCRANGE) Serial.print("Thermocouple Range Fault");
+    if (fault & MAX31856_FAULT_CJHIGH) Serial.print("Cold Junction High Fault");
+    if (fault & MAX31856_FAULT_CJLOW) Serial.print("Cold Junction Low Fault");
+    if (fault & MAX31856_FAULT_TCHIGH) Serial.print("Thermocouple High Fault");
+    if (fault & MAX31856_FAULT_TCLOW) Serial.print("Thermocouple Low Fault");
+    if (fault & MAX31856_FAULT_OVUV) Serial.print("Over/Under Voltage Fault");
+    if (fault & MAX31856_FAULT_OPEN) Serial.print("Thermocouple Open Fault");
+  } else {
+    Serial.print(fault);
+  }
 }
 
 void serialSend() {
@@ -933,11 +963,11 @@ void save_data() {
     fp.write((const uint8_t *)&Data, sizeof(Data));
     time_since_save = millis();
   } else if (state_file == true) {
-    if (static_cast<uint32_t>(millis() - time_since_save) >= frequence_save) {
+    if (static_cast<uint32_t>(millis() - time_since_save) >= save_freq) {
       fp.write((const uint8_t *)&Data, sizeof(Data));
       fp.close();
       state_file = false;
-    } else if (static_cast<uint32_t>(millis() - time_since_save) < frequence_save) {
+    } else if (static_cast<uint32_t>(millis() - time_since_save) < save_freq) {
       fp.write((const uint8_t *)&Data, sizeof(Data));
     }
   }
