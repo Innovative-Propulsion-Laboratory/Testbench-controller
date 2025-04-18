@@ -232,53 +232,53 @@ void updateData() {
   Data.n++;
 
   // Read pressures and convert to mbar
-  Data.PS11 = 26000;   //PS_25bar_reading(PS11_pin);
-  Data.PS12 = 1;   //PS_25bar_reading(PS12_pin);
-  Data.PS21 = 2;   //PS_25bar_reading(PS21_pin);
-  Data.PS22 = 3;   //PS_25bar_reading(PS22_pin);
-  Data.PS31 = 4;   //PS_70bar_reading(PS31_pin);
-  Data.PS41 = 5;   //PS_25bar_reading(PS41_pin);
-  Data.PS42 = 6;   //PS_25bar_reading(PS42_pin);
-  Data.PS51 = 7;   //PS_350bar_reading(PS51_pin);
-  Data.PS61 = 8;   //PS_25bar_reading(PS61_pin);
-  Data.PS62 = 9;   //PS_25bar_reading(PS62_pin);
-  Data.PS63 = 10;  //PS_25bar_reading(PS63_pin);
-  Data.PS64 = 11;  //PS_25bar_reading(PS64_pin);
+  Data.PS11 = PS_25bar_reading(PS11_pin);
+  Data.PS12 = PS_25bar_reading(PS12_pin);
+  Data.PS21 = PS_25bar_reading(PS21_pin);
+  Data.PS22 = PS_25bar_reading(PS22_pin);
+  Data.PS31 = PS_70bar_reading(PS31_pin);
+  Data.PS41 = PS_25bar_reading(PS41_pin);
+  Data.PS42 = PS_25bar_reading(PS42_pin);
+  Data.PS51 = PS_350bar_reading(PS51_pin);
+  Data.PS61 = PS_25bar_reading(PS61_pin);
+  Data.PS62 = PS_25bar_reading(PS62_pin);
+  Data.PS63 = PS_25bar_reading(PS63_pin);
+  Data.PS64 = PS_25bar_reading(PS64_pin);
 
   // Read 5V reference
-  Data.ref5V = 22;  //ref5V_reading(PSalim_pin);
+  Data.ref5V = ref5V_reading(PSalim_pin);
 
   // Read load cell
-  Data.LC = 21;  //LC_reading(LC01_pin);
+  Data.LC = LC_reading(LC01_pin);
 
   // Read flow meters
-  Data.FM11 = 18;  //FM11_reading(FM11_pin);
-  Data.FM21 = 19;  //FM21_reading(FM21_pin);
-  Data.FM61 = 20;  //FM61_reading(FM61_pin);
+  Data.FM11 = FM11_reading(FM11_pin);
+  Data.FM21 = FM21_reading(FM21_pin);
+  Data.FM61 = FM61_reading(FM61_pin);
 
   // getting data from the thermocouples if ready
   if (TS11_waiting && thermo11.conversionComplete()) {
-    Data.TS11 = 12;  //thermo11.readThermocoupleTemperature();
+    Data.TS11 = thermo11.readThermocoupleTemperature();
     TS11_waiting = 0;
   }
   if (TS12_waiting && thermo12.conversionComplete()) {
-    Data.TS12 = 13;  //thermo12.readThermocoupleTemperature();
+    Data.TS12 = thermo12.readThermocoupleTemperature();
     TS12_waiting = 0;
   }
   if (TS41_waiting && thermo41.conversionComplete()) {
-    Data.TS41 = 14;  //thermo41.readThermocoupleTemperature();
+    Data.TS41 = thermo41.readThermocoupleTemperature();
     TS41_waiting = 0;
   }
   if (TS42_waiting && thermo42.conversionComplete()) {
-    Data.TS42 = 15;  //thermo42.readThermocoupleTemperature();
+    Data.TS42 = thermo42.readThermocoupleTemperature();
     TS42_waiting = 0;
   }
   if (TS61_waiting && thermo61.conversionComplete()) {
-    Data.TS61 = 16;  //thermo61.readThermocoupleTemperature();
+    Data.TS61 = thermo61.readThermocoupleTemperature();
     TS61_waiting = 0;
   }
   if (TS62_waiting && thermo62.conversionComplete()) {
-    Data.TS62 = 17;  //thermo62.readThermocoupleTemperature();
+    Data.TS62 = thermo62.readThermocoupleTemperature();
     TS62_waiting = 0;
   }
 }
