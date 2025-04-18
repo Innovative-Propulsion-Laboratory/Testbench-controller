@@ -63,10 +63,11 @@ void BB_param_set(uint8_t tank, uint16_t pressure) {
 void BB_enable(uint8_t tank, bool command) {
   /* Enable or disable the Bang-Bang pressurization for the chosen tank
      tank: 1 = LOX, 2 = ETH, 6 = WATER
-     command: 1 = enable, 0 = disable */if (command == 0) {
-    if (tank == 1) { LOX_BB = 0; }
-    if (tank == 2) { ETH_BB = 0; }
-    if (tank == 6) { WATER_BB = 0; }
+     command: 1 = enable, 0 = disable */
+  if (command == 0) {
+    if (tank == 1) { LOX_BB = 0;}
+    if (tank == 2) { ETH_BB = 0;}
+    if (tank == 6) { WATER_BB = 0;}
   }
   if (command == 1) {
     if (tank == 1) {
@@ -84,7 +85,7 @@ void BB_enable(uint8_t tank, bool command) {
       setValve(SV62, 0);
     }
   }
-  byte message[8] = { 0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, tank, command };
+  byte message[8] = { 0xEE, 0xEE, 0xFF, 0xFF, 0xDD, 0xDD, tank, command};
   reply(message, sizeof(message));
 }
 
@@ -93,12 +94,12 @@ void BB_pressurization(uint16_t PS11, uint16_t PS21, uint16_t PS61, uint16_t PS6
      this function uses Bang-Bang to pressurize the tanks at the right pressure
      THIS FUNCTION NEEDS TO BE CALLED FREQUENTLY FOR THE BANG BANG TO WORK */
   if (LOX_BB) {
-    if (PS11 < PS11_BB_min) { setValve(SV33, 1); }
-    if (PS11 > PS11_BB_max) { setValve(SV33, 0); }
+    if (PS11 < PS11_BB_min) {setValve(SV33, 1);}
+    if (PS11 > PS11_BB_max) {setValve(SV33, 0);}
   }
   if (ETH_BB) {
-    if (PS21 < PS21_BB_min) { setValve(SV34, 1); }
-    if (PS21 > PS21_BB_max) { setValve(SV34, 0); }
+    if (PS21 < PS21_BB_min) {setValve(SV34, 1);}
+    if (PS21 > PS21_BB_max) {setValve(SV34, 0);}
   }
   if (WATER_BB) {
     if ((PS61 <= WATER_BB_min) || (PS62 <= WATER_BB_min)) {

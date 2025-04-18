@@ -1,15 +1,16 @@
 #include "Sensors.h"
+// #include "UDP.h"
 
 // main variable
 uint32_t time_last_reading = 0;
 
-unsigned long t_last_data_packet = 0, data_send_rate = 50;
+unsigned long t_last_data_packet = 0, data_send_rate = 1000;
 
 bool test_will_begin = false;
 
 // Sequence
 #define IGN_pin 33
-#define IGN_check_pin 34
+#define IGN_check_pin A15
 
 uint16_t T_confirm;
 uint16_t Chilldown_finished;
@@ -31,9 +32,12 @@ uint16_t chill_temp_seems_ok;
 uint16_t Chilldown_duration;
 uint16_t Chilldown_verified_duration;
 
+// SaveData
+
+
 void setup() {
   Serial.begin(9600);  //initialize Serial Port
-  SPI.begin();         //initialize SPI
+  // SPI.begin();         //initialize SPI
   if (CrashReport) {
     Serial.println("CrashReport:");
     Serial.print(CrashReport);
@@ -41,7 +45,7 @@ void setup() {
   pinMode(IGN_pin, OUTPUT);
   // pinMode(IGN_check_pin, INPUT);
 
-  pinMode(2, OUTPUT);
+  pinMode(1, OUTPUT);
   pinMode(10, OUTPUT);
   pinMode(28, OUTPUT);
   pinMode(29, OUTPUT);
@@ -92,7 +96,7 @@ void setup() {
 
   setupUDP();
 
-  setupSaveData();
+  // setupSaveData();
 }
 
 void loop() {
@@ -102,13 +106,13 @@ void loop() {
   if (p.length >= 4 && p.data != nullptr) {
     decode(p.data);
   }
-  // if (p.data != nullptr) {
-  //   delete[] p.data;
-  // }
-  if (millis() - time_last_reading >= data_send_rate) {
+  if (p.data != nullptr) {
+    delete[] p.data;
+  }
+  if (millis() - time_last_reading >= 50) {
     sensorsLoop();
     time_last_reading = millis();
-    serialSend();
+    // serialSend();
   }
   if (test_will_begin) {
     // vérifier que les valeurs sont bonne
@@ -217,9 +221,9 @@ void decode(byte* instructions) {
     Serial.println(value);
     BB_param_set(2, value);
 
-    Data.test_cooling = assembleUInt16(instructions[8], instructions[9]);
+    Sequence_data.cooling_enable = assembleUInt16(instructions[8], instructions[9]);
     Serial.print("Cooling enable : ");
-    Serial.println(Data.test_cooling);
+    Serial.println(Sequence_data.cooling_enable);
 
     uint16_t value2 = assembleUInt16(instructions[11], instructions[10]);
     Serial.print("H2O pressure bangbang set : ");
@@ -436,7 +440,7 @@ void Sequence() {
       ////// Start cooling //////
       case 6:
         {
-          if (Data.test_cooling) {
+          if (Sequence_data.cooling_enable) {
             if (millis() >= (Chilldown_finished + Sequence_data.Chilldown_to_cooling)) {
               setValve(SV63, 1);
               PS63_duration = millis();

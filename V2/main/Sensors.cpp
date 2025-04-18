@@ -2,7 +2,7 @@
 
 // --------------------- VARIABLES INITIALIZATION ------------------------------
 
-uint32_t n = 0;  //Packet ID
+uint32_t n = 1;  //Packet ID
 uint8_t cr0, fault11, fault12, fault41, fault42, fault61, fault62; // Thermocouple faults for debug
 
 data Data;
@@ -34,7 +34,7 @@ uint32_t time_since_save;
 SdExFat sd;
 ExFile fp;
 uint32_t save_freq = 1000;  // ms
-uint32_t number = 0;
+uint32_t number = 1;
 
 // ------------------------- LIMITS DEFINITION ---------------------------------
 
@@ -164,9 +164,10 @@ void sensorsLoop() {
   updateData();                                                  //read the sensors
   values_check();                                                //check if values are within limits
   BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
+  Data.valvesState = valvePositions;
   // serialSend();
   send_data(&Data, sizeof(data));                                //send data to the ground station
-  if (Data.state == 1){save_data();}                                              //save data to the SD card
+  // if (Data.state == 1){save_data();}                                              //save data to the SD card
   trigger_TS();                                                  //requesting data from the thermocouples if not waiting for a conversion
 }
 
@@ -247,17 +248,17 @@ void updateData() {
 
   // Read pressures and convert to mbar
   Data.PS11 = PS_25bar_reading(PS11_pin);
-  Data.PS12 = PS_25bar_reading(PS12_pin) - offset_PS12;
+  Data.PS12 = PS_25bar_reading(PS12_pin); // - offset_PS12;
   Data.PS21 = PS_25bar_reading(PS21_pin);
-  Data.PS22 = PS_25bar_reading(PS22_pin) - offset_PS22;
+  Data.PS22 = PS_25bar_reading(PS22_pin); // - offset_PS22;
   Data.PS31 = PS_70bar_reading(PS31_pin);
-  Data.PS41 = PS_25bar_reading(PS41_pin) - offset_PS41;
-  Data.PS42 = PS_25bar_reading(PS42_pin) - offset_PS42;
+  Data.PS41 = PS_25bar_reading(PS41_pin); // - offset_PS41;
+  Data.PS42 = PS_25bar_reading(PS42_pin); // - offset_PS42;
   Data.PS51 = PS_350bar_reading(PS51_pin);
   Data.PS61 = PS_25bar_reading(PS61_pin);
   Data.PS62 = PS_25bar_reading(PS62_pin);
-  Data.PS63 = PS_25bar_reading(PS63_pin) - offset_PS63;
-  Data.PS64 = PS_25bar_reading(PS64_pin) - offset_PS64;
+  Data.PS63 = PS_25bar_reading(PS63_pin); // - offset_PS63;
+  Data.PS64 = PS_25bar_reading(PS64_pin); // - offset_PS64;
 
   // Read 5V reference
   Data.ref5V = ref5V_reading(PSalim_pin);
@@ -295,7 +296,21 @@ void updateData() {
     Data.TS62 = thermo62.readThermocoupleTemperature();
     TS62_waiting = 0;
   }
-  Data.valvesState = valvePositions; // update the valves state
+}
+
+void printFault(uint8_t fault) {
+  if (fault) {
+    if (fault & MAX31856_FAULT_CJRANGE) Serial.print("Cold Junction Range Fault");
+    if (fault & MAX31856_FAULT_TCRANGE) Serial.print("Thermocouple Range Fault");
+    if (fault & MAX31856_FAULT_CJHIGH) Serial.print("Cold Junction High Fault");
+    if (fault & MAX31856_FAULT_CJLOW) Serial.print("Cold Junction Low Fault");
+    if (fault & MAX31856_FAULT_TCHIGH) Serial.print("Thermocouple High Fault");
+    if (fault & MAX31856_FAULT_TCLOW) Serial.print("Thermocouple Low Fault");
+    if (fault & MAX31856_FAULT_OVUV) Serial.print("Over/Under Voltage Fault");
+    if (fault & MAX31856_FAULT_OPEN) Serial.print("Thermocouple Open Fault");
+  } else {
+    Serial.print(fault);
+  }
 }
 
 int32_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
@@ -828,21 +843,6 @@ void values_check() {
   
 }
 
-void printFault(uint8_t fault) {
-  if (fault) {
-    if (fault & MAX31856_FAULT_CJRANGE) Serial.print("Cold Junction Range Fault");
-    if (fault & MAX31856_FAULT_TCRANGE) Serial.print("Thermocouple Range Fault");
-    if (fault & MAX31856_FAULT_CJHIGH) Serial.print("Cold Junction High Fault");
-    if (fault & MAX31856_FAULT_CJLOW) Serial.print("Cold Junction Low Fault");
-    if (fault & MAX31856_FAULT_TCHIGH) Serial.print("Thermocouple High Fault");
-    if (fault & MAX31856_FAULT_TCLOW) Serial.print("Thermocouple Low Fault");
-    if (fault & MAX31856_FAULT_OVUV) Serial.print("Over/Under Voltage Fault");
-    if (fault & MAX31856_FAULT_OPEN) Serial.print("Thermocouple Open Fault");
-  } else {
-    Serial.print(fault);
-  }
-}
-
 void serialSend() {
   Serial.println("------ Sensor Data ------");
 
@@ -946,7 +946,7 @@ void serialSend() {
   Serial.println();
 }
 
-// ---------------------------- SD SAVING --------------------------------------
+
 void setupSaveData() {
   Serial.println("Initialisation du stockage SD...");
   if (!sd.begin(SdioConfig(FIFO_SDIO))) {
@@ -989,14 +989,12 @@ void save_data() {
     fp.println(line);
     time_since_save = millis();
   } else if (state_file == true) {
-    if (static_cast<uint32_t>(millis() - time_since_save) >= save_freq) {
+    if (static_cast<uint32_t>(millis() - time_since_save) >= frequence_save) {
       fp.println(line);
       fp.close();
       state_file = false;
-    } else if (static_cast<uint32_t>(millis() - time_since_save) < save_freq) {
+    } else if (static_cast<uint32_t>(millis() - time_since_save) < frequence_save) {
       fp.println(line);
     }
   }
 }
-
-
