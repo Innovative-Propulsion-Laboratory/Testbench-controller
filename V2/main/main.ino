@@ -10,7 +10,7 @@ bool test_will_begin = false;
 
 // Sequence
 #define IGN_pin 33
-#define IGN_check_pin A15
+#define IGN_check_pin 34
 
 uint16_t T_confirm;
 uint16_t Chilldown_finished;
@@ -31,9 +31,6 @@ uint16_t Chilldown_start;
 uint16_t chill_temp_seems_ok;
 uint16_t Chilldown_duration;
 uint16_t Chilldown_verified_duration;
-
-// SaveData
-
 
 void setup() {
   Serial.begin(9600);  //initialize Serial Port
