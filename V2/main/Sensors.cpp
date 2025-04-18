@@ -570,14 +570,12 @@ void values_check() {
 
   if (Data.state == 1 && Data.PS41 >= PS41_TUL) {
     if (PS41_TUL_active == 1 && (millis() - PS41_TUL_time) >= PS_oob_max_delay) {
-
-      abort();
-      
       if ((millis() - last_PS41_TUL_msg) >= message_delay) {
         send_string("error: PS41 over limit - test aborted", 1);
         Serial.println("error: PS41 over limit - test aborted");
         last_PS41_TUL_msg = millis();
       }
+      abort();
     } else if (PS41_TUL_active == 0) {
       PS41_TUL_active = 1;
       PS41_TUL_time = millis();
@@ -618,12 +616,12 @@ void values_check() {
   
   if (Data.state == 1 && Data.PS41 <= PS41_TLL) {
     if (PS41_TLL_active == 1 && (millis() - PS41_TLL_time) >= PS_oob_max_delay) {
-      abort();
       if ((millis() - last_PS41_TLL_msg) >= message_delay) {
         send_string("error: PS41 below limit - test aborted", 1);
         Serial.println("error: PS41 below limit - test aborted");
         last_PS41_TLL_msg = millis();
       }
+      abort();
     } else if (PS41_TLL_active == 0) {
       PS41_TLL_active = 1;
       PS41_TLL_time = millis();
@@ -634,12 +632,12 @@ void values_check() {
   
   if (Data.state == 1 && Data.PS42 >= PS42_TUL) {
     if (PS42_TUL_active == 1 && (millis() - PS42_TUL_time) >= PS_oob_max_delay) {
-      abort();
       if ((millis() - last_PS42_TUL_msg) >= message_delay) {
         send_string("error: PS42 over limit - test aborted", 1);
         Serial.println("error: PS42 over limit - test aborted");
         last_PS42_TUL_msg = millis();
       }
+      abort();
     } else if (PS42_TUL_active == 0) {
       PS42_TUL_active = 1;
       PS42_TUL_time = millis();
@@ -680,12 +678,12 @@ void values_check() {
   
   if (Data.state == 1 && Data.PS42 <= PS42_TLL) {
     if (PS42_TLL_active == 1 && (millis() - PS42_TLL_time) >= PS_oob_max_delay) {
-      // emergency_stop();
       if ((millis() - last_PS42_TLL_msg) >= message_delay) {
         send_string("error: PS42 below limit - test aborted", 1);
         Serial.println("error: PS42 below limit - test aborted");
         last_PS42_TLL_msg = millis();
       }
+      abort();
     } else if (PS42_TLL_active == 0) {
       PS42_TLL_active = 1;
       PS42_TLL_time = millis();
@@ -726,12 +724,12 @@ void values_check() {
   
   if (Data.state == 1 && Data.test_cooling == 1 && Data.PS51 <= PS51_TLL) {
     if (PS51_TLL_active == 1 && (millis() - PS51_TLL_time) >= PS_oob_max_delay) {
-      // emergency_stop();
       if ((millis() - last_PS51_TLL_msg) >= message_delay) {
         send_string("error: PS51 below limit - test aborted", 1);
         Serial.println("error: PS51 below limit - test aborted");
         last_PS51_TLL_msg = millis();
       }
+      abort();
     } else if (PS51_TLL_active == 0) {
       PS51_TLL_active = 1;
       PS51_TLL_time = millis();
@@ -828,13 +826,12 @@ void values_check() {
 
   if (Data.state == 1 && Data.test_cooling == 1 && Data.TS62 >= TS62_TUL) {
     if (TS62_TUL_active == 1 && (millis() - TS62_TUL_time) >= PS_oob_max_delay) {
-      // emergency_stop();       // stops the test and puts the testbench in a safe configuration
-      
       if ((millis() - last_TS62_TUL_msg) >= message_delay) {
         send_string("error: TS62 over limit - test aborted",1);
         Serial.println("error: TS62 over limit - test aborted");
         last_TS62_TUL_msg = millis();
       }
+      abort();
     } else if (TS62_TUL_active == 0) {
       TS62_TUL_active = 1;
       TS62_TUL_time = millis();
