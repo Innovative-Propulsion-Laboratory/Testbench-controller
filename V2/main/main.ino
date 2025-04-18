@@ -65,25 +65,6 @@ void setup() {
   setupValves();
   Serial.println("setup valve");
   delay(50);
-  setValve(SV11, 0);
-  setValve(SV12, 1);
-  setValve(SV13, 1);
-  setValve(SV21, 0);
-  setValve(SV22, 1);
-  setValve(SV24, 1);
-  setValve(SV31, 1);
-  setValve(SV32, 0);
-  setValve(SV33, 1);
-  setValve(SV34, 1);
-  setValve(SV35, 1);
-  setValve(SV36, 1);
-  setValve(SV51, 0);
-  setValve(SV52, 1);
-  setValve(SV53, 1);
-  setValve(SV61, 0);
-  setValve(SV62, 0);
-  setValve(SV63, 1);
-  delay(1000);
 
   Set_valve_position();
   Serial.println("set valve");
@@ -217,9 +198,9 @@ void decode(byte* instructions) {
     Serial.println(value);
     BB_param_set(2, value);
 
-    Sequence_data.cooling_enable = assembleUInt16(instructions[8], instructions[9]);
+    Data.test_cooling = assembleUInt16(instructions[8], instructions[9]);
     Serial.print("Cooling enable : ");
-    Serial.println(Sequence_data.cooling_enable);
+    Serial.println(Data.test_cooling);
 
     uint16_t value2 = assembleUInt16(instructions[11], instructions[10]);
     Serial.print("H2O pressure bangbang set : ");
@@ -436,7 +417,7 @@ void Sequence() {
       ////// Start cooling //////
       case 6:
         {
-          if (Sequence_data.cooling_enable) {
+          if (Data.test_cooling) {
             if (millis() >= (Chilldown_finished + Sequence_data.Chilldown_to_cooling)) {
               setValve(SV63, 1);
               PS63_duration = millis();

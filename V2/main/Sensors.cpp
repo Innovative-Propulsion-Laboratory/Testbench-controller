@@ -318,35 +318,35 @@ int32_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and
 }
 
 int32_t PS_70bar_reading(int pin) {  // For PS31
-  Serial.print("PS31: ");
-  Serial.print(analogRead(pin));
-  Serial.print("\t");
+  // Serial.print("PS31: ");
+  // Serial.print(analogRead(pin));
+  // Serial.print("\t");
   return (int32_t)(87500.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
 int32_t PS_350bar_reading(int pin) {  // For PS51
-  Serial.print("PS51: ");
-  Serial.println(analogRead(pin));
+  // Serial.print("PS51: ");
+  // Serial.println(analogRead(pin));
   return (int32_t)(437500.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
 uint16_t FM11_reading(int pin) {
-  Serial.print("FM11: ");
-  Serial.print(analogRead(pin));
-  Serial.print("\t");
+  // Serial.print("FM11: ");
+  // Serial.print(analogRead(pin));
+  // Serial.print("\t");
   return (uint16_t)((50000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
 uint16_t FM21_reading(int pin) {
-  Serial.print("FM21: ");
-  Serial.print(analogRead(pin));
-  Serial.print("\t");
+  // Serial.print("FM21: ");
+  // Serial.print(analogRead(pin));
+  // Serial.print("\t");
   return (uint16_t)((40000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
 uint16_t FM61_reading(int pin) {
-  Serial.print("FM61: ");
-  Serial.println(analogRead(pin));
+  // Serial.print("FM61: ");
+  // Serial.println(analogRead(pin));
   return (uint16_t)((150000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
@@ -989,11 +989,11 @@ void save_data() {
     fp.println(line);
     time_since_save = millis();
   } else if (state_file == true) {
-    if (static_cast<uint32_t>(millis() - time_since_save) >= frequence_save) {
+    if (static_cast<uint32_t>(millis() - time_since_save) >= save_freq) {
       fp.println(line);
       fp.close();
       state_file = false;
-    } else if (static_cast<uint32_t>(millis() - time_since_save) < frequence_save) {
+    } else if (static_cast<uint32_t>(millis() - time_since_save) < save_freq) {
       fp.println(line);
     }
   }
