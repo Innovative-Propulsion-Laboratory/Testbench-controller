@@ -2,7 +2,7 @@
 
 // --------------------- VARIABLES INITIALIZATION ------------------------------
 
-uint32_t n = 0;  //Packet ID
+uint32_t n = 1;  //Packet ID
 uint8_t cr0, fault11, fault12, fault41, fault42, fault61, fault62; // Thermocouple faults for debug
 
 data Data;
@@ -34,7 +34,7 @@ uint32_t time_since_save;
 SdExFat sd;
 ExFile fp;
 uint32_t save_freq = 1000;  // ms
-uint32_t number = 0;
+uint32_t number = 1;
 
 // ------------------------- LIMITS DEFINITION ---------------------------------
 
@@ -164,9 +164,10 @@ void sensorsLoop() {
   updateData();                                                  //read the sensors
   values_check();                                                //check if values are within limits
   BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
-  // serialSend();
+  Data.valvesState = valvePositions;
+  serialSend();
   send_data(&Data, sizeof(data));                                //send data to the ground station
-  if (Data.state == 1){save_data();}                                              //save data to the SD card
+  if (Data.state == 1){save_data();}                             //save data to the SD card during tests
   trigger_TS();                                                  //requesting data from the thermocouples if not waiting for a conversion
 }
 
@@ -295,7 +296,21 @@ void updateData() {
     Data.TS62 = thermo62.readThermocoupleTemperature();
     TS62_waiting = 0;
   }
-  Data.valvesState = valvePositions; // update the valves state
+}
+
+void printFault(uint8_t fault) {
+  if (fault) {
+    if (fault & MAX31856_FAULT_CJRANGE) Serial.print("Cold Junction Range Fault");
+    if (fault & MAX31856_FAULT_TCRANGE) Serial.print("Thermocouple Range Fault");
+    if (fault & MAX31856_FAULT_CJHIGH) Serial.print("Cold Junction High Fault");
+    if (fault & MAX31856_FAULT_CJLOW) Serial.print("Cold Junction Low Fault");
+    if (fault & MAX31856_FAULT_TCHIGH) Serial.print("Thermocouple High Fault");
+    if (fault & MAX31856_FAULT_TCLOW) Serial.print("Thermocouple Low Fault");
+    if (fault & MAX31856_FAULT_OVUV) Serial.print("Over/Under Voltage Fault");
+    if (fault & MAX31856_FAULT_OPEN) Serial.print("Thermocouple Open Fault");
+  } else {
+    Serial.print(fault);
+  }
 }
 
 int32_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
@@ -303,35 +318,35 @@ int32_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and
 }
 
 int32_t PS_70bar_reading(int pin) {  // For PS31
-  Serial.print("PS31: ");
-  Serial.print(analogRead(pin));
-  Serial.print("\t");
+  // Serial.print("PS31: ");
+  // Serial.print(analogRead(pin));
+  // Serial.print("\t");
   return (int32_t)(87500.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
 int32_t PS_350bar_reading(int pin) {  // For PS51
-  Serial.print("PS51: ");
-  Serial.println(analogRead(pin));
+  // Serial.print("PS51: ");
+  // Serial.println(analogRead(pin));
   return (int32_t)(437500.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
 uint16_t FM11_reading(int pin) {
-  Serial.print("FM11: ");
-  Serial.print(analogRead(pin));
-  Serial.print("\t");
+  // Serial.print("FM11: ");
+  // Serial.print(analogRead(pin));
+  // Serial.print("\t");
   return (uint16_t)((50000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
 uint16_t FM21_reading(int pin) {
-  Serial.print("FM21: ");
-  Serial.print(analogRead(pin));
-  Serial.print("\t");
+  // Serial.print("FM21: ");
+  // Serial.print(analogRead(pin));
+  // Serial.print("\t");
   return (uint16_t)((40000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
 uint16_t FM61_reading(int pin) {
-  Serial.print("FM61: ");
-  Serial.println(analogRead(pin));
+  // Serial.print("FM61: ");
+  // Serial.println(analogRead(pin));
   return (uint16_t)((150000.0 * (float)analogRead(pin)) / (1023.0 * 60.0));
 }
 
@@ -555,12 +570,12 @@ void values_check() {
 
   if (Data.state == 1 && Data.PS41 >= PS41_TUL) {
     if (PS41_TUL_active == 1 && (millis() - PS41_TUL_time) >= PS_oob_max_delay) {
-      // emergency_stop();
       if ((millis() - last_PS41_TUL_msg) >= message_delay) {
         send_string("error: PS41 over limit - test aborted", 1);
         Serial.println("error: PS41 over limit - test aborted");
         last_PS41_TUL_msg = millis();
       }
+      abort();
     } else if (PS41_TUL_active == 0) {
       PS41_TUL_active = 1;
       PS41_TUL_time = millis();
@@ -601,12 +616,12 @@ void values_check() {
   
   if (Data.state == 1 && Data.PS41 <= PS41_TLL) {
     if (PS41_TLL_active == 1 && (millis() - PS41_TLL_time) >= PS_oob_max_delay) {
-      // emergency_stop();
       if ((millis() - last_PS41_TLL_msg) >= message_delay) {
         send_string("error: PS41 below limit - test aborted", 1);
         Serial.println("error: PS41 below limit - test aborted");
         last_PS41_TLL_msg = millis();
       }
+      abort();
     } else if (PS41_TLL_active == 0) {
       PS41_TLL_active = 1;
       PS41_TLL_time = millis();
@@ -617,12 +632,12 @@ void values_check() {
   
   if (Data.state == 1 && Data.PS42 >= PS42_TUL) {
     if (PS42_TUL_active == 1 && (millis() - PS42_TUL_time) >= PS_oob_max_delay) {
-      // emergency_stop();
       if ((millis() - last_PS42_TUL_msg) >= message_delay) {
         send_string("error: PS42 over limit - test aborted", 1);
         Serial.println("error: PS42 over limit - test aborted");
         last_PS42_TUL_msg = millis();
       }
+      abort();
     } else if (PS42_TUL_active == 0) {
       PS42_TUL_active = 1;
       PS42_TUL_time = millis();
@@ -663,12 +678,12 @@ void values_check() {
   
   if (Data.state == 1 && Data.PS42 <= PS42_TLL) {
     if (PS42_TLL_active == 1 && (millis() - PS42_TLL_time) >= PS_oob_max_delay) {
-      // emergency_stop();
       if ((millis() - last_PS42_TLL_msg) >= message_delay) {
         send_string("error: PS42 below limit - test aborted", 1);
         Serial.println("error: PS42 below limit - test aborted");
         last_PS42_TLL_msg = millis();
       }
+      abort();
     } else if (PS42_TLL_active == 0) {
       PS42_TLL_active = 1;
       PS42_TLL_time = millis();
@@ -709,12 +724,12 @@ void values_check() {
   
   if (Data.state == 1 && Data.test_cooling == 1 && Data.PS51 <= PS51_TLL) {
     if (PS51_TLL_active == 1 && (millis() - PS51_TLL_time) >= PS_oob_max_delay) {
-      // emergency_stop();
       if ((millis() - last_PS51_TLL_msg) >= message_delay) {
         send_string("error: PS51 below limit - test aborted", 1);
         Serial.println("error: PS51 below limit - test aborted");
         last_PS51_TLL_msg = millis();
       }
+      abort();
     } else if (PS51_TLL_active == 0) {
       PS51_TLL_active = 1;
       PS51_TLL_time = millis();
@@ -811,13 +826,12 @@ void values_check() {
 
   if (Data.state == 1 && Data.test_cooling == 1 && Data.TS62 >= TS62_TUL) {
     if (TS62_TUL_active == 1 && (millis() - TS62_TUL_time) >= PS_oob_max_delay) {
-      // emergency_stop();       // stops the test and puts the testbench in a safe configuration
-      
       if ((millis() - last_TS62_TUL_msg) >= message_delay) {
         send_string("error: TS62 over limit - test aborted",1);
         Serial.println("error: TS62 over limit - test aborted");
         last_TS62_TUL_msg = millis();
       }
+      abort();
     } else if (TS62_TUL_active == 0) {
       TS62_TUL_active = 1;
       TS62_TUL_time = millis();
@@ -828,20 +842,78 @@ void values_check() {
   
 }
 
-void printFault(uint8_t fault) {
-  if (fault) {
-    if (fault & MAX31856_FAULT_CJRANGE) Serial.print("Cold Junction Range Fault");
-    if (fault & MAX31856_FAULT_TCRANGE) Serial.print("Thermocouple Range Fault");
-    if (fault & MAX31856_FAULT_CJHIGH) Serial.print("Cold Junction High Fault");
-    if (fault & MAX31856_FAULT_CJLOW) Serial.print("Cold Junction Low Fault");
-    if (fault & MAX31856_FAULT_TCHIGH) Serial.print("Thermocouple High Fault");
-    if (fault & MAX31856_FAULT_TCLOW) Serial.print("Thermocouple Low Fault");
-    if (fault & MAX31856_FAULT_OVUV) Serial.print("Over/Under Voltage Fault");
-    if (fault & MAX31856_FAULT_OPEN) Serial.print("Thermocouple Open Fault");
-  } else {
-    Serial.print(fault);
+void abort() {
+    /*abort from IHM or if UL or LL during test is detected or if check in sequence not reached:
+  - before Igniter ON:
+  	close SV63 (if test_cooling is enabled)
+  - after Igniter ON:
+  	close SV12, SV13
+  	SV36 open
+  	LOX_to_ETH_closing_delay
+  	close SV22, SV24
+  	SV35 open
+  	purge_after_duration
+  	SV35 closed
+  	SV36 closed
+  	cooling_duration_after_burn
+  	SV63 closed*/
+
+  if (Data.test_step < 9) {
+    setValve(SV63, 0); // close SV63
+    Data.state = 0; // go back to active state
+    Data.test_step = 0; // go back to initial state
+  }
+  else if (Data.test_step >= 9){
+    Data.test_step = 20; // go to purge step
+    Data.state = 2; // set emergency state
+    T0 = millis(); // reset timer
+    do {
+      sensorsLoop();
+      switch (Data.test_step) {
+        ////// stop main injection and purge //////
+        case 20:
+        {
+
+          setValve(SV12, 0);
+          setValve(SV13, 0);
+          setValve(SV36, 1);
+          Data.test_step++;
+          break;
+        }
+      case 21:
+        {
+          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay)) {
+            setValve(SV22, 0);
+            setValve(SV24, 0);
+            setValve(SV35, 1);
+            Data.test_step++;
+          }
+          break;
+        }
+      case 22:
+        {
+          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2)) {
+            setValve(SV36, 0);
+            setValve(SV35, 0);
+            Data.test_step++;
+          }
+          break;
+        }
+      ////// stop cooling //////
+      case 23:
+        {
+          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2 + Sequence_data.Cooling_duration_after_end_burn)) {
+            setValve(SV63, 0);
+            Data.state = 0;
+            Data.test_step = 0;
+          }
+          break;
+        }
+      }
+    } while (Data.state == 2);
   }
 }
+
 
 void serialSend() {
   Serial.println("------ Sensor Data ------");
@@ -946,13 +1018,13 @@ void serialSend() {
   Serial.println();
 }
 
-// ---------------------------- SD SAVING --------------------------------------
+// ----------------------------- SD CARD ---------------------------------------
 void setupSaveData() {
-  Serial.println("Initialisation du stockage SD...");
+  Serial.println("Initializing SD card");
   if (!sd.begin(SdioConfig(FIFO_SDIO))) {
-    Serial.println("Erreur : Carte SD non détectée !");
+    Serial.println("Error: SD card not detected");
   }
-  Serial.println("Stockage SD Initialisé");
+  Serial.println("SD card initialized successfully");
 }
 
 void save_data() {
@@ -976,14 +1048,13 @@ void save_data() {
               String(Data.actLOK) + "," + String(Data.actROK) + "," +
 
               String(Data.state) + "," + String(Data.test_step) + "," +
-              String(Data.test_cooling ? 1 : 0);  // bool en int
+              String(Data.test_cooling ? 1 : 0);
 
   if (state_file == false) {
     state_file = true;
     if (Data.n >= (number + 1000) ){
       number = Data.n;
     }
-    // check if have the good ID
     String fileID = String(number) + ".txt";
     fp = sd.open(fileID, FILE_WRITE);
     fp.println(line);
@@ -998,5 +1069,3 @@ void save_data() {
     }
   }
 }
-
-
