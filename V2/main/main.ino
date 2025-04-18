@@ -109,7 +109,6 @@ void loop() {
   if (millis() - time_last_reading >= 50) {
     sensorsLoop();
     time_last_reading = millis();
-    // serialSend();
   }
   if (test_will_begin) {
     // vérifier que les valeurs sont bonne

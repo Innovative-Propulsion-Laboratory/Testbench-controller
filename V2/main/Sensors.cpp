@@ -166,7 +166,7 @@ void sensorsLoop() {
   BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
   Data.valvesState = valvePositions;
   // serialSend();
-  send_data(&Data, sizeof(data));                                //send data to the ground station
+  // send_data(&Data, sizeof(data));                                //send data to the ground station
   // if (Data.state == 1){save_data();}                                              //save data to the SD card
   trigger_TS();                                                  //requesting data from the thermocouples if not waiting for a conversion
 }
