@@ -39,7 +39,6 @@ void reply(byte* message, uint16_t size) {  // send the message send
 
 void convert(const char* message, uint16_t length, int type) {
   if (type == 0) {
-    const uint8_t header[4] = { 0xDD, 0xDD, 0xDD, 0xDD };
     uint16_t totalLength = 4 + length;
 
     // Create a buffer on the stack
@@ -59,7 +58,6 @@ void convert(const char* message, uint16_t length, int type) {
     udp.send(senderIP, senderPort, buffer, totalLength);
   } 
   else if (type == 1) {
-    const uint8_t header[4] = { 0xCC, 0xCC, 0xCC, 0xCC };
     uint16_t totalLength = 4 + length;
 
     // Create a buffer on the stack

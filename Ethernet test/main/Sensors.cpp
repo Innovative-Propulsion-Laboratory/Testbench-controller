@@ -828,17 +828,17 @@ void values_check() {
   
 }
 
-void abort() {
-  if (Data.state == 1) {
-    if (Data.test_step < 9 && Sequence_data.cooling_enable == true){
-      setValve(SV63, 0);  //close SV63
-    }
-    if (Data.test_step >= 9){
+// void abort() {
+//   if (Data.state == 1) {
+//     if (Data.test_step < 9 && Sequence_data.cooling_enable == true){
+//       setValve(SV63, 0);  //close SV63
+//     }
+//     if (Data.test_step >= 9){
       
-    }
-  }
+//     }
+//   }
 
-}
+// }
 
 void serialSend() {
   Serial.println("------ Sensor Data ------");
