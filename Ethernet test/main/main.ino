@@ -619,6 +619,7 @@ void Sequence() {
   } while (Data.state == 1);
   byte message[4] = {0xAB, 0xCD, 0xAB, 0xCD};
   reply(message, sizeof(message));
+  Data.test_cooling = 1;
 }
 
 float average(byte* L, int length) {

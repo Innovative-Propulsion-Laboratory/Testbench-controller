@@ -620,6 +620,9 @@ void Sequence() {
     }
   } while (Data.state == 1);
   reset_offset_pressure();
+  Data.test_cooling = 1;
+  byte message[4] = {0xAB, 0xCD, 0xAB, 0xCD};
+  reply(message, sizeof(message));
 }
 
 float average(byte* L, int length) {

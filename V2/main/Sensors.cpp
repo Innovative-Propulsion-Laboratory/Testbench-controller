@@ -723,7 +723,7 @@ void valuesCheck() {
   }
   
   if (Data.PS51 >= PS51_UW) {
-    if (PS51_UW_active == 1 && (millis() - PS51_UW_time) >= PS_oob_max_delay) {
+    if (Data.test_cooling == 1 && PS51_UW_active == 1 && (millis() - PS51_UW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS51_UW_msg) >= message_delay) {
         send_string("warning: PS51 too high", 0);
         Serial.println("warning: PS51 too high");
@@ -738,7 +738,7 @@ void valuesCheck() {
   }
   
   if (Data.PS51 <= PS51_LW) {
-    if (PS51_LW_active == 1 && (millis() - PS51_LW_time) >= PS_oob_max_delay) {
+    if (Data.test_cooling == 1 && PS51_LW_active == 1 && (millis() - PS51_LW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS51_LW_msg) >= message_delay) {
         send_string("warning: PS51 too low", 0);
         Serial.println("warning: PS51 too low");
@@ -768,7 +768,7 @@ void valuesCheck() {
     PS51_TLL_active = 0;
   }
   
-  if ((Data.PS61 >= PS_WATER_UL) || (Data.PS62 >= PS_WATER_UL)) {
+  if (Data.test_cooling == 1 && (Data.PS61 >= PS_WATER_UL) || (Data.PS62 >= PS_WATER_UL)) {
     if (PS_WATER_UL_active == 1 && (millis() - PS_WATER_UL_time) >= PS_oob_max_delay) {
       setValve(SV61, 1);  //open SV61
       setValve(SV62, 1);  //open SV62
@@ -838,7 +838,7 @@ void valuesCheck() {
     PS_WATER_TLL_active = 0;
   }
   
-  if (Data.TS62 >= TS62_UW) {
+  if (Data.test_cooling == 1 && Data.TS62 >= TS62_UW) {
     if (TS62_UW_active == 1 && (millis() - TS62_UW_time) >= PS_oob_max_delay) {
       if ((millis() - last_TS62_UW_msg) >= message_delay) {
         send_string("warning: TS62 too high", 0);
@@ -892,6 +892,7 @@ void abort() {
     setValve(SV63, 0); // close SV63
     Data.state = 0; // go back to active state
     Data.test_step = 0; // go back to initial state
+    Data.test_cooling = 1; // enable cooling cycle valuesCheck again
   }
 
   else if (Data.test_step >= 9){
