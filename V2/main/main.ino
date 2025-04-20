@@ -14,14 +14,16 @@ uint16_t BB_check_duration = 620000;
 
 void setup() {
   Serial.begin(9600);  //initialize Serial Port
-  // SPI.begin();         //initialize SPI
+  SPI.begin();         //initialize SPI
+
   if (CrashReport) {
     Serial.println("CrashReport:");
     Serial.print(CrashReport);
   }
   pinMode(IGN_pin, OUTPUT);
-  // pinMode(IGN_check_pin, INPUT);
+  // pinMode(IGN_check_pin, INPUT);  // only on PCB V2
 
+  // Disable all CS pins in the setup
   pinMode(1, OUTPUT);
   pinMode(10, OUTPUT);
   pinMode(28, OUTPUT);
@@ -40,25 +42,18 @@ void setup() {
   digitalWrite(36, HIGH);
   digitalWrite(37, HIGH);
 
-  Serial.println("pinmode");
-
   setupValves();
-  Serial.println("setup valve");
+
   delay(50);
 
   Set_valve_position();
-  Serial.println("set valve");
-
   setupSensors();
-  Serial.println("setup sensor");
-
   setupUDP();
-
   setupSaveData();
 }
 
 void loop() {
-  //listen to commands
+  // Listen to commands
   Packet p = receivePacket();
 
   if (p.length >= 4 && p.data != nullptr) {
@@ -77,15 +72,12 @@ void loop() {
     BB_check_time = millis();
     // Check if the Bang Bang Pressurization works
     while (check_BB_pressure() == false || (millis() - BB_check_time) < BB_check_duration){
+
       //listen to commands
       Packet p = receivePacket();
+      if (p.length >= 4 && p.data != nullptr) {decode(p.data);}
+      if (p.data != nullptr) {delete[] p.data;}
 
-      if (p.length >= 4 && p.data != nullptr) {
-        decode(p.data);
-      }
-      if (p.data != nullptr) {
-        delete[] p.data;
-      }
       // Send data at 20Hz
       if (millis() - time_last_reading >= 50) {
         sensorsLoop();
@@ -351,8 +343,10 @@ void count_down() {
 
 void Sequence() {
   newFile(); // Create a new SD file at each test
+
   T_confirm = millis();
   Data.test_step = 1;
+  Chilldown_count = 0;
   set_offset_pressure();
 
   do {
@@ -366,7 +360,6 @@ void Sequence() {
       case 1:
         {
           if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay)) {
-            Chilldown_start = 0;
             setValve(SV36, 1);
             Data.test_step++;
           }
@@ -374,11 +367,11 @@ void Sequence() {
         }
       case 2:
         {
-          if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
+          if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
             setValve(SV36, 0);
       ////// End of PURGE //////
       ////// start chilldown //////
-            Chilldown_start++;
+            if (Chilldown_count == 0){Chilldown_start = millis();}
             setValve(SV13, 1);
             Data.test_step++;
           }
@@ -386,25 +379,28 @@ void Sequence() {
         }
       case 3:
         {
-          if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration)) {
+          if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration)) {
             setValve(SV13, 0);
+            Chilldown_count ++;
             Data.test_step++;
           }
           break;
         }
       case 4:
         {
-          if (millis() <= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
+          if (millis() <= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
             if (Data.TS12 >= Sequence_data.chill_temp) {
               chill_temp_seems_ok = millis();
-              Data.test_step = 5;  // remplace l'étape 4.5
-            } else if (Chilldown_start >= Sequence_data.Max_chilldown) {
-              Data.state = 0;  // Erreur chilldown
+              Data.test_step = ++;
+            } else if (Chilldown_count >= Sequence_data.Max_chilldown) {
+              send_string("error: Chilldown failed", 1);
+              abort();
             }
-          } else {
-            T_confirm = millis();
-            Data.test_step = 2;
-            Chilldown_start++;
+            else {
+              T_confirm = millis();
+              Sequence_data.Confirm_to_purge_delay = 0;
+              Data.test_step = 2;
+           }
           }
           break;
         }
@@ -415,7 +411,7 @@ void Sequence() {
             Chilldown_duration = Chilldown_finished - Chilldown_start;
             Data.test_step++;
             count_down_time = -10000;
-            byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF) };
+            byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)};
             reply(message, sizeof(message));
           } else if (Data.TS12 < Sequence_data.chill_temp) {
             Data.test_step = 4;

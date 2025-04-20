@@ -56,10 +56,10 @@ struct __attribute__((packed)) data {
   uint32_t t = 0;  // Timestamp (ms)
 
   int32_t PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64;  // Pressure in mbar
-  float TS11, TS12, TS41, TS42, TS61, TS62;                                      // Thermocouples in °C
-  uint16_t FM11, FM21, FM61;                                                        // Flow in mL/s
+  float TS11, TS12, TS41, TS42, TS61, TS62;                                        // Thermocouples in °C
+  uint16_t FM11, FM21, FM61;                                                       // Flow in mL/s
   int32_t LC;                                                                      // Load cell (N)
-  uint16_t ref5V;                                                                   // 5V reference (mV)
+  uint16_t ref5V;                                                                  // 5V reference (mV)
 
   uint32_t valvesState;
   uint8_t actLPos = 0, actRPos = 0;  // Actuator positions (0-255)

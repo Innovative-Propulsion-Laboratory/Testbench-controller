@@ -147,7 +147,7 @@ void BBLoop() {
   Data.PS61 = PS_25bar_reading(PS61_pin);
   Data.PS62 = PS_25bar_reading(PS62_pin);
 
-  //BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
+  BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
 }
 
 void sensorsLoop() {
