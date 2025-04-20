@@ -147,7 +147,7 @@ void BBLoop() {
   Data.PS61 = PS_25bar_reading(PS61_pin);
   Data.PS62 = PS_25bar_reading(PS62_pin);
 
-  //BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
+  BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
 }
 
 void sensorsLoop() {
@@ -258,27 +258,27 @@ void updateData() {
 
   // getting data from the thermocouples if ready
   if (TS11_waiting && thermo11.conversionComplete()) {
-    Data.TS11 = thermo11.readThermocoupleTemperature();
+    Data.TS11 = thermo11.readThermocoupleTemperature()*10;
     TS11_waiting = 0;
   }
   if (TS12_waiting && thermo12.conversionComplete()) {
-    Data.TS12 = thermo12.readThermocoupleTemperature();
+    Data.TS12 = thermo12.readThermocoupleTemperature()*10;
     TS12_waiting = 0;
   }
   if (TS41_waiting && thermo41.conversionComplete()) {
-    Data.TS41 = thermo41.readThermocoupleTemperature();
+    Data.TS41 = thermo41.readThermocoupleTemperature()*10;
     TS41_waiting = 0;
   }
   if (TS42_waiting && thermo42.conversionComplete()) {
-    Data.TS42 = thermo42.readThermocoupleTemperature();
+    Data.TS42 = thermo42.readThermocoupleTemperature()*10;
     TS42_waiting = 0;
   }
   if (TS61_waiting && thermo61.conversionComplete()) {
-    Data.TS61 = thermo61.readThermocoupleTemperature();
+    Data.TS61 = thermo61.readThermocoupleTemperature()*10;
     TS61_waiting = 0;
   }
   if (TS62_waiting && thermo62.conversionComplete()) {
-    Data.TS62 = thermo62.readThermocoupleTemperature();
+    Data.TS62 = thermo62.readThermocoupleTemperature()*10;
     TS62_waiting = 0;
   }
 }
