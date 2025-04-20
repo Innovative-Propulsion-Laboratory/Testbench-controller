@@ -57,10 +57,14 @@ struct __attribute__((packed)) data {
   uint32_t n = 0;  // packet ID
   uint32_t t = 0;  // Timestamp (ms)
 
-  uint16_t PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64;  // Pressure in mbar
-  uint32_t TS11, TS12, TS41, TS42, TS61, TS62;                                      // Thermocouples in °C
+  int16_t PS11, PS12, PS21, PS22;
+  int32_t PS31;
+  int16_t PS41, PS42;
+  int32_t PS51;
+  int16_t PS61, PS62, PS63, PS64;
+  int16_t TS11, TS12, TS41, TS42, TS61, TS62;                                      // Thermocouples in °C
   uint16_t FM11, FM21, FM61;                                                        // Flow in mL/s
-  uint32_t LC;                                                                      // Load cell (N)
+  int32_t LC;                                                                      // Load cell (N)
   uint16_t ref5V;                                                                   // 5V reference (mV)
 
   uint32_t valvesState;
@@ -120,13 +124,13 @@ void trigger_TS();
 void updateData();
 void serialSend();
 
-uint16_t PS_25bar_reading(int pin);
-uint32_t PS_70bar_reading(int pin);
-uint32_t PS_350bar_reading(int pin);
+int16_t PS_25bar_reading(int pin);
+int32_t PS_70bar_reading(int pin);
+int32_t PS_350bar_reading(int pin);
 uint16_t FM11_reading(int pin);
 uint16_t FM21_reading(int pin);
 uint16_t FM61_reading(int pin);
-uint32_t LC_reading(int pin);
+int32_t LC_reading(int pin);
 uint16_t ref5V_reading(int pin);
 
 void sendDataFromSensor(data* d);
