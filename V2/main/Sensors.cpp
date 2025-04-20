@@ -28,6 +28,26 @@ int32_t offset_PS64 = 0;
 // Sequence_data is used when aborts are triggered in valuesCheck()
 sequence_data Sequence_data;
 
+uint16_t T_confirm;
+uint16_t Chilldown_finished;
+uint16_t last_send;
+uint16_t count_down_time;
+uint16_t PS63_duration;
+uint16_t PS63_seems_rise;
+uint16_t Ign_duration;
+uint16_t Ign_seems_on;
+uint16_t T0;
+uint16_t ETH_open;
+uint16_t Bypass_duration;
+uint16_t Main_seems_rise;
+uint16_t Main_duration;
+uint16_t Nominal_pressure_reached;
+uint16_t T_burn;
+uint16_t Chilldown_start;
+uint16_t chill_temp_seems_ok;
+uint16_t Chilldown_duration;
+uint16_t Chilldown_verified_duration;
+
 // Save data 
 SdFat sd;
 SdFile fp;
@@ -274,27 +294,27 @@ void updateData() {
 
   // getting data from the thermocouples if ready
   if (TS11_waiting && thermo11.conversionComplete()) {
-    Data.TS11 = thermo11.readThermocoupleTemperature();
+    Data.TS11 = thermo11.readThermocoupleTemperature()*10;
     TS11_waiting = 0;
   }
   if (TS12_waiting && thermo12.conversionComplete()) {
-    Data.TS12 = thermo12.readThermocoupleTemperature();
+    Data.TS12 = thermo12.readThermocoupleTemperature()*10;
     TS12_waiting = 0;
   }
   if (TS41_waiting && thermo41.conversionComplete()) {
-    Data.TS41 = thermo41.readThermocoupleTemperature();
+    Data.TS41 = thermo41.readThermocoupleTemperature()*10;
     TS41_waiting = 0;
   }
   if (TS42_waiting && thermo42.conversionComplete()) {
-    Data.TS42 = thermo42.readThermocoupleTemperature();
+    Data.TS42 = thermo42.readThermocoupleTemperature()*10;
     TS42_waiting = 0;
   }
   if (TS61_waiting && thermo61.conversionComplete()) {
-    Data.TS61 = thermo61.readThermocoupleTemperature();
+    Data.TS61 = thermo61.readThermocoupleTemperature()*10;
     TS61_waiting = 0;
   }
   if (TS62_waiting && thermo62.conversionComplete()) {
-    Data.TS62 = thermo62.readThermocoupleTemperature();
+    Data.TS62 = thermo62.readThermocoupleTemperature()*10;
     TS62_waiting = 0;
   }
 }
@@ -329,48 +349,6 @@ int32_t PS_350bar_reading(int pin) {  // For PS51
   // Serial.print("PS51: ");
   // Serial.println(analogRead(pin));
   return (int32_t)(437500.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
-}
-
-float average(byte* L, int length) {
-  float sum = 0;
-  for (int i = 0; i < length; i++) {
-    sum += L[i];
-  }
-  return sum / length;
-}
-
-void set_offset_pressure() {  // set sensors at 0
-  const int N = 10;
-  byte average_PS12_data[N];
-  byte average_PS22_data[N];
-  byte average_PS41_data[N];
-  byte average_PS42_data[N];
-  byte average_PS63_data[N];
-  byte average_PS64_data[N];
-
-  for (int i = 0; i < N; i++) {
-    sensorsLoop();
-    Packet p = receivePacket();
-    if (p.length >= 4 && p.data != nullptr) {
-      decode(p.data);
-    }
-    if (p.data != nullptr) {
-      delete[] p.data;
-    }
-    average_PS12_data[i] = Data.PS12;
-    average_PS22_data[i] = Data.PS22;
-    average_PS41_data[i] = Data.PS41;
-    average_PS42_data[i] = Data.PS42;
-    average_PS63_data[i] = Data.PS63;
-    average_PS64_data[i] = Data.PS64;
-  }
-
-  offset_PS12 = average(average_PS12_data, N);
-  offset_PS22 = average(average_PS22_data, N);
-  offset_PS41 = average(average_PS41_data, N);
-  offset_PS42 = average(average_PS42_data, N);
-  offset_PS63 = average(average_PS63_data, N);
-  offset_PS64 = average(average_PS64_data, N);
 }
 
 void reset_offset_pressure(){

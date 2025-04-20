@@ -104,21 +104,41 @@ struct __attribute__((packed)) sequence_data {
 extern data Data;
 extern sequence_data Sequence_data;
 
+// Variables for the sequence
+extern uint16_t T_confirm;
+extern uint16_t Chilldown_finished;
+extern uint16_t last_send;
+extern uint16_t count_down_time;
+extern uint16_t PS63_duration;
+extern uint16_t PS63_seems_rise;
+extern uint16_t Ign_duration;
+extern uint16_t Ign_seems_on;
+extern uint16_t T0;
+extern uint16_t ETH_open;
+extern uint16_t Bypass_duration;
+extern uint16_t Main_seems_rise;
+extern uint16_t Main_duration;
+extern uint16_t Nominal_pressure_reached;
+extern uint16_t T_burn;
+extern uint16_t Chilldown_start;
+extern uint16_t chill_temp_seems_ok;
+extern uint16_t Chilldown_duration;
+extern uint16_t Chilldown_verified_duration;
+
 // Functions:
 void setupSensors();
 void BBLoop();
 void sensorsLoop();
-void values_check();
+void valuesCheck();
 void trigger_TS();
 void updateData();
 void serialSend();
+void abort();
 
 // Sensor reading functions
 int32_t PS_25bar_reading(int pin);
 int32_t PS_70bar_reading(int pin);
 int32_t PS_350bar_reading(int pin);
-float average(byte* L, int length);
-void set_offset_pressure();
 void reset_offset_pressure();
 uint16_t FM11_reading(int pin);
 uint16_t FM21_reading(int pin);
