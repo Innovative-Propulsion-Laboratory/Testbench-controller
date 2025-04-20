@@ -104,10 +104,6 @@ struct __attribute__((packed)) sequence_data {
 extern data Data;
 extern sequence_data Sequence_data;
 
-// //Save data 
-// extern bool state_file;
-// extern uint32_t frequence_save;
-
 // Functions:
 void setupSensors();
 void BBLoop();
@@ -117,19 +113,24 @@ void trigger_TS();
 void updateData();
 void serialSend();
 
+// Sensor reading functions
 int32_t PS_25bar_reading(int pin);
 int32_t PS_70bar_reading(int pin);
 int32_t PS_350bar_reading(int pin);
+float average(byte* L, int length);
+void set_offset_pressure();
+void reset_offset_pressure();
 uint16_t FM11_reading(int pin);
 uint16_t FM21_reading(int pin);
 uint16_t FM61_reading(int pin);
 int32_t LC_reading(int pin);
 uint16_t ref5V_reading(int pin);
 
-void sendDataFromSensor(data* d);
-
+// SD card functions
 void setupSaveData();
-void save_data();
-
+void newFile();
+void saveData();
+void closeFile();
+String generate_csv_line();
 
 #endif

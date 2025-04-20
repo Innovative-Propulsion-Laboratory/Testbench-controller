@@ -87,6 +87,8 @@ void loop() {
   if (p.data != nullptr) {
     delete[] p.data;
   }
+
+  // Send data at 20Hz
   if (millis() - time_last_reading >= 50) {
     sensorsLoop();
     time_last_reading = millis();
@@ -96,7 +98,7 @@ void loop() {
     byte message[4] = { 0xBB, 0xBB, 0xBB, 0xBB };
     reply(message, sizeof(message));
   }
-
+  // Update BB pressurization more ofsten than sensorsLoop
   BBLoop();
 }
 
@@ -108,7 +110,7 @@ void decode(byte* instructions) {
 
   if (instructions[0] == 0xff && instructions[1] == 0xff && instructions[2] == 0xff && instructions[3] == 0xff) {  // Valve
     if (instructions[5] == 0x00 || instructions[5] == 0x01) {
-      setValve(instructions[4], instructions[5]);  // Activer ou dÃ©sactiver la valve
+      setValve(instructions[4], instructions[5]);  // Open or close the valve
       byte message[8] = { 0xEE, 0xEE, 0xFF, 0xFF, 0xFF, 0xFF, instructions[4], instructions[5] };
       reply(message, sizeof(message));
     }
@@ -136,32 +138,33 @@ void decode(byte* instructions) {
   if (instructions[0] == 0xFF && instructions[1] == 0xFF && instructions[2] == 0xDD && instructions[3] == 0xDD) {  // bang-bang enable
     if (instructions[4] == 1) {                                                                                    // tank: 1 = LOX, 2 = ETH, 6 = WATER
       if (instructions[5] == 0X00) {
-        Serial.println("LOX bangbang desactivate");
+        Serial.println("LOX bangbang disabled");
         BB_enable(1, 0);
       } else if (instructions[5] == 0X01) {
-        Serial.println("LOX bangbang activate");
+        Serial.println("LOX bangbang enabled");
         BB_enable(1, 1);
       }
     } else if (instructions[4] == 2) {
       if (instructions[5] == 0X00) {
-        Serial.println("ETH bangbang desactivate");
+        Serial.println("ETH bangbang disabled");
         BB_enable(2, 0);
       }
       if (instructions[5] == 0X01) {
-        Serial.println("ETH bangbang activate");
+        Serial.println("ETH bangbang enabled");
         BB_enable(2, 1);
       }
     } else if (instructions[4] == 6) {
       if (instructions[5] == 0X00) {
-        Serial.println("H2O bangbang desactivate");
+        Serial.println("H2O bangbang disabled");
         BB_enable(6, 0);
       }
       if (instructions[5] == 0X01) {
-        Serial.println("H2O bangbang activate");
+        Serial.println("H2O bangbang enabled");
         BB_enable(6, 1);
       }
     }
   }
+  /* To be implemented when the digital potentiometers are ready
   if (instructions[0] == 0xEE && instructions[1] == 0xEE && instructions[2] == 0xEE && instructions[3] == 0xEE) {  // Actuators
     if (instructions[4] == 0) {
       // the obcsur TVC name + instruction[5]
@@ -187,6 +190,7 @@ void decode(byte* instructions) {
       // the obcsur TVC name
     }
   }
+  */
   if (instructions[0] == 0xAA && instructions[1] == 0xAA && instructions[2] == 0xAA && instructions[3] == 0xAA) {  // Start test
     uint16_t value1 = assembleUInt16(instructions[5], instructions[4]);
     Serial.print("LOX pressure bangbang set : ");
@@ -324,7 +328,8 @@ void decode(byte* instructions) {
     Data.state = 1;
     Sequence();
   }
-  if (instructions[0] == 0xCC && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC) {  // Abort test
+  if (instructions[0] == 0xCC && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC) {
+    abort();
   }
 }
 
@@ -338,9 +343,7 @@ void count_down() {
 }
 
 void Sequence() {
-  pinMode(IGN_pin, OUTPUT);
-  pinMode(IGN_check_pin, INPUT);
-
+  newFile(); // Create a new SD file at each test
   T_confirm = millis();
   Data.test_step = 1;
   set_offset_pressure();
@@ -348,8 +351,8 @@ void Sequence() {
   do {
     sensorsLoop();
     Packet p = receivePacket();
-    if (p.length >= 4 && p.data != nullptr) { decode(p.data); }
-    if (p.data != nullptr) { delete[] p.data; }
+    if (p.length >= 4 && p.data != nullptr) {decode(p.data);}
+    if (p.data != nullptr) {delete[] p.data;}
 
     switch (Data.test_step) {
       ////// PURGE //////
@@ -613,46 +616,5 @@ void Sequence() {
         }
     }
   } while (Data.state == 1);
-}
-
-float average(byte* L, int length) {
-  float sum = 0;
-  for (int i = 0; i < length; i++) {
-    sum += L[i];
-  }
-  return sum / length;
-}
-
-void set_offset_pressure() {  // set sensors at 0
-  const int N = 10;
-  byte average_PS12_data[N];
-  byte average_PS22_data[N];
-  byte average_PS41_data[N];
-  byte average_PS42_data[N];
-  byte average_PS63_data[N];
-  byte average_PS64_data[N];
-
-  for (int i = 0; i < N; i++) {
-    sensorsLoop();
-    Packet p = receivePacket();
-    if (p.length >= 4 && p.data != nullptr) {
-      decode(p.data);
-    }
-    if (p.data != nullptr) {
-      delete[] p.data;
-    }
-    average_PS12_data[i] = Data.PS12;
-    average_PS22_data[i] = Data.PS22;
-    average_PS41_data[i] = Data.PS41;
-    average_PS42_data[i] = Data.PS42;
-    average_PS63_data[i] = Data.PS63;
-    average_PS64_data[i] = Data.PS64;
-  }
-
-  offset_PS12 = average(average_PS12_data, N);
-  offset_PS22 = average(average_PS22_data, N);
-  offset_PS41 = average(average_PS41_data, N);
-  offset_PS42 = average(average_PS42_data, N);
-  offset_PS63 = average(average_PS63_data, N);
-  offset_PS64 = average(average_PS64_data, N);
+  reset_offset_pressure();
 }

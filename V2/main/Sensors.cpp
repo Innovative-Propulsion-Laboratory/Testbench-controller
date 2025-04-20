@@ -25,16 +25,17 @@ int32_t offset_PS42 = 0;
 int32_t offset_PS63 = 0;
 int32_t offset_PS64 = 0;
 
-// Sequence_data is used when aborts are triggered in values_check()
+// Sequence_data is used when aborts are triggered in valuesCheck()
 sequence_data Sequence_data;
 
 // Save data 
+SdFat sd;
+SdFile fp;
+
 bool state_file = false;
-uint32_t time_since_save;
-SdExFat sd;
-ExFile fp;
-uint32_t save_freq = 1000;  // ms
-uint32_t number = 1;
+uint32_t time_since_save = 0;
+uint32_t save_freq = 1000; // example value in ms
+char current_file[20];     // stores the filename of the current file
 
 // ------------------------- LIMITS DEFINITION ---------------------------------
 
@@ -162,12 +163,12 @@ void sensorsLoop() {
      - trigger thermocouples reading */
 
   updateData();                                                  //read the sensors
-  values_check();                                                //check if values are within limits
+  valuesCheck();                                                //check if values are within limits
   BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
   Data.valvesState = valvePositions;
   serialSend();
   send_data(&Data, sizeof(data));                                //send data to the ground station
-  if (Data.state == 1){save_data();}                             //save data to the SD card during tests
+  if (Data.state != 0){saveData();}                              //save data to the SD card during tests
   trigger_TS();                                                  //requesting data from the thermocouples if not waiting for a conversion
 }
 
@@ -330,6 +331,57 @@ int32_t PS_350bar_reading(int pin) {  // For PS51
   return (int32_t)(437500.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
+float average(byte* L, int length) {
+  float sum = 0;
+  for (int i = 0; i < length; i++) {
+    sum += L[i];
+  }
+  return sum / length;
+}
+
+void set_offset_pressure() {  // set sensors at 0
+  const int N = 10;
+  byte average_PS12_data[N];
+  byte average_PS22_data[N];
+  byte average_PS41_data[N];
+  byte average_PS42_data[N];
+  byte average_PS63_data[N];
+  byte average_PS64_data[N];
+
+  for (int i = 0; i < N; i++) {
+    sensorsLoop();
+    Packet p = receivePacket();
+    if (p.length >= 4 && p.data != nullptr) {
+      decode(p.data);
+    }
+    if (p.data != nullptr) {
+      delete[] p.data;
+    }
+    average_PS12_data[i] = Data.PS12;
+    average_PS22_data[i] = Data.PS22;
+    average_PS41_data[i] = Data.PS41;
+    average_PS42_data[i] = Data.PS42;
+    average_PS63_data[i] = Data.PS63;
+    average_PS64_data[i] = Data.PS64;
+  }
+
+  offset_PS12 = average(average_PS12_data, N);
+  offset_PS22 = average(average_PS22_data, N);
+  offset_PS41 = average(average_PS41_data, N);
+  offset_PS42 = average(average_PS42_data, N);
+  offset_PS63 = average(average_PS63_data, N);
+  offset_PS64 = average(average_PS64_data, N);
+}
+
+void reset_offset_pressure(){
+  offset_PS12 = 0;
+  offset_PS22 = 0;
+  offset_PS41 = 0;
+  offset_PS42 = 0;
+  offset_PS63 = 0;
+  offset_PS64 = 0;
+}
+
 uint16_t FM11_reading(int pin) {
   // Serial.print("FM11: ");
   // Serial.print(analogRead(pin));
@@ -358,7 +410,7 @@ uint16_t ref5V_reading(int pin) {
   return analogRead(pin);
 }
 
-void values_check() {
+void valuesCheck() {
   // check if values reached a warning or a limit
   // if so, start a timer (corresponding to the last time the value was in the bounds)
   // each time the sensors are read, check is the value is back in bounds (set the timer to zero) or is it is still out of bounds (let the timer run)
@@ -863,6 +915,7 @@ void abort() {
     Data.state = 0; // go back to active state
     Data.test_step = 0; // go back to initial state
   }
+
   else if (Data.test_step >= 9){
     Data.test_step = 20; // go to purge step
     Data.state = 2; // set emergency state
@@ -912,6 +965,8 @@ void abort() {
       }
     } while (Data.state == 2);
   }
+  closeFile(); // close the test SD file
+  reset_offset_pressure();
 }
 
 
@@ -1023,49 +1078,73 @@ void setupSaveData() {
   Serial.println("Initializing SD card");
   if (!sd.begin(SdioConfig(FIFO_SDIO))) {
     Serial.println("Error: SD card not detected");
+  } else {
+    Serial.println("SD card initialized successfully");
   }
-  Serial.println("SD card initialized successfully");
 }
 
-void save_data() {
-  String line = String(Data.n) + "," +
-              String(Data.t) + "," +
-              String(Data.PS11) + "," + String(Data.PS12) + "," + String(Data.PS21) + "," +
-              String(Data.PS22) + "," + String(Data.PS31) + "," + String(Data.PS41) + "," +
-              String(Data.PS42) + "," + String(Data.PS51) + "," + String(Data.PS61) + "," +
-              String(Data.PS62) + "," + String(Data.PS63) + "," + String(Data.PS64) + "," +
+void newFile() {
+  snprintf(current_file, sizeof(current_file), "%08lu.TXT", millis());
 
-              String(Data.TS11) + "," + String(Data.TS12) + "," + String(Data.TS41) + "," +
-              String(Data.TS42) + "," + String(Data.TS61) + "," + String(Data.TS62) + "," +
-
-              String(Data.FM11) + "," + String(Data.FM21) + "," + String(Data.FM61) + "," +
-
-              String(Data.LC) + "," +
-              String(Data.ref5V) + "," +
-
-              String(Data.valvesState) + "," +
-              String(Data.actLPos) + "," + String(Data.actRPos) + "," +
-              String(Data.actLOK) + "," + String(Data.actROK) + "," +
-
-              String(Data.state) + "," + String(Data.test_step) + "," +
-              String(Data.test_cooling ? 1 : 0);
-
-  if (state_file == false) {
-    state_file = true;
-    if (Data.n >= (number + 1000) ){
-      number = Data.n;
-    }
-    String fileID = String(number) + ".txt";
-    fp = sd.open(fileID, FILE_WRITE);
-    fp.println(line);
-    time_since_save = millis();
-  } else if (state_file == true) {
-    if (static_cast<uint32_t>(millis() - time_since_save) >= save_freq) {
-      fp.println(line);
-      fp.close();
-      state_file = false;
-    } else if (static_cast<uint32_t>(millis() - time_since_save) < save_freq) {
-      fp.println(line);
-    }
+  if (!fp.open(current_file, O_WRITE | O_CREAT | O_APPEND)) {
+    Serial.println("Error opening file");
+    state_file = false;
+    return;
   }
+
+  Serial.print("New file created: ");
+  Serial.println(current_file);
+
+  state_file = true;
+  time_since_save = millis();
+  fp.close();
+}
+
+
+void saveData() {
+  if (!state_file) return;
+
+  uint32_t now = millis();
+  if ((now - time_since_save) < save_freq) return;
+  time_since_save = now;
+
+  if (!fp.open(current_file, O_WRITE | O_APPEND)) {
+    Serial.println("Error opening file for writing");
+    return;
+  }
+
+  fp.println(generate_csv_line());
+  fp.close();
+}
+
+void closeFile() {
+  if (state_file) {
+    if (fp.isOpen()) fp.close();
+    state_file = false;
+    Serial.println("File closed.");
+  }
+}
+
+String generate_csv_line() {
+  String line = String(Data.n) + "," +
+                String(Data.t) + "," +
+                String(Data.PS11) + "," + String(Data.PS12) + "," + String(Data.PS21) + "," +
+                String(Data.PS22) + "," + String(Data.PS31) + "," + String(Data.PS41) + "," +
+                String(Data.PS42) + "," + String(Data.PS51) + "," + String(Data.PS61) + "," +
+                String(Data.PS62) + "," + String(Data.PS63) + "," + String(Data.PS64) + "," +
+
+                String(Data.TS11) + "," + String(Data.TS12) + "," + String(Data.TS41) + "," +
+                String(Data.TS42) + "," + String(Data.TS61) + "," + String(Data.TS62) + "," +
+
+                String(Data.FM11) + "," + String(Data.FM21) + "," + String(Data.FM61) + "," +
+
+                String(Data.LC) + "," + String(Data.ref5V) + "," +
+
+                String(Data.valvesState) + "," +
+                String(Data.actLPos) + "," + String(Data.actRPos) + "," +
+                String(Data.actLOK ? 1 : 0) + "," + String(Data.actROK ? 1 : 0) + "," +
+
+                String(Data.state) + "," + String(Data.test_step) + "," +
+                String(Data.test_cooling ? 1 : 0);
+  return line;
 }
