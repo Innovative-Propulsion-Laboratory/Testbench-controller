@@ -331,7 +331,7 @@ void decode(byte* instructions) {
       Data.state = 1;
       Sequence();
     }
-    if (instructions[0] == 0x && instructions[1] == 0xBB && instructions[2] == 0xBB && instructions[3] == 0xBB) {  // Confirm test
+    if (instructions[0] == 0xDC && instructions[1] == 0xBA && instructions[2] == 0xDC && instructions[3] == 0xBA) {  // Confirm test
       Data.state = 1;
       Sequence();
     }
