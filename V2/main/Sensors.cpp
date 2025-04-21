@@ -186,11 +186,15 @@ void sensorsLoop() {
      - trigger thermocouples reading */
 
   updateData();                                                  //read the sensors
-  valuesCheck();                                                //check if values are within limits
+  valuesCheck();                                                 //check if values are within limits
   BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
   Data.valvesState = valvePositions;
   // serialSend();
-  send_data(&Data, sizeof(data));                                //send data to the ground station
+  // Send data at 20Hz
+  if (millis() - time_last_reading >= 5) {
+    send_data(&Data, sizeof(data));                              //send data to the ground station
+    time_last_reading = millis();
+  }
   if (Data.state != 0){saveData();}                              //save data to the SD card during tests
   trigger_TS();                                                  //requesting data from the thermocouples if not waiting for a conversion
 }
