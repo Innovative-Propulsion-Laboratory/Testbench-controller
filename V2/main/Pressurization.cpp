@@ -65,9 +65,9 @@ void BB_enable(uint8_t tank, bool command) {
      tank: 1 = LOX, 2 = ETH, 6 = WATER
      command: 1 = enable, 0 = disable */
   if (command == 0) {
-    if (tank == 1) { LOX_BB = 0;}
-    if (tank == 2) { ETH_BB = 0;}
-    if (tank == 6) { WATER_BB = 0;}
+    if (tank == 1) { LOX_BB = 0; setValve(SV33, 0);}
+    if (tank == 2) { ETH_BB = 0; setValve(SV34, 0);}
+    if (tank == 6) { WATER_BB = 0; setValve(SV52, 0); setValve(SV53, 0);}
   }
   if (command == 1) {
     if (tank == 1) {
