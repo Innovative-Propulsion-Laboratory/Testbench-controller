@@ -140,7 +140,7 @@ void valuesCheck();
 void trigger_TS();
 void updateData();
 void serialSend();
-void abort();
+void test_abort();
 
 // Sensor reading functions
 int16_t PS_25bar_reading(int pin);
