@@ -5,6 +5,10 @@
 uint32_t n = 1;  //Packet ID
 uint8_t cr0, fault11, fault12, fault41, fault42, fault61, fault62; // Thermocouple faults for debug
 
+
+uint32_t time_last_reading = 0;
+unsigned long t_last_data_packet = 0, data_send_rate = 50;
+
 data Data;
 
 bool TS12_waiting = 0, TS41_waiting = 0, TS42_waiting = 0, TS61_waiting = 0, TS62_waiting = 0, TS11_waiting = 0;
@@ -186,11 +190,15 @@ void sensorsLoop() {
      - trigger thermocouples reading */
 
   updateData();                                                  //read the sensors
-  valuesCheck();                                                //check if values are within limits
+  valuesCheck();                                                 //check if values are within limits
   BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
   Data.valvesState = valvePositions;
   // serialSend();
-  send_data(&Data, sizeof(data));                                //send data to the ground station
+  // Send data at 20Hz
+  if (millis() - time_last_reading >= 5) {
+    send_data(&Data, sizeof(data));                              //send data to the ground station
+    time_last_reading = millis();
+  }
   if (Data.state != 0){saveData();}                              //save data to the SD card during tests
   trigger_TS();                                                  //requesting data from the thermocouples if not waiting for a conversion
 }

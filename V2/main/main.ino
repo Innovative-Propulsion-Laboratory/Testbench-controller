@@ -2,8 +2,6 @@
 // #include "UDP.h"
 
 // main variable
-uint32_t time_last_reading = 0;
-unsigned long t_last_data_packet = 0, data_send_rate = 1000;
 bool test_will_begin = false;
 uint32_t BB_check_time;
 uint32_t BB_check_duration = 30000;
@@ -360,7 +358,7 @@ void Sequence() {
   do {
     BBLoop();
     // Send data at 20Hz
-    if (millis() - time_last_reading >= 50) {
+    if (millis() - time_last_reading >= data_send_rate) {
       sensorsLoop();
       time_last_reading = millis();
     }
