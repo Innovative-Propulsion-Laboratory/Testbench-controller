@@ -33,6 +33,8 @@ extern int32_t offset_PS42;
 extern int32_t offset_PS63;
 extern int32_t offset_PS64;
 
+extern int32_t avg_PS11, avg_PS21, avg_PS61, avg_PS62;
+
 // Load cell:
 #define LC01_pin A10
 
@@ -121,6 +123,7 @@ extern uint16_t Main_duration;
 extern uint16_t Nominal_pressure_reached;
 extern uint16_t T_burn;
 extern uint16_t Chilldown_start;
+extern uint16_t Chilldown_count;
 extern uint16_t chill_temp_seems_ok;
 extern uint16_t Chilldown_duration;
 extern uint16_t Chilldown_verified_duration;

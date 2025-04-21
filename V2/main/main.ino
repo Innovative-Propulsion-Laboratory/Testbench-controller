@@ -6,7 +6,7 @@ uint32_t time_last_reading = 0;
 unsigned long t_last_data_packet = 0, data_send_rate = 1000;
 bool test_will_begin = false;
 uint32_t BB_check_time;
-uint16_t BB_check_duration = 620000;
+uint32_t BB_check_duration = 620000;
 
 // Sequence
 #define IGN_pin 33
@@ -50,6 +50,8 @@ void setup() {
   setupSensors();
   setupUDP();
   setupSaveData();
+
+  Data.test_cooling = 0;
 }
 
 void loop() {
@@ -367,7 +369,7 @@ void Sequence() {
         }
       case 2:
         {
-          if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
+          if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
             setValve(SV36, 0);
       ////// End of PURGE //////
       ////// start chilldown //////
@@ -379,7 +381,7 @@ void Sequence() {
         }
       case 3:
         {
-          if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration)) {
+          if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration)) {
             setValve(SV13, 0);
             Chilldown_count ++;
             Data.test_step++;
@@ -388,10 +390,10 @@ void Sequence() {
         }
       case 4:
         {
-          if (millis() <= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
+          if (millis() <= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
             if (Data.TS12 >= Sequence_data.chill_temp) {
               chill_temp_seems_ok = millis();
-              Data.test_step = ++;
+              Data.test_step ++;
             } else if (Chilldown_count >= Sequence_data.Max_chilldown) {
               send_string("error: Chilldown failed", 1);
               abort();
@@ -696,17 +698,15 @@ bool check_BB_pressure() {
 
   if (Data.test_cooling == 1){
     if (avg_PS11 > (PS11_BB_min - 200) && avg_PS11 < (PS11_BB_max + 200)
-    && avg_PS1 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)
+    && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)
     && avg_PS61 > (WATER_BB_min - 200) && avg_PS61 < (WATER_BB_min + 200)
     && avg_PS62 > (WATER_BB_min - 200) && avg_PS62 < (WATER_BB_min + 200)){
-      return true
+      return true;
   }
   }
   else if (avg_PS11 > (PS11_BB_min - 200) && avg_PS11 < (PS11_BB_max + 200)
   && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)) {
-    return true
+    return true;
   }
-  else{
-    return false
-  }  
+  return false;
 }
