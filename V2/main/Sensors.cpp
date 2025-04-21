@@ -448,7 +448,7 @@ void valuesCheck() {
     PS11_BBLW_active = 0;
   }
 
-  if (Data.state == 1 && Data.PS12 >= PS12_TUW) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS12 >= PS12_TUW) {
     if (PS12_TUW_active == 1 && (millis() - PS12_TUW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS12_TUW_msg) >= message_delay) {
         send_string("warning: PS12 too high", 0);
@@ -463,7 +463,7 @@ void valuesCheck() {
     PS12_TUW_active = 0;
   }
 
-  if (Data.state == 1 && Data.PS12 <= PS12_TLW) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS12 <= PS12_TLW) {
     if (PS12_TLW_active == 1 && (millis() - PS12_TLW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS12_TLW_msg) >= message_delay) {
         send_string("warning: PS12 too low", 0);
@@ -525,7 +525,7 @@ void valuesCheck() {
     PS21_BBLW_active = 0;
   }
 
-  if (Data.state == 1 && Data.PS22 >= PS22_TUW) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS22 >= PS22_TUW) {
     if (PS22_TUW_active == 1 && (millis() - PS22_TUW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS22_TUW_msg) >= message_delay) {
         send_string("warning: PS22 too high", 0);
@@ -540,7 +540,7 @@ void valuesCheck() {
     PS22_TUW_active = 0;
   }
 
-  if (Data.state == 1 && Data.PS22 <= PS22_TLW) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS22 <= PS22_TLW) {
     if (PS22_TLW_active == 1 && (millis() - PS22_TLW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS22_TLW_msg) >= message_delay) {
         send_string("warning: PS22 too low", 0);
@@ -601,7 +601,7 @@ void valuesCheck() {
     PS31_LW_active = 0;
   }
 
-  if (Data.state == 1 && Data.PS41 >= PS41_TUL) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS41 >= PS41_TUL) {
     if (PS41_TUL_active == 1 && (millis() - PS41_TUL_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS41_TUL_msg) >= message_delay) {
         send_string("error: PS41 over limit - test aborted", 1);
@@ -617,7 +617,7 @@ void valuesCheck() {
     PS41_TUL_active = 0;
   }
   
-  if (Data.state == 1 && Data.PS41 >= PS41_TUW) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS41 >= PS41_TUW) {
     if (PS41_TUW_active == 1 && (millis() - PS41_TUW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS41_TUW_msg) >= message_delay) {
         send_string("warning: PS41 too high", 0);
@@ -632,7 +632,7 @@ void valuesCheck() {
     PS41_TUW_active = 0;
   }
   
-  if (Data.state == 1 && Data.PS41 <= PS41_TLW) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS41 <= PS41_TLW) {
     if (PS41_TLW_active == 1 && (millis() - PS41_TLW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS41_TLW_msg) >= message_delay) {
         send_string("warning: PS41 too low", 0);
@@ -647,7 +647,7 @@ void valuesCheck() {
     PS41_TLW_active = 0;
   }
   
-  if (Data.state == 1 && Data.PS41 <= PS41_TLL) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS41 <= PS41_TLL) {
     if (PS41_TLL_active == 1 && (millis() - PS41_TLL_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS41_TLL_msg) >= message_delay) {
         send_string("error: PS41 below limit - test aborted", 1);
@@ -663,7 +663,7 @@ void valuesCheck() {
     PS41_TLL_active = 0;
   }
   
-  if (Data.state == 1 && Data.PS42 >= PS42_TUL) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS42 >= PS42_TUL) {
     if (PS42_TUL_active == 1 && (millis() - PS42_TUL_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS42_TUL_msg) >= message_delay) {
         send_string("error: PS42 over limit - test aborted", 1);
@@ -679,7 +679,7 @@ void valuesCheck() {
     PS42_TUL_active = 0;
   }
   
-  if (Data.state == 1 && Data.PS42 >= PS42_TUW) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS42 >= PS42_TUW) {
     if (PS42_TUW_active == 1 && (millis() - PS42_TUW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS42_TUW_msg) >= message_delay) {
         send_string("warning: PS42 too high", 0);
@@ -694,7 +694,7 @@ void valuesCheck() {
     PS42_TUW_active = 0;
   }
   
-  if (Data.state == 1 && Data.PS42 <= PS42_TLW) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS42 <= PS42_TLW) {
     if (PS42_TLW_active == 1 && (millis() - PS42_TLW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS42_TLW_msg) >= message_delay) {
         send_string("warning: PS42 too low", 0);
@@ -709,7 +709,7 @@ void valuesCheck() {
     PS42_TLW_active = 0;
   }
   
-  if (Data.state == 1 && Data.PS42 <= PS42_TLL) {
+  if (Data.state == 1 && Data.test_step == 19 && Data.PS42 <= PS42_TLL) {
     if (PS42_TLL_active == 1 && (millis() - PS42_TLL_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS42_TLL_msg) >= message_delay) {
         send_string("error: PS42 below limit - test aborted", 1);
