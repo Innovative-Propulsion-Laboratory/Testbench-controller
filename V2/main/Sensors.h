@@ -56,10 +56,10 @@ struct __attribute__((packed)) data {
   uint32_t t = 0;  // Timestamp (ms)
 
   int32_t PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64;  // Pressure in mbar
-  float TS11, TS12, TS41, TS42, TS61, TS62;                                      // Thermocouples in °C
-  uint16_t FM11, FM21, FM61;                                                        // Flow in mL/s
+  float TS11, TS12, TS41, TS42, TS61, TS62;                                        // Thermocouples in °C
+  uint16_t FM11, FM21, FM61;                                                       // Flow in mL/s
   int32_t LC;                                                                      // Load cell (N)
-  uint16_t ref5V;                                                                   // 5V reference (mV)
+  uint16_t ref5V;                                                                  // 5V reference (mV)
 
   uint32_t valvesState;
   uint8_t actLPos = 0, actRPos = 0;  // Actuator positions (0-255)
@@ -104,32 +104,53 @@ struct __attribute__((packed)) sequence_data {
 extern data Data;
 extern sequence_data Sequence_data;
 
-// //Save data 
-// extern bool state_file;
-// extern uint32_t frequence_save;
+// Variables for the sequence
+extern uint16_t T_confirm;
+extern uint16_t Chilldown_finished;
+extern uint16_t last_send;
+extern uint16_t count_down_time;
+extern uint16_t PS63_duration;
+extern uint16_t PS63_seems_rise;
+extern uint16_t Ign_duration;
+extern uint16_t Ign_seems_on;
+extern uint16_t T0;
+extern uint16_t ETH_open;
+extern uint16_t Bypass_duration;
+extern uint16_t Main_seems_rise;
+extern uint16_t Main_duration;
+extern uint16_t Nominal_pressure_reached;
+extern uint16_t T_burn;
+extern uint16_t Chilldown_start;
+extern uint16_t chill_temp_seems_ok;
+extern uint16_t Chilldown_duration;
+extern uint16_t Chilldown_verified_duration;
 
 // Functions:
 void setupSensors();
 void BBLoop();
 void sensorsLoop();
-void values_check();
+void valuesCheck();
 void trigger_TS();
 void updateData();
 void serialSend();
+void abort();
 
+// Sensor reading functions
 int32_t PS_25bar_reading(int pin);
 int32_t PS_70bar_reading(int pin);
 int32_t PS_350bar_reading(int pin);
+void reset_offset_pressure();
 uint16_t FM11_reading(int pin);
 uint16_t FM21_reading(int pin);
 uint16_t FM61_reading(int pin);
 int32_t LC_reading(int pin);
 uint16_t ref5V_reading(int pin);
 
-void sendDataFromSensor(data* d);
-
+// SD card functions
 void setupSaveData();
-void save_data();
-
+void newFile();
+void saveData();
+void closeFile();
+String generate_csv_line();
 
 #endif

@@ -77,7 +77,6 @@ void BB_enable(uint8_t tank, bool command) {
     if (tank == 2) {
       ETH_BB = 1;
       setValve(SV21, 0);
-      Serial.print("ETH_BB actif");
     }
     if (tank == 6) {
       WATER_BB = 1;
