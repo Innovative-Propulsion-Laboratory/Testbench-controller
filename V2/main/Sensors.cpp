@@ -957,6 +957,9 @@ void test_abort() {
   }
   closeFile(); // close the test SD file
   reset_offset_pressure();
+  BB_enable(1, 0);
+  BB_enable(2, 0);
+  BB_enable(6, 0);
 }
 
 void serialSend() {

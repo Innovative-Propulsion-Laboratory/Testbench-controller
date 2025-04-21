@@ -212,7 +212,7 @@ void decode(byte* instructions) {
       uint16_t value2 = assembleUInt16(instructions[11], instructions[10]);
       Serial.print("H2O pressure bangbang set : ");
       Serial.println(value2);
-      BB_param_set(6, value2);
+      if (Data.test_cooling == 1) {BB_param_set(6, value2);}
   
       Sequence_data.tvc_pattern = assembleUInt16(instructions[13], instructions[12]);
       Serial.print("TVC pattern : ");
@@ -627,6 +627,9 @@ void Sequence() {
   } while (Data.state == 1);
   reset_offset_pressure();
   Data.test_cooling = 1;
+  BB_enable(1, 0);
+  BB_enable(2, 0);
+  BB_enable(6, 0);
   byte message[4] = {0xAB, 0xCD, 0xAB, 0xCD};
   reply(message, sizeof(message));
 }
