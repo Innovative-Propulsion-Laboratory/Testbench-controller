@@ -5,6 +5,10 @@
 uint32_t n = 1;  //Packet ID
 uint8_t cr0, fault11, fault12, fault41, fault42, fault61, fault62; // Thermocouple faults for debug
 
+
+uint32_t time_last_reading = 0;
+unsigned long t_last_data_packet = 0, data_send_rate = 50;
+
 data Data;
 
 bool TS12_waiting = 0, TS41_waiting = 0, TS42_waiting = 0, TS61_waiting = 0, TS62_waiting = 0, TS11_waiting = 0;

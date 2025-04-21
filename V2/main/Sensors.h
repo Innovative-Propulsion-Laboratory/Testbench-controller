@@ -51,6 +51,10 @@ extern int32_t avg_PS11, avg_PS21, avg_PS61, avg_PS62;
 #define TS61_pin 36  // Water initial temperature
 #define TS62_pin 37  // Water final temperature
 
+extern uint32_t time_last_reading;
+extern unsigned long t_last_data_packet, data_send_rate;
+
+
 // Structure containing all the data sent from the Teensy to the computer
 struct __attribute__((packed)) data {
   byte header[4] = { 0xFF, 0xFF, 0xFF, 0xFF };
