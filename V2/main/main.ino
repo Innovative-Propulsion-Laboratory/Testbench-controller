@@ -691,7 +691,6 @@ bool check_BB_pressure() {
     time_last_reading = millis();
     }
     BBLoop();
-    BBLoop();
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {
       decode(p.data);
