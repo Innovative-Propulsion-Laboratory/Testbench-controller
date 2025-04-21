@@ -328,6 +328,7 @@ void decode(byte* instructions) {
     Sequence();
   }
   if (instructions[0] == 0xCC && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC) {  // Abort test
+    test_will_begin = false;
   }
 }
 
@@ -617,6 +618,7 @@ void Sequence() {
         }
     }
   } while (Data.state == 1);
+  test_will_begin = false;
   byte message[4] = {0xAB, 0xCD, 0xAB, 0xCD};
   reply(message, sizeof(message));
   Data.test_cooling = 1;
