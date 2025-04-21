@@ -72,6 +72,8 @@ void loop() {
   }
   if (test_will_begin) {
     BB_check_time = millis();
+    byte message[4] = { 0xBB, 0xBB, 0xBB, 0xBB };
+    reply(message, sizeof(message));    
     // Check if the Bang Bang Pressurization works
     while ((millis() - BB_check_time) < BB_check_duration && !check_BB_pressure()){
 
