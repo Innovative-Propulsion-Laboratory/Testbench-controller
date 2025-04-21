@@ -25,6 +25,8 @@ int32_t offset_PS42 = 0;
 int32_t offset_PS63 = 0;
 int32_t offset_PS64 = 0;
 
+int32_t avg_PS11, avg_PS21, avg_PS61, avg_PS62;
+
 // Sequence_data is used when aborts are triggered in valuesCheck()
 sequence_data Sequence_data;
 
@@ -44,6 +46,7 @@ uint16_t Main_duration;
 uint16_t Nominal_pressure_reached;
 uint16_t T_burn;
 uint16_t Chilldown_start;
+uint16_t Chilldown_count;
 uint16_t chill_temp_seems_ok;
 uint16_t Chilldown_duration;
 uint16_t Chilldown_verified_duration;
@@ -723,7 +726,7 @@ void valuesCheck() {
   }
   
   if (Data.PS51 >= PS51_UW) {
-    if (PS51_UW_active == 1 && (millis() - PS51_UW_time) >= PS_oob_max_delay) {
+    if (Data.test_cooling == 1 && PS51_UW_active == 1 && (millis() - PS51_UW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS51_UW_msg) >= message_delay) {
         send_string("warning: PS51 too high", 0);
         Serial.println("warning: PS51 too high");
@@ -738,7 +741,7 @@ void valuesCheck() {
   }
   
   if (Data.PS51 <= PS51_LW) {
-    if (PS51_LW_active == 1 && (millis() - PS51_LW_time) >= PS_oob_max_delay) {
+    if (Data.test_cooling == 1 && PS51_LW_active == 1 && (millis() - PS51_LW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS51_LW_msg) >= message_delay) {
         send_string("warning: PS51 too low", 0);
         Serial.println("warning: PS51 too low");
@@ -768,7 +771,7 @@ void valuesCheck() {
     PS51_TLL_active = 0;
   }
   
-  if ((Data.PS61 >= PS_WATER_UL) || (Data.PS62 >= PS_WATER_UL)) {
+  if (Data.test_cooling == 1 && ((Data.PS61 >= PS_WATER_UL) || (Data.PS62 >= PS_WATER_UL))) {
     if (PS_WATER_UL_active == 1 && (millis() - PS_WATER_UL_time) >= PS_oob_max_delay) {
       setValve(SV61, 1);  //open SV61
       setValve(SV62, 1);  //open SV62
@@ -838,7 +841,7 @@ void valuesCheck() {
     PS_WATER_TLL_active = 0;
   }
   
-  if (Data.TS62 >= TS62_UW) {
+  if (Data.test_cooling == 1 && Data.TS62 >= TS62_UW) {
     if (TS62_UW_active == 1 && (millis() - TS62_UW_time) >= PS_oob_max_delay) {
       if ((millis() - last_TS62_UW_msg) >= message_delay) {
         send_string("warning: TS62 too high", 0);
@@ -892,6 +895,7 @@ void abort() {
     setValve(SV63, 0); // close SV63
     Data.state = 0; // go back to active state
     Data.test_step = 0; // go back to initial state
+    Data.test_cooling = 1; // enable cooling cycle valuesCheck again
   }
 
   else if (Data.test_step >= 9){
