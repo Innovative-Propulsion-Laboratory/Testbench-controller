@@ -649,7 +649,7 @@ void set_offset_pressure() {  // set sensors at 0
   byte average_PS64_data[N];
 
   for (int i = 0; i < N; i++) {
-    BBLoop();
+    read_atm_pressure();
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {
       decode(p.data);
@@ -681,7 +681,7 @@ bool check_BB_pressure() {
   byte average_PS62_data[N];
 
   for (int i = 0; i < N; i++) {
-    sensorsLoop();
+    BBLoop();
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {
       decode(p.data);
