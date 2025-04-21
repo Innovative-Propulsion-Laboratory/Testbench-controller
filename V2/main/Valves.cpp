@@ -9,15 +9,15 @@ void setupValves() {
   /*
   Setup for the IO expander and the GPIOs conncected to the valves
   */
-  pinMode(6, OUTPUT);
+  // pinMode(6, OUTPUT);
   pinMode(7, OUTPUT);
   pinMode(8, OUTPUT);
   pinMode(9, OUTPUT);
-  //reset MCP23S17 during the setup
-  digitalWrite(9, LOW);
-  delay(100);
-  digitalWrite(9, HIGH);
-  delay(100);
+  // reset MCP23S17 during the setup
+  // digitalWrite(9, LOW);
+  // delay(100);
+  // digitalWrite(9, HIGH);
+  // delay(100);
 
   mcp.begin_SPI(10, 13, 12, 11);
 
