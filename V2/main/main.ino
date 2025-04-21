@@ -107,7 +107,7 @@ uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {  // to assemble 2 b
 void decode(byte* instructions) {
   if (Data.state == 1){
     if (instructions[0] == 0xCC && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC) {
-      abort();
+      test_abort();
     }
   }
   else {
@@ -396,7 +396,7 @@ void Sequence() {
               Data.test_step ++;
             } else if (Chilldown_count >= Sequence_data.Max_chilldown) {
               send_string("error: Chilldown failed", 1);
-              abort();
+              test_abort();
             }
             else {
               T_confirm = millis();
@@ -443,7 +443,8 @@ void Sequence() {
             PS63_seems_rise = millis();
             Data.test_step++;
           } else if ((millis() - PS63_duration) >= Sequence_data.PS63_check_duration) {
-            Data.state = 0;  // erreur
+            send_string("error: Cooling not detected", 1);
+            test_abort();
           }
           count_down();
           break;
@@ -474,7 +475,8 @@ void Sequence() {
             Ign_seems_on = millis();
             Data.test_step++;
           } else if ((millis() - Ign_duration) >= Sequence_data.Ign_check_duration) {
-            Data.state = 0;
+            send_string("error: Ignition failed", 1);
+            test_abort();
           }
           count_down();
           break;
@@ -511,7 +513,8 @@ void Sequence() {
             Bypass_duration = millis();
             Data.test_step++;
           } else if ((millis() - Bypass_duration) >= Sequence_data.Bypass_check_duration) {
-            Data.state = 0;
+            send_string("error: Pressure too low with bypass valves", 1);
+            test_abort();
           }
           count_down();
           break;
@@ -545,7 +548,8 @@ void Sequence() {
             Main_seems_rise = millis();
             Data.test_step++;
           } else if ((millis() - Main_duration) >= Sequence_data.Main_check_duration) {
-            Data.state = 0;
+            send_string("error: Pressure too low with main valves", 1);
+            test_abort();
           }
           count_down();
           break;
@@ -645,7 +649,7 @@ void set_offset_pressure() {  // set sensors at 0
   byte average_PS64_data[N];
 
   for (int i = 0; i < N; i++) {
-    sensorsLoop();
+    BBLoop();
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {
       decode(p.data);
