@@ -135,6 +135,7 @@ extern uint16_t Chilldown_count;
 extern uint16_t chill_temp_seems_ok;
 extern uint16_t Chilldown_duration;
 extern uint16_t Chilldown_verified_duration;
+extern uint16_t Tchilldown;
 
 // Functions:
 void setupSensors();
