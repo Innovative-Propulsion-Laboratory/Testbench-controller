@@ -332,8 +332,7 @@ void decode(byte* instructions) {
       Sequence();
     }
     if (instructions[0] == 0xDC && instructions[1] == 0xBA && instructions[2] == 0xDC && instructions[3] == 0xBA) {  // Confirm test
-      Data.state = 1;
-      Sequence();
+      test_will_begin = false;
     }
   }
 }
@@ -636,6 +635,7 @@ void Sequence() {
   BB_enable(6, 0);
   byte message[4] = {0xAB, 0xCD, 0xAB, 0xCD};
   reply(message, sizeof(message));
+  test_will_begin = false;
 }
 
 float average(byte* L, int length) {
