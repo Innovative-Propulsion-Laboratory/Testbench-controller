@@ -691,35 +691,17 @@ void set_offset_pressure() {  // set sensors at 0
 }
 
 bool check_BB_pressure() {
-  const int N = 100;
-  byte average_PS11_data[N];
-  byte average_PS21_data[N];
-  byte average_PS61_data[N];
-  byte average_PS62_data[N];
-
-  for (int i = 0; i < N; i++) {
-    BBLoop();
-    average_PS11_data[i] = Data.PS11;
-    average_PS21_data[i] = Data.PS21;
-    average_PS61_data[i] = Data.PS61;
-    average_PS62_data[i] = Data.PS62;
-  }
-  
-  avg_PS11 = average(average_PS11_data, N);
-  avg_PS21 = average(average_PS21_data, N);
-  avg_PS61 = average(average_PS61_data, N);
-  avg_PS62 = average(average_PS62_data, N);
-
+  BBLoop();
   if (Data.test_cooling == 1){
-    if (avg_PS11 > (PS11_BB_min - 200) && avg_PS11 < (PS11_BB_max + 200)
-    && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)
-    && avg_PS61 > (WATER_BB_min - 200) && avg_PS61 < (WATER_BB_min + 200)
-    && avg_PS62 > (WATER_BB_min - 200) && avg_PS62 < (WATER_BB_min + 200)){
+    if (Data.PS11 > (PS11_BB_min - 200) && Data.PS11 < (PS11_BB_max + 200)
+    && Data.PS21 > (PS21_BB_min - 200) && Data.PS21 < (PS21_BB_max + 200)
+    && Data.PS61 > (WATER_BB_min - 200) && Data.PS61 < (WATER_BB_min + 200)
+    && Data.PS62 > (WATER_BB_min - 200) && Data.PS62 < (WATER_BB_min + 200)){
       return true;
   }
   }
-  else if (avg_PS11 > (PS11_BB_min - 200) && avg_PS11 < (PS11_BB_max + 200)
-  && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)) {
+  else if (Data.PS11 > (PS11_BB_min - 200) && Data.PS11 < (PS11_BB_max + 200)
+  && Data.PS21 > (PS21_BB_min - 200) && Data.PS21 < (PS21_BB_max + 200)) {
     return true;
   }
   else {return false;}
