@@ -331,6 +331,10 @@ void decode(byte* instructions) {
       Data.state = 1;
       Sequence();
     }
+    if (instructions[0] == 0x && instructions[1] == 0xBB && instructions[2] == 0xBB && instructions[3] == 0xBB) {  // Confirm test
+      Data.state = 1;
+      Sequence();
+    }
   }
 }
 
@@ -652,6 +656,11 @@ void set_offset_pressure() {  // set sensors at 0
   byte average_PS64_data[N];
 
   for (int i = 0; i < N; i++) {
+    if (millis() - time_last_reading >= 50) {
+    sensorsLoop();
+    time_last_reading = millis();
+    }
+    BBLoop();
     read_atm_pressure();
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {
@@ -684,6 +693,10 @@ bool check_BB_pressure() {
   byte average_PS62_data[N];
 
   for (int i = 0; i < N; i++) {
+    if (millis() - time_last_reading >= 50) {
+    sensorsLoop();
+    time_last_reading = millis();
+    }
     BBLoop();
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {
