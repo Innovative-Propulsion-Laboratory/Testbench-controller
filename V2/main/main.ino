@@ -6,7 +6,7 @@ uint32_t time_last_reading = 0;
 unsigned long t_last_data_packet = 0, data_send_rate = 1000;
 bool test_will_begin = false;
 uint32_t BB_check_time;
-uint32_t BB_check_duration = 620000;
+uint32_t BB_check_duration = 30000;
 
 // Sequence
 #define IGN_pin 33
@@ -357,7 +357,12 @@ void Sequence() {
   set_offset_pressure();
 
   do {
-    sensorsLoop();
+    BBLoop();
+    // Send data at 20Hz
+    if (millis() - time_last_reading >= 50) {
+      sensorsLoop();
+      time_last_reading = millis();
+    }
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {decode(p.data);}
     if (p.data != nullptr) {delete[] p.data;}
@@ -695,18 +700,7 @@ bool check_BB_pressure() {
   byte average_PS62_data[N];
 
   for (int i = 0; i < N; i++) {
-    if (millis() - time_last_reading >= 50) {
-    sensorsLoop();
-    time_last_reading = millis();
-    }
     BBLoop();
-    Packet p = receivePacket();
-    if (p.length >= 4 && p.data != nullptr) {
-      decode(p.data);
-    }
-    if (p.data != nullptr) {
-      delete[] p.data;
-    }
     average_PS11_data[i] = Data.PS11;
     average_PS21_data[i] = Data.PS21;
     average_PS61_data[i] = Data.PS61;
@@ -730,5 +724,5 @@ bool check_BB_pressure() {
   && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)) {
     return true;
   }
-  return false;
+  else {return false;}
 }
