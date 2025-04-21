@@ -320,7 +320,7 @@ void decode(byte* instructions) {
       
       BB_enable(1, 1);
       BB_enable(2, 1);
-      BB_enable(6, 1);
+      if (Data.test_cooling == 1) {BB_enable(6, 1);}
   
       test_will_begin = true;
   
