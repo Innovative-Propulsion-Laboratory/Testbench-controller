@@ -337,7 +337,7 @@ void printFault(uint8_t fault) {
   }
 }
 
-int32_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
+int16_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
   return (int16_t)(31250.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 

@@ -57,11 +57,15 @@ struct __attribute__((packed)) data {
   uint32_t n = 0;  // packet ID
   uint32_t t = 0;  // Timestamp (ms)
 
-  int32_t PS11, PS12, PS21, PS22, PS31, PS41, PS42, PS51, PS61, PS62, PS63, PS64;  // Pressure in mbar
-  float TS11, TS12, TS41, TS42, TS61, TS62;                                        // Thermocouples in °C
-  uint16_t FM11, FM21, FM61;                                                       // Flow in mL/s
+  int16_t PS11, PS12, PS21, PS22;
+  int32_t PS31;
+  int16_t PS41, PS42;
+  int32_t PS51;
+  int16_t PS61, PS62, PS63, PS64;
+  int16_t TS11, TS12, TS41, TS42, TS61, TS62;                                      // Thermocouples in °C
+  uint16_t FM11, FM21, FM61;                                                        // Flow in mL/s
   int32_t LC;                                                                      // Load cell (N)
-  uint16_t ref5V;                                                                  // 5V reference (mV)
+  uint16_t ref5V;                                                                   // 5V reference (mV)
 
   uint32_t valvesState;
   uint8_t actLPos = 0, actRPos = 0;  // Actuator positions (0-255)
@@ -139,10 +143,9 @@ void serialSend();
 void abort();
 
 // Sensor reading functions
-int32_t PS_25bar_reading(int pin);
+int16_t PS_25bar_reading(int pin);
 int32_t PS_70bar_reading(int pin);
 int32_t PS_350bar_reading(int pin);
-void reset_offset_pressure();
 uint16_t FM11_reading(int pin);
 uint16_t FM21_reading(int pin);
 uint16_t FM61_reading(int pin);
