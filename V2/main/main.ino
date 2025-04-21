@@ -654,6 +654,7 @@ void set_offset_pressure() {  // set sensors at 0
     time_last_reading = millis();
     }
     BBLoop();
+    read_atm_pressure();
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {
       decode(p.data);
@@ -689,6 +690,7 @@ bool check_BB_pressure() {
     sensorsLoop();
     time_last_reading = millis();
     }
+    BBLoop();
     BBLoop();
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {

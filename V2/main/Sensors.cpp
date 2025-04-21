@@ -363,6 +363,14 @@ void reset_offset_pressure(){
   offset_PS64 = 0;
 }
 
+void read_atm_pressure(){
+  Data.PS12 = PS_25bar_reading(PS12_pin);
+  Data.PS22 = PS_25bar_reading(PS12_pin);
+  Data.PS41 = PS_25bar_reading(PS12_pin);
+  Data.PS42 = PS_25bar_reading(PS12_pin);
+  Data.PS63 = PS_25bar_reading(PS12_pin);
+  Data.PS64 = PS_25bar_reading(PS12_pin);
+}
 uint16_t FM11_reading(int pin) {
   // Serial.print("FM11: ");
   // Serial.print(analogRead(pin));
@@ -950,7 +958,6 @@ void test_abort() {
   closeFile(); // close the test SD file
   reset_offset_pressure();
 }
-
 
 void serialSend() {
   Serial.println("------ Sensor Data ------");
