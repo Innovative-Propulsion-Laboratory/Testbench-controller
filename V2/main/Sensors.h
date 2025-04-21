@@ -146,6 +146,7 @@ void abort();
 int16_t PS_25bar_reading(int pin);
 int32_t PS_70bar_reading(int pin);
 int32_t PS_350bar_reading(int pin);
+void reset_offset_pressure();
 uint16_t FM11_reading(int pin);
 uint16_t FM21_reading(int pin);
 uint16_t FM61_reading(int pin);
