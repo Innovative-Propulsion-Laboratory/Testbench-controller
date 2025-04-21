@@ -77,7 +77,7 @@ void BB_enable(uint8_t tank, bool command) {  // tank: 1 = LOX, 2 = ETH, 6 = WAT
   reply(message, sizeof(message));
 }
 
-void BB_pressurization(uint16_t PS11, uint16_t PS21, uint16_t PS61, uint16_t PS62) {
+void BB_pressurization(int16_t PS11, int16_t PS21, int16_t PS61, int16_t PS62) {
   if (LOX_BB) {
     if (PS11 < PS11_BB_min) { setValve(SV33, 1); }
     if (PS11 > PS11_BB_max) { setValve(SV33, 0); }
