@@ -73,7 +73,7 @@ void loop() {
   if (test_will_begin) {
     BB_check_time = millis();
     // Check if the Bang Bang Pressurization works
-    while (check_BB_pressure() == false || (millis() - BB_check_time) < BB_check_duration){
+    while ((millis() - BB_check_time) < BB_check_duration && !check_BB_pressure()){
 
       //listen to commands
       Packet p = receivePacket();
