@@ -317,9 +317,9 @@ void decode(byte* instructions) {
       Sequence_data.Cooling_duration_after_end_burn = assembleUInt16(instructions[63], instructions[62]);
       Serial.print("Cooling duration after end of burn : ");
       Serial.println(Sequence_data.Cooling_duration_after_end_burn);
-  
+      
+      BB_enable(1, 1);
       BB_enable(2, 1);
-      BB_enable(6, 0);
       BB_enable(6, 1);
   
       test_will_begin = true;
