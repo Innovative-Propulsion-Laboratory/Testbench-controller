@@ -15,6 +15,8 @@ uint32_t BB_check_duration = 30000;
 
 #define debugf(fmt, ...) if (DEBUG) { char buf[128]; snprintf(buf, sizeof(buf), fmt, __VA_ARGS__); Serial.println(buf); }
 
+uint16_t Tchilldown;
+
 
 
 void setup() {
@@ -77,8 +79,6 @@ void loop() {
   }
   if (test_will_begin) {
     BB_check_time = millis();
-    byte message[4] = { 0xBB, 0xBB, 0xBB, 0xBB };
-    reply(message, sizeof(message));  
     // // Check if the Bang Bang Pressurization works
     while ((millis() - BB_check_time) < BB_check_duration && !check_BB_pressure() && test_will_begin){
 
@@ -100,6 +100,9 @@ void loop() {
     }
     else {
       send_string("error: BB target not reached",1);
+      BB_enable(1, 0);
+      BB_enable(2, 0);
+      BB_enable(6, 0);
       test_will_begin = false;
     }
   }
@@ -213,7 +216,7 @@ void decode(byte* instructions) {
       BB_param_set(2, value);
   
       Data.test_cooling = assembleUInt16(instructions[8], instructions[9]);
-      Serial.print("Cooling enable : ");
+      Serial.println("Cooling enable : ");
       Serial.println(Data.test_cooling);
   
       uint16_t value2 = assembleUInt16(instructions[11], instructions[10]);
@@ -338,8 +341,11 @@ void decode(byte* instructions) {
       Data.state = 1;
       Sequence();
     }
-    if (instructions[0] == 0xDC && instructions[1] == 0xBA && instructions[2] == 0xDC && instructions[3] == 0xBA) {  // Confirm test
+    if (instructions[0] == 0xDC && instructions[1] == 0xBA && instructions[2] == 0xDC && instructions[3] == 0xBA) {  // Stop test 
       test_will_begin = false;
+      BB_enable(1, 0);
+      BB_enable(2, 0);
+      BB_enable(6, 0);
       Serial.println("arreter le test");
     }
   }
@@ -388,263 +394,274 @@ void Sequence() {
         break;
 
       case 2:
-        {
-          if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
-            setValve(SV36, 0);
-      ////// End of PURGE //////
-      ////// start chilldown //////
-            if (Chilldown_count == 0){Chilldown_start = millis();}
-            setValve(SV13, 1);
-            Data.test_step++;
-          }
-          break;
+        debug("[2] Purge en cours");
+        if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
+          setValve(SV36, 0);
+          debug("→ Fermeture SV36 (fin purge)");
         }
-      case 3:
-        {
-          if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration)) {
-            setValve(SV13, 0);
-            Chilldown_count ++;
-            Data.test_step++;
-          }
-          break;
-        }
+        break;
+
+      case 3:  
+        if (Chilldown_count == 0) { Chilldown_start = millis(); } else {Chilldown_count++; debug("→ Ouverture SV13 (chilldown)");}
+        setValve(SV13, 1);
+        Tchilldown = millis();
+        Data.test_step++;
+        break;
+
       case 4:
-        {
-          if (millis() <= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
-            if (Data.TS12 >= Sequence_data.chill_temp) {
-              chill_temp_seems_ok = millis();
-              Data.test_step ++;
-            } else if (Chilldown_count >= Sequence_data.Max_chilldown) {
-              send_string("error: Chilldown failed", 1);
-              test_abort();
-            }
-            else {
-              T_confirm = millis();
-              Sequence_data.Confirm_to_purge_delay = 0;
-              Data.test_step = 2;
-           }
-          }
-          break;
-        }
-      case 5:
-        {
-          if ((Data.TS12 >= Sequence_data.chill_temp) && ((millis() - chill_temp_seems_ok) >= Chilldown_verified_duration)) {
-            Chilldown_finished = millis();
-            Chilldown_duration = Chilldown_finished - Chilldown_start;
-            Data.test_step++;
-            count_down_time = -10000;
-            byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)};
-            reply(message, sizeof(message));
-          } else if (Data.TS12 < Sequence_data.chill_temp) {
-            Data.test_step = 4;
-          }
-          break;
-        }
-      ////// end chilldown //////
-      ////// Start cooling //////
-      case 6:
-        {
-          if (Data.test_cooling) {
-            if (millis() >= (Chilldown_finished + Sequence_data.Chilldown_to_cooling)) {
-              setValve(SV63, 1);
-              PS63_duration = millis();
-              Data.test_step++;
-            }
-          } else if (millis() >= static_cast<uint32_t>(Chilldown_finished + 10000)) {
-            Data.test_step = 9;
-          }
-          count_down();
-          break;
-        }
-      ////// check cooling //////
-      case 7:
-        {
-          if (Data.PS63 >= Sequence_data.cooling_pressure) {
-            PS63_seems_rise = millis();
-            Data.test_step++;
-          } else if ((millis() - PS63_duration) >= Sequence_data.PS63_check_duration) {
-            send_string("error: Cooling not detected", 1);
-            test_abort();
-          }
-          count_down();
-          break;
-        }
-      case 8:
-        {
-          if ((Data.PS63 >= Sequence_data.cooling_pressure) && ((millis() - PS63_seems_rise) >= Sequence_data.PS63_verified_duration)) {
-            Data.test_step++;
-          } else if (Data.PS63 < Sequence_data.cooling_pressure) {
-            Data.test_step = 7;
-          }
-          count_down();
-          break;
-        }
-      ////// start igniter //////
-      case 9:
-        {
-          Ign_duration = millis();
-          digitalWrite(IGN_pin, HIGH);
-          Data.test_step++;
-          count_down();
-          break;
-        }
-      case 10:
-        {
-          ////// check igniter //////
-          if (digitalRead(IGN_check_pin) == HIGH) {
-            Ign_seems_on = millis();
-            Data.test_step++;
-          } else if ((millis() - Ign_duration) >= Sequence_data.Ign_check_duration) {
-            send_string("error: Ignition failed", 1);
-            test_abort();
-          }
-          count_down();
-          break;
-        }
-      case 11:
-        {
-          if ((digitalRead(IGN_check_pin) == HIGH) && ((millis() - Ign_seems_on) >= Sequence_data.Ign_verified_duration)) {
-            digitalWrite(IGN_pin, LOW);
-            T0 = millis();
-            ////// stop ignite //////
-            ////// start bypass //////
-            setValve(SV24, 1);
-            Data.test_step++;
-          } else {
-            Data.test_step = 10;
-          }
-          count_down();
-          break;
-        }
-      case 12:
-        {
-          if (millis() >= (T0 + Sequence_data.ETH_to_LOX_bypass)) {
-            Bypass_duration = millis();
-            setValve(SV13, 1);
-            Data.test_step++;
-          }
-          count_down();
-          break;
-        }
-      case 13:
-        {
-          ////// check bypass //////
-          if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure)) {
-            Bypass_duration = millis();
-            Data.test_step++;
-          } else if ((millis() - Bypass_duration) >= Sequence_data.Bypass_check_duration) {
-            send_string("error: Pressure too low with bypass valves", 1);
-            test_abort();
-          }
-          count_down();
-          break;
-        }
-      case 14:
-        {
-          if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure) && ((millis() - Bypass_duration) >= Sequence_data.Bypass_verified_duration)) {
-            ETH_open = millis();
-            ////// start main injection //////
-            setValve(SV22, 1);
-            Data.test_step++;
-          } else {
-            Data.test_step = 12;
-          }
-          count_down();
-          break;
-        }
-      case 15:
-        {
-          if (millis() >= (T0 + Sequence_data.ETH_to_LOX_main)) {
-            Main_duration = millis();
-            setValve(SV12, 1);
-            Data.test_step++;
-          }
-          count_down();
-          break;
-        }
-      case 16:
-        {
-          if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure)) {
-            Main_seems_rise = millis();
-            Data.test_step++;
-          } else if ((millis() - Main_duration) >= Sequence_data.Main_check_duration) {
-            send_string("error: Pressure too low with main valves", 1);
-            test_abort();
-          }
-          count_down();
-          break;
-        }
-      case 17:
-        {
-          ////// check main injection //////
-          if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure) && ((millis() - Main_seems_rise) >= Sequence_data.Main_verified_duration)) {
-            Data.test_step++;
-          } else {
-            Data.test_step = 15;
-          }
-          count_down();
-          break;
-        }
-      case 18:
-        {
-          ////// stop bypass //////
-          setValve(SV24, 0);
+        debug("[3] Chilldown ON");
+        if (millis() >= static_cast<uint32_t>(Tchilldown + Sequence_data.Chilldown_on_duration)) {
           setValve(SV13, 0);
-          Nominal_pressure_reached = millis();
+          debug("→ Fermeture SV13 (chilldown OFF)");
           Data.test_step++;
-          count_down();
-          break;
         }
+        break;
+
+      case 5:
+        debug("[4] Chilldown OFF / Verification");
+        if (millis() <= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
+          if (Data.TS12 <= Sequence_data.chill_temp) {
+            debug("✓ Temperature chilldown atteinte");
+            chill_temp_seems_ok = millis();
+            Data.test_step++;
+          } else if (Chilldown_count >= Sequence_data.Max_chilldown) {
+            debug("✖ Chilldown echoue");
+            send_string("error: Chilldown failed", 1);
+            test_abort();
+          } else {
+            debug("↻ Chilldown supplementaire necessaire");
+            Tchilldown = millis();
+            Sequence_data.Confirm_to_purge_delay = 0;
+            Data.test_step = 3;
+          }
+        }
+        break;
+
+      case 6:
+        debug("[5] Verif chilldown stable");
+        if ((Data.TS12 <= Sequence_data.chill_temp) && ((millis() - chill_temp_seems_ok) >= Chilldown_verified_duration)) {
+          Chilldown_finished = millis();
+          Chilldown_duration = Chilldown_finished - Chilldown_start;
+          debugf("✓ Chilldown termine en %d ms", Chilldown_duration);
+          Data.test_step++;
+          count_down_time = -10000;
+          byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)};
+          reply(message, sizeof(message));
+        } else if (Data.TS12 < Sequence_data.chill_temp) {
+          Data.test_step = 4;
+        }
+        break;
+
+      case 7:
+        if (Data.test_cooling) {
+          debug("[6] Demarrage refroidissement");
+          if (millis() >= (Chilldown_finished + Sequence_data.Chilldown_to_cooling)) {
+            setValve(SV63, 1);
+            debug("→ Ouverture SV63 (refroidissement)");
+            PS63_duration = millis();
+            Data.test_step++;
+          }
+        } else if (millis() >= static_cast<uint32_t>(Chilldown_finished + 10000)) {
+          Data.test_step = 9;
+        }
+        count_down();
+        break;
+
+      case 8:
+        debug("[7] Verif pression refroidissement");
+        if (Data.PS63 >= Sequence_data.cooling_pressure) {
+          PS63_seems_rise = millis();
+          debug("✓ Refroidissement detecte");
+          Data.test_step++;
+        } else if ((millis() - PS63_duration) >= Sequence_data.PS63_check_duration) {
+          debug("✖ Erreur: Refroidissement non detecte");
+          send_string("error: Cooling not detected", 1);
+          test_abort();
+        }
+        count_down();
+        break;
+
+      case 9:
+        debug("[8] Stabilisation refroidissement");
+        if ((Data.PS63 >= Sequence_data.cooling_pressure) && ((millis() - PS63_seems_rise) >= Sequence_data.PS63_verified_duration)) {
+          Data.test_step++;
+        } else if (Data.PS63 < Sequence_data.cooling_pressure) {
+          Data.test_step = 7;
+        }
+        count_down();
+        break;
+
+      case 10:
+        debug("[9] Allumage");
+        Ign_duration = millis();
+        digitalWrite(IGN_pin, HIGH);
+        Data.test_step++;
+        count_down();
+        break;
+
+      case 11:
+        debug("[10] Verif allumage");
+        if (digitalRead(IGN_check_pin) == LOW) {
+          Ign_seems_on = millis();
+          debug("✓ Allumeur actif");
+          Data.test_step++;
+        } else if ((millis() - Ign_duration) >= Sequence_data.Ign_check_duration) {
+          debug("✖ Erreur: Allumage rate");
+          send_string("error: Ignition failed", 1);
+          test_abort();
+        }
+        count_down();
+        break;
+
+      case 12:
+        debug("[11] Confirmation allumage et bypass");
+        if ((digitalRead(IGN_check_pin) == LOW) && ((millis() - Ign_seems_on) >= Sequence_data.Ign_verified_duration)) {
+          digitalWrite(IGN_pin, LOW);
+          T0 = millis();
+          setValve(SV24, 1);
+          debug("→ Ouverture SV24 (bypass)");
+          Data.test_step++;
+        } else {
+          Data.test_step = 10;
+        }
+        count_down();
+        break;
+
+      case 13:
+        debug("[12] Attente injection LOX");
+        if (millis() >= (T0 + Sequence_data.ETH_to_LOX_bypass)) {
+          Bypass_duration = millis();
+          setValve(SV13, 1);
+          debug("→ Ouverture SV13 (LOX)");
+          Data.test_step++;
+        }
+        count_down();
+        break;
+
+      case 14:
+        debug("[13] Verif bypass");
+        if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure)) {
+          Bypass_duration = millis();
+          debug("✓ Pressions bypass OK");
+          Data.test_step++;
+        } else if ((millis() - Bypass_duration) >= Sequence_data.Bypass_check_duration) {
+          debug("✖ Erreur: Pression trop basse (bypass)");
+          send_string("error: Pressure too low with bypass valves", 1);
+          test_abort();
+        }
+        count_down();
+        break;
+
+      case 15:
+        debug("[14] Stabilisation bypass");
+        if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure) && ((millis() - Bypass_duration) >= Sequence_data.Bypass_verified_duration)) {
+          ETH_open = millis();
+          setValve(SV22, 1);
+          debug("→ Ouverture SV22 (ETH)");
+          Data.test_step++;
+        } else {
+          Data.test_step = 12;
+        }
+        count_down();
+        break;
+
+      case 16:
+        debug("[15] Injection LOX");
+        if (millis() >= (T0 + Sequence_data.ETH_to_LOX_main)) {
+          Main_duration = millis();
+          setValve(SV12, 1);
+          debug("→ Ouverture SV12 (LOX)");
+          Data.test_step++;
+        }
+        count_down();
+        break;
+
+      case 17:
+        debug("[16] Verif pression injection");
+        if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure)) {
+          Main_seems_rise = millis();
+          debug("✓ Pressions injection OK");
+          Data.test_step++;
+        } else if ((millis() - Main_duration) >= Sequence_data.Main_check_duration) {
+          debug("✖ Erreur: Pression injection trop faible");
+          send_string("error: Pressure too low with main valves", 1);
+          test_abort();
+        }
+        count_down();
+        break;
+
+      case 18:
+        debug("[17] Stabilisation injection");
+        if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure) && ((millis() - Main_seems_rise) >= Sequence_data.Main_verified_duration)) {
+          Data.test_step++;
+        } else {
+          Data.test_step = 15;
+        }
+        count_down();
+        break;
+
       case 19:
-        {
-          // TVC launch, not implemented
-          Data.test_step++;
-          count_down();
-          break;
-        }
+        debug("[18] Fermeture bypass");
+        setValve(SV24, 0);
+        setValve(SV13, 0);
+        debug("→ Fermeture SV24 et SV13");
+        Nominal_pressure_reached = millis();
+        Data.test_step++;
+        count_down();
+        break;
+
       case 20:
-        {
-          ////// stop main injection and purge //////
-          if (millis() >= (T0 + Sequence_data.burn_duration)) {
-            setValve(SV12, 0);
-            setValve(SV36, 1);
-            Data.test_step++;
-          }
-          count_down();
-          break;
-        }
+        debug("[19] TVC (non implemente)");
+        Data.test_step++;
+        count_down();
+        break;
+
       case 21:
-        {
-          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay)) {
-            setValve(SV22, 0);
-            setValve(SV35, 1);
-            Data.test_step++;
-          }
-          count_down();
-          break;
+        debug("[20] Fin de combustion, purge LOX");
+        if (millis() >= (T0 + Sequence_data.burn_duration)) {
+          setValve(SV12, 0);
+          setValve(SV36, 1);
+          debug("→ Fermeture SV12, Ouverture SV36");
+          Data.test_step++;
         }
+        count_down();
+        break;
+
       case 22:
-        {
-          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2)) {
-            setValve(SV36, 0);
-            setValve(SV35, 0);
-            Data.test_step++;
-          }
-          count_down();
-          break;
+        debug("[21] Fermeture ETH, purge ETH");
+        if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay)) {
+          setValve(SV22, 0);
+          setValve(SV35, 1);
+          debug("→ Fermeture SV22, Ouverture SV35");
+          Data.test_step++;
         }
-      ////// stop cooling //////
+        count_down();
+        break;
+
       case 23:
-        {
-          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2 + Sequence_data.Cooling_duration_after_end_burn)) {
-            setValve(SV63, 0);
-            Data.state = 0;
-          }
-          count_down();
-          break;
+        debug("[22] Fin de purge");
+        if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2)) {
+          setValve(SV36, 0);
+          setValve(SV35, 0);
+          debug("→ Fermeture SV36 et SV35");
+          Data.test_step++;
         }
+        count_down();
+        break;
+
+      case 24:
+        debug("[23] Fin refroidissement");
+        if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.burn_duration + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2 + Sequence_data.Cooling_duration_after_end_burn)) {
+          setValve(SV63, 0);
+          debug("→ Fermeture SV63 (fin refroidissement)");
+          Data.state = 0;
+        }
+        count_down();
+        break;
     }
-  } while (Data.state == 1);
+  } while (Data.state == 1) && (test_will_begin);
+
+  debug("=== Fin de sequence ===");
   reset_offset_pressure();
   Data.test_cooling = 1;
   BB_enable(1, 0);
@@ -731,13 +748,13 @@ bool check_BB_pressure() {
     && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)
     && avg_PS61 > (WATER_BB_min - 200) && avg_PS61 < (WATER_BB_min + 200)
     && avg_PS62 > (WATER_BB_min - 200) && avg_PS62 < (WATER_BB_min + 200)){
-      Serial.println("pressure reached");
+      // Serial.println("pressure reached");
       return true;
   }
   }
   else if (avg_PS11 > (PS11_BB_min - 200) && avg_PS11 < (PS11_BB_max + 200)
   && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)) {
-    Serial.println("pressure reached");
+    // Serial.println("pressure reached");
     return true;
   }
   return false;
