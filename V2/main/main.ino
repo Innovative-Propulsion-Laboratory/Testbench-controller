@@ -15,6 +15,8 @@ uint32_t BB_check_duration = 30000;
 
 #define debugf(fmt, ...) if (DEBUG) { char buf[128]; snprintf(buf, sizeof(buf), fmt, __VA_ARGS__); Serial.println(buf); }
 
+uint16_t Tchilldown;
+
 
 
 void setup() {
@@ -77,8 +79,6 @@ void loop() {
   }
   if (test_will_begin) {
     BB_check_time = millis();
-    byte message[4] = { 0xBB, 0xBB, 0xBB, 0xBB };
-    reply(message, sizeof(message));  
     // // Check if the Bang Bang Pressurization works
     while ((millis() - BB_check_time) < BB_check_duration && !check_BB_pressure() && test_will_begin){
 
@@ -100,6 +100,9 @@ void loop() {
     }
     else {
       send_string("error: BB target not reached",1);
+      BB_enable(1, 0);
+      BB_enable(2, 0);
+      BB_enable(6, 0);
       test_will_begin = false;
     }
   }
@@ -213,7 +216,7 @@ void decode(byte* instructions) {
       BB_param_set(2, value);
   
       Data.test_cooling = assembleUInt16(instructions[8], instructions[9]);
-      Serial.print("Cooling enable : ");
+      Serial.println("Cooling enable : ");
       Serial.println(Data.test_cooling);
   
       uint16_t value2 = assembleUInt16(instructions[11], instructions[10]);
@@ -338,8 +341,11 @@ void decode(byte* instructions) {
       Data.state = 1;
       Sequence();
     }
-    if (instructions[0] == 0xDC && instructions[1] == 0xBA && instructions[2] == 0xDC && instructions[3] == 0xBA) {  // Confirm test
+    if (instructions[0] == 0xDC && instructions[1] == 0xBA && instructions[2] == 0xDC && instructions[3] == 0xBA) {  // Stop test 
       test_will_begin = false;
+      BB_enable(1, 0);
+      BB_enable(2, 0);
+      BB_enable(6, 0);
       Serial.println("arreter le test");
     }
   }
@@ -652,7 +658,7 @@ void Sequence() {
         count_down();
         break;
     }
-  } while (Data.state == 1) && (test_will_begin);
+  } while ((Data.state == 1) && (test_will_begin));
 
   debug("=== Fin de sequence ===");
   reset_offset_pressure();
@@ -741,13 +747,13 @@ bool check_BB_pressure() {
     && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)
     && avg_PS61 > (WATER_BB_min - 200) && avg_PS61 < (WATER_BB_min + 200)
     && avg_PS62 > (WATER_BB_min - 200) && avg_PS62 < (WATER_BB_min + 200)){
-      Serial.println("pressure reached");
+      // Serial.println("pressure reached");
       return true;
   }
   }
   else if (avg_PS11 > (PS11_BB_min - 200) && avg_PS11 < (PS11_BB_max + 200)
   && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)) {
-    Serial.println("pressure reached");
+    // Serial.println("pressure reached");
     return true;
   }
   return false;
