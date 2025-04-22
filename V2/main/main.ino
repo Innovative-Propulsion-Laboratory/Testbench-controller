@@ -64,7 +64,7 @@ void loop() {
   }
 
   // Send data at 20Hz
-  if (millis() - time_last_reading >= 50) {
+  if (millis() - time_last_reading >= data_send_rate) {
     sensorsLoop();
     time_last_reading = millis();
   }
@@ -96,7 +96,7 @@ void loop() {
       test_will_begin = false;
     }
   }
-  // Update BB pressurization more ofsten than sensorsLoop
+  // Update BB pressurization more often than sensorsLoop
   BBLoop();
 }
 
@@ -357,14 +357,15 @@ void Sequence() {
 
   do {
     BBLoop();
-    // Send data at 20Hz
-    if (millis() - time_last_reading >= data_send_rate) {
+    // Send data at 200Hz
+    if (millis() - time_last_reading >= test_send_rate) {
       sensorsLoop();
       time_last_reading = millis();
     }
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {decode(p.data);}
     if (p.data != nullptr) {delete[] p.data;}
+    Serial.print("Data.test_step: "); Serial.println(Data.test_step);
 
     switch (Data.test_step) {
       ////// PURGE //////
@@ -400,7 +401,7 @@ void Sequence() {
       case 4:
         {
           if (millis() <= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
-            if (Data.TS12 >= Sequence_data.chill_temp) {
+            if (Data.TS12 <= Sequence_data.chill_temp) {
               chill_temp_seems_ok = millis();
               Data.test_step ++;
             } else if (Chilldown_count >= Sequence_data.Max_chilldown) {
@@ -480,7 +481,7 @@ void Sequence() {
       case 10:
         {
           ////// check igniter //////
-          if (digitalRead(IGN_check_pin) == HIGH) {
+          if (digitalRead(IGN_check_pin) == LOW) {
             Ign_seems_on = millis();
             Data.test_step++;
           } else if ((millis() - Ign_duration) >= Sequence_data.Ign_check_duration) {

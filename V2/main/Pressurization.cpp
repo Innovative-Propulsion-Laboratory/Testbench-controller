@@ -4,16 +4,16 @@
 // --------------------- VARIABLES INITIALIZATION ------------------------------
 bool LOX_BB = 0, ETH_BB = 0, WATER_BB = 0;
 
-uint16_t PS11_BB_min = 15800, PS11_BB_max = 16200;
-uint16_t PS11_BBLW = 15, PS11_BBUW = 17, PS11_BB_ulim = 22000;
+int16_t PS11_BB_min = 15800, PS11_BB_max = 16200;
+int16_t PS11_BBLW = 15, PS11_BBUW = 17, PS11_BB_ulim = 22000;
 
-uint16_t PS21_BB_min = 15800, PS21_BB_max = 16200;
-uint16_t PS21_BBLW = 15000, PS21_BBUW = 17000, PS21_BB_ulim = 22000;
+int16_t PS21_BBLW = 15000, PS21_BBUW = 17000, PS21_BB_ulim = 22000;
+int16_t PS21_BB_min = 15800, PS21_BB_max = 16200;
 
-uint16_t WATER_BB_min = 9800, WATER_BB_max = 10200;
-uint16_t WATER_BBLW = 9000, WATER_BBUW = 11000, WATER_BB_ulim = 12000;
+int16_t WATER_BB_min = 9800, WATER_BB_max = 10200;
+int16_t WATER_BBLW = 9000, WATER_BBUW = 11000, WATER_BB_ulim = 12000;
 
-void BB_param_set(uint8_t tank, uint16_t pressure) {  
+void BB_param_set(uint8_t tank, int16_t pressure) {  
   /* Set the pressure limits for the chosen tank
     !!! THIS FUNCTION DOES NOT ENABLE THE BANG-BANG PRESSURIZATION !!!
      BB_min/BB_max: range of the wanted pressure

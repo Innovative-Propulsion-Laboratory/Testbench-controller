@@ -7,7 +7,7 @@ uint8_t cr0, fault11, fault12, fault41, fault42, fault61, fault62; // Thermocoup
 
 
 uint32_t time_last_reading = 0;
-unsigned long t_last_data_packet = 0, data_send_rate = 50;
+unsigned long t_last_data_packet = 0, data_send_rate = 50, data_send_rate = 5;
 
 data Data;
 
