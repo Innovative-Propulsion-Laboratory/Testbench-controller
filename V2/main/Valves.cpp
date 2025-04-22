@@ -51,11 +51,11 @@ void setValve(uint8_t ID, bool command) {
     valvePositions &= ~(1 << ID);
   }
 
-  // Serial.println(valvePositions);
-  // Serial.print("Valve ");
-  // Serial.print(ID);
-  // Serial.print(" set to ");
-  // Serial.println(command ? "open" : "closed");
+  Serial.println(valvePositions);
+  Serial.print("Valve ");
+  Serial.print(ID);
+  Serial.print(" set to ");
+  Serial.println(command ? "open" : "closed");
 }
 
 void Set_valve_position() {

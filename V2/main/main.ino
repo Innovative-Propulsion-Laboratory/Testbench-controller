@@ -9,6 +9,13 @@ uint32_t BB_check_duration = 30000;
 // Sequence
 #define IGN_pin 33
 #define IGN_check_pin 39
+#define DEBUG true  // Mettre sur false pour couper les logs
+
+#define debug(msg) if (DEBUG) { Serial.println(msg); }
+
+#define debugf(fmt, ...) if (DEBUG) { char buf[128]; snprintf(buf, sizeof(buf), fmt, __VA_ARGS__); Serial.println(buf); }
+
+
 
 void setup() {
   Serial.begin(9600);  //initialize Serial Port
@@ -71,9 +78,9 @@ void loop() {
   if (test_will_begin) {
     BB_check_time = millis();
     byte message[4] = { 0xBB, 0xBB, 0xBB, 0xBB };
-    reply(message, sizeof(message));    
-    // Check if the Bang Bang Pressurization works
-    while ((millis() - BB_check_time) < BB_check_duration && !check_BB_pressure()){
+    reply(message, sizeof(message));  
+    // // Check if the Bang Bang Pressurization works
+    while ((millis() - BB_check_time) < BB_check_duration && !check_BB_pressure() && test_will_begin){
 
       //listen to commands
       Packet p = receivePacket();
@@ -347,6 +354,7 @@ void count_down() {
   }
 }
 
+
 void Sequence() {
   newFile(); // Create a new SD file at each test
 
@@ -354,6 +362,7 @@ void Sequence() {
   Data.test_step = 1;
   Chilldown_count = 0;
   set_offset_pressure();
+  debug("=== Debut de la sequence ===");
 
   do {
     BBLoop();
@@ -362,21 +371,22 @@ void Sequence() {
       sensorsLoop();
       time_last_reading = millis();
     }
+
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {decode(p.data);}
     if (p.data != nullptr) {delete[] p.data;}
     Serial.print("Data.test_step: "); Serial.println(Data.test_step);
 
     switch (Data.test_step) {
-      ////// PURGE //////
       case 1:
-        {
-          if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay)) {
-            setValve(SV36, 1);
-            Data.test_step++;
-          }
-          break;
+        debug("[1] Attente avant purge");
+        if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay)) {
+          setValve(SV36, 1);
+          debug("→ Ouverture SV36 (purge)");
+          Data.test_step++;
         }
+        break;
+
       case 2:
         {
           if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
@@ -401,7 +411,7 @@ void Sequence() {
       case 4:
         {
           if (millis() <= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
-            if (Data.TS12 <= Sequence_data.chill_temp) {
+            if (Data.TS12 >= Sequence_data.chill_temp) {
               chill_temp_seems_ok = millis();
               Data.test_step ++;
             } else if (Chilldown_count >= Sequence_data.Max_chilldown) {
@@ -481,7 +491,7 @@ void Sequence() {
       case 10:
         {
           ////// check igniter //////
-          if (digitalRead(IGN_check_pin) == LOW) {
+          if (digitalRead(IGN_check_pin) == HIGH) {
             Ign_seems_on = millis();
             Data.test_step++;
           } else if ((millis() - Ign_duration) >= Sequence_data.Ign_check_duration) {
@@ -645,7 +655,7 @@ void Sequence() {
   test_will_begin = false;
 }
 
-float average(byte* L, int length) {
+float average(int32_t* L, int length) {
   float sum = 0;
   for (int i = 0; i < length; i++) {
     sum += L[i];
@@ -655,12 +665,12 @@ float average(byte* L, int length) {
 
 void set_offset_pressure() {  // set sensors at 0
   const int N = 10;
-  byte average_PS12_data[N];
-  byte average_PS22_data[N];
-  byte average_PS41_data[N];
-  byte average_PS42_data[N];
-  byte average_PS63_data[N];
-  byte average_PS64_data[N];
+  int32_t average_PS12_data[N];
+  int32_t average_PS22_data[N];
+  int32_t average_PS41_data[N];
+  int32_t average_PS42_data[N];
+  int32_t average_PS63_data[N];
+  int32_t average_PS64_data[N];
 
   for (int i = 0; i < N; i++) {
     if (millis() - time_last_reading >= 50) {
@@ -693,18 +703,42 @@ void set_offset_pressure() {  // set sensors at 0
 }
 
 bool check_BB_pressure() {
-  BBLoop();
+  const int N = 100;
+  int32_t average_PS11_data[N];
+  int32_t average_PS21_data[N];
+  int32_t average_PS61_data[N];
+  int32_t average_PS62_data[N];
+
+  for (int i = 0; i < N; i++) {
+    BBLoop();
+    average_PS11_data[i] = Data.PS11;
+    average_PS21_data[i] = Data.PS21;
+    average_PS61_data[i] = Data.PS61;
+    average_PS62_data[i] = Data.PS62;
+  }
+  
+  avg_PS11 = average(average_PS11_data, N);
+  avg_PS21 = average(average_PS21_data, N);
+  avg_PS61 = average(average_PS61_data, N);
+  avg_PS62 = average(average_PS62_data, N);
+  // Serial.print(avg_PS11);
+  // Serial.print(avg_PS21);
+  // Serial.print(avg_PS61);
+  // Serial.println(avg_PS62);
+
   if (Data.test_cooling == 1){
-    if (Data.PS11 > (PS11_BB_min - 200) && Data.PS11 < (PS11_BB_max + 200)
-    && Data.PS21 > (PS21_BB_min - 200) && Data.PS21 < (PS21_BB_max + 200)
-    && Data.PS61 > (WATER_BB_min - 200) && Data.PS61 < (WATER_BB_min + 200)
-    && Data.PS62 > (WATER_BB_min - 200) && Data.PS62 < (WATER_BB_min + 200)){
+    if (avg_PS11 > (PS11_BB_min - 200) && avg_PS11 < (PS11_BB_max + 200)
+    && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)
+    && avg_PS61 > (WATER_BB_min - 200) && avg_PS61 < (WATER_BB_min + 200)
+    && avg_PS62 > (WATER_BB_min - 200) && avg_PS62 < (WATER_BB_min + 200)){
+      Serial.println("pressure reached");
       return true;
   }
   }
-  else if (Data.PS11 > (PS11_BB_min - 200) && Data.PS11 < (PS11_BB_max + 200)
-  && Data.PS21 > (PS21_BB_min - 200) && Data.PS21 < (PS21_BB_max + 200)) {
+  else if (avg_PS11 > (PS11_BB_min - 200) && avg_PS11 < (PS11_BB_max + 200)
+  && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)) {
+    Serial.println("pressure reached");
     return true;
   }
-  else {return false;}
+  return false;
 }

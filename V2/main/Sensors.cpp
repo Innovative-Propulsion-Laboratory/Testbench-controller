@@ -906,23 +906,25 @@ void test_abort() {
   	SV36 closed
   	cooling_duration_after_burn
   	SV63 closed*/
+  Serial.println("abort");
 
-  if (Data.test_step < 9) {
+
+  if (Data.test_step < 10) {
     setValve(SV63, 0); // close SV63
     Data.state = 0; // go back to active state
     Data.test_step = 0; // go back to initial state
     Data.test_cooling = 1; // enable cooling cycle valuesCheck again
   }
 
-  else if (Data.test_step >= 9){
-    Data.test_step = 20; // go to purge step
+  else if (Data.test_step >= 10){
+    Data.test_step = 21; // go to purge step
     Data.state = 2; // set emergency state
     T0 = millis(); // reset timer
     do {
       sensorsLoop();
       switch (Data.test_step) {
         ////// stop main injection and purge //////
-        case 20:
+        case 21:
         {
 
           setValve(SV12, 0);
@@ -931,7 +933,7 @@ void test_abort() {
           Data.test_step++;
           break;
         }
-      case 21:
+      case 22:
         {
           if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay)) {
             setValve(SV22, 0);
@@ -941,7 +943,7 @@ void test_abort() {
           }
           break;
         }
-      case 22:
+      case 23:
         {
           if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2)) {
             setValve(SV36, 0);
@@ -951,7 +953,7 @@ void test_abort() {
           break;
         }
       ////// stop cooling //////
-      case 23:
+      case 24:
         {
           if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2 + Sequence_data.Cooling_duration_after_end_burn)) {
             setValve(SV63, 0);
