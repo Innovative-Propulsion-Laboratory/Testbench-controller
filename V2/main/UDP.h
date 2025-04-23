@@ -9,6 +9,7 @@ using namespace qindesign::network;
 extern EthernetUDP udp;
 extern IPAddress senderIP;
 extern uint16_t senderPort;
+extern IPAddress ip;
 
 struct Packet {
   byte* data;

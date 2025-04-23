@@ -15,8 +15,6 @@ uint32_t BB_check_duration = 30000;
 
 #define debugf(fmt, ...) if (DEBUG) { char buf[128]; snprintf(buf, sizeof(buf), fmt, __VA_ARGS__); Serial.println(buf); }
 
-uint16_t Tchilldown;
-
 
 
 void setup() {
@@ -28,7 +26,7 @@ void setup() {
     Serial.print(CrashReport);
   }
   pinMode(IGN_pin, OUTPUT);
-  // pinMode(IGN_check_pin, INPUT);  // only on PCB V2
+  pinMode(IGN_check_pin, INPUT);  // only on PCB V2
 
   // Disable all CS pins in the setup
   pinMode(1, OUTPUT);
@@ -96,7 +94,8 @@ void loop() {
 
     if (check_BB_pressure() == true){
       byte message[4] = { 0xBB, 0xBB, 0xBB, 0xBB };
-      reply(message, sizeof(message));      
+      reply(message, sizeof(message));     
+      test_will_begin = false;
     }
     else {
       send_string("error: BB target not reached",1);
@@ -117,6 +116,7 @@ uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {  // to assemble 2 b
 void decode(byte* instructions) {
   if (Data.state == 1){
     if (instructions[0] == 0xCC && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC) {
+      Data.state = 0;
       test_abort();
     }
   }
@@ -244,7 +244,7 @@ void decode(byte* instructions) {
       Serial.print("Chilldown OFF duration : ");
       Serial.println(Sequence_data.Chilldown_off_duration);
   
-      Sequence_data.chill_temp = assembleUInt16(instructions[23], instructions[22]) / 10;
+      Sequence_data.chill_temp = assembleUInt16(instructions[23], instructions[22]);
       Serial.print("Chill temperature (°C) : ");
       Serial.println(Sequence_data.chill_temp);
   
@@ -352,10 +352,11 @@ void decode(byte* instructions) {
 }
 
 void count_down() {
-  if (millis() - last_send >= 200) {
+  if (millis() - last_send >= 50) {
     last_send = millis();
-    count_down_time += 200;
+    count_down_time += 50;
     byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF) };
+    Serial.println( assembleUInt16((byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)));
     reply(message, sizeof(message));
   }
 }
@@ -363,8 +364,8 @@ void count_down() {
 
 void Sequence() {
   newFile(); // Create a new SD file at each test
-
   T_confirm = millis();
+  Serial.println(millis());
   Data.test_step = 1;
   Chilldown_count = 0;
   set_offset_pressure();
@@ -381,12 +382,18 @@ void Sequence() {
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {decode(p.data);}
     if (p.data != nullptr) {delete[] p.data;}
-    Serial.print("Data.test_step: "); Serial.println(Data.test_step);
+    // Serial.print("Data.test_step: "); Serial.println(Data.test_step);
 
     switch (Data.test_step) {
       case 1:
         debug("[1] Attente avant purge");
         if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay)) {
+          Serial.println("Activation : ");
+          Serial.println(millis());
+          Serial.println("T_confirm : ");
+          Serial.println(T_confirm);
+          Serial.println("Confimr to purge : ");
+          Serial.println(Sequence_data.Confirm_to_purge_delay);
           setValve(SV36, 1);
           debug("→ Ouverture SV36 (purge)");
           Data.test_step++;
@@ -395,22 +402,32 @@ void Sequence() {
 
       case 2:
         debug("[2] Purge en cours");
-        if (millis() >= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
+        if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
           setValve(SV36, 0);
           debug("→ Fermeture SV36 (fin purge)");
+          Serial.println("Activation : ");
+          Serial.println(millis());
+          Data.test_step++;
         }
         break;
 
-      case 3:  
-        if (Chilldown_count == 0) { Chilldown_start = millis(); } else {Chilldown_count++; debug("→ Ouverture SV13 (chilldown)");}
+      case 3:
+        if (millis() - time_last_reading >= data_send_rate) {
+        debug("[3] Chilldown ON");
+        time_last_reading = millis();
+        }
+          
+        if (Chilldown_count == 0) { 
+          Chilldown_start = millis();
+        } 
+        Serial.println("→ Ouverture SV13 (chilldown) ON");
         setValve(SV13, 1);
         Tchilldown = millis();
         Data.test_step++;
         break;
 
       case 4:
-        debug("[3] Chilldown ON");
-        if (millis() >= static_cast<uint32_t>(Tchilldown + Sequence_data.Chilldown_on_duration)) {
+        if (millis() >= (Tchilldown + Sequence_data.Chilldown_on_duration)) {
           setValve(SV13, 0);
           debug("→ Fermeture SV13 (chilldown OFF)");
           Data.test_step++;
@@ -418,9 +435,8 @@ void Sequence() {
         break;
 
       case 5:
-        debug("[4] Chilldown OFF / Verification");
-        if (millis() <= static_cast<uint32_t>(T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1 + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
-          if (Data.TS12 <= Sequence_data.chill_temp) {
+        if (millis() <= (Tchilldown + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
+          if (Data.TS12 <= (Sequence_data.chill_temp*10)) {
             debug("✓ Temperature chilldown atteinte");
             chill_temp_seems_ok = millis();
             Data.test_step++;
@@ -430,8 +446,15 @@ void Sequence() {
             test_abort();
           } else {
             debug("↻ Chilldown supplementaire necessaire");
+            Serial.println("Chilldown count : ");
+            Serial.println(Chilldown_count);
+            Serial.println("TS12 temp : ");
+            Serial.println(Data.TS12);
+            Serial.println("goal temp : ");
+            Serial.println(Sequence_data.chill_temp*10);
             Tchilldown = millis();
             Sequence_data.Confirm_to_purge_delay = 0;
+            Chilldown_count++; 
             Data.test_step = 3;
           }
         }
@@ -439,15 +462,17 @@ void Sequence() {
 
       case 6:
         debug("[5] Verif chilldown stable");
-        if ((Data.TS12 <= Sequence_data.chill_temp) && ((millis() - chill_temp_seems_ok) >= Chilldown_verified_duration)) {
+        if ((Data.TS12 <= (Sequence_data.chill_temp*10)) && ((millis() - chill_temp_seems_ok) >= Chilldown_verified_duration)) {
           Chilldown_finished = millis();
           Chilldown_duration = Chilldown_finished - Chilldown_start;
-          debugf("✓ Chilldown termine en %d ms", Chilldown_duration);
+          debugf("✓ Chilldown termine en %lu ms", Chilldown_duration);
           Data.test_step++;
           count_down_time = -10000;
           byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)};
           reply(message, sizeof(message));
-        } else if (Data.TS12 < Sequence_data.chill_temp) {
+          Serial.println("envoie countdown");//debug
+          delay(1000);//debug
+        } else if (Data.TS12 < (Sequence_data.chill_temp*10)) {
           Data.test_step = 4;
         }
         break;
@@ -462,7 +487,7 @@ void Sequence() {
             Data.test_step++;
           }
         } else if (millis() >= static_cast<uint32_t>(Chilldown_finished + 10000)) {
-          Data.test_step = 9;
+          Data.test_step = 10;
         }
         count_down();
         break;
@@ -486,7 +511,7 @@ void Sequence() {
         if ((Data.PS63 >= Sequence_data.cooling_pressure) && ((millis() - PS63_seems_rise) >= Sequence_data.PS63_verified_duration)) {
           Data.test_step++;
         } else if (Data.PS63 < Sequence_data.cooling_pressure) {
-          Data.test_step = 7;
+          Data.test_step = 8;
         }
         count_down();
         break;
@@ -522,7 +547,7 @@ void Sequence() {
           debug("→ Ouverture SV24 (bypass)");
           Data.test_step++;
         } else {
-          Data.test_step = 10;
+          Data.test_step = 11;
         }
         count_down();
         break;
@@ -560,7 +585,7 @@ void Sequence() {
           debug("→ Ouverture SV22 (ETH)");
           Data.test_step++;
         } else {
-          Data.test_step = 12;
+          Data.test_step = 13;
         }
         count_down();
         break;
@@ -595,7 +620,7 @@ void Sequence() {
         if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure) && ((millis() - Main_seems_rise) >= Sequence_data.Main_verified_duration)) {
           Data.test_step++;
         } else {
-          Data.test_step = 15;
+          Data.test_step = 16;
         }
         count_down();
         break;
@@ -659,17 +684,18 @@ void Sequence() {
         count_down();
         break;
     }
-  } while (Data.state == 1) && (test_will_begin);
+  } while (Data.state == 1);
 
   debug("=== Fin de sequence ===");
   reset_offset_pressure();
-  Data.test_cooling = 1;
+  Data.test_cooling = 0;
   BB_enable(1, 0);
   BB_enable(2, 0);
   BB_enable(6, 0);
   byte message[4] = {0xAB, 0xCD, 0xAB, 0xCD};
   reply(message, sizeof(message));
   test_will_begin = false;
+  Serial.println("sortie de boucle");
 }
 
 float average(int32_t* L, int length) {
