@@ -7,8 +7,6 @@ uint32_t BB_check_time;
 uint32_t BB_check_duration = 30000;
 
 // Sequence
-#define IGN_pin 33
-#define IGN_check_pin 34
 #define DEBUG true  // Mettre sur false pour couper les logs
 
 #define debug(msg) if (DEBUG) { Serial.println(msg); }

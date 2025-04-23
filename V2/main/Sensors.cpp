@@ -106,6 +106,9 @@ bool PS_WATER_TLL_active = 0, PS_WATER_BBLW_active = 0, PS_WATER_BBUW_active = 0
 // Thermocouples:
 bool TS62_UW_active = 0, TS62_TUL_active = 0;
 
+// Igniter:
+uint32_t IGN_CHECK_active;
+
 // Pressure sensors:
 uint32_t PS11_UL_time = 0, PS11_BBLW_time = 0, PS11_BBUW_time = 0;
 uint32_t PS12_TLW_time = 0, PS12_TUW_time = 0;
@@ -120,6 +123,8 @@ uint32_t PS_WATER_TLL_time = 0, PS_WATER_BBLW_time = 0, PS_WATER_BBUW_time = 0, 
 // Thermocouples:
 uint32_t TS62_UW_time = 0, TS62_TUL_time = 0;
 
+// Igniter:
+uint32_t IGN_CHECK_time;
 
 uint16_t message_delay = 2000;
 // Pressure sensors:
@@ -135,6 +140,11 @@ uint32_t last_PSWATER_UL_msg, last_PSWATER_BBUW_msg, last_PSWATER_BBLW_msg, last
 
 // Thermocouples:
 uint32_t last_TS62_UW_msg, last_TS62_TUL_msg;
+
+// Igniter:
+uint32_t last_IGN_CHECK_msg;
+
+
 
 // ------------------------------ SETUP ----------------------------------------
 void setupSensors() {
@@ -889,6 +899,22 @@ void valuesCheck() {
     }
   } else {
     TS62_TUL_active = 0;
+  }
+
+  if (digitalRead(IGN_check_pin) == LOW) {
+    if (IGN_CHECK_active == 1 && (millis() - IGN_CHECK_time) >= PS_oob_max_delay) {
+      if ((millis() - last_IGN_CHECK_msg) >= message_delay) {
+        send_string("warning: Igniter discontinuity", 0);
+        Serial.println("warning: Igniter discontinuity");
+
+        last_IGN_CHECK_msg = millis();
+      }
+    } else if (IGN_CHECK_active == 0) {
+      IGN_CHECK_active = 1;
+      IGN_CHECK_time = millis();
+    }
+  } else {
+    IGN_CHECK_active = 0;
   }
   
 }

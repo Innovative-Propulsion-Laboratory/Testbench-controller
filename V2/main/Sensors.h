@@ -25,6 +25,10 @@
 // #define PSextra_pin A15
 #define PSalim_pin A14      // Pressure sensors alimentation
 
+// Igniter
+#define IGN_pin 33
+#define IGN_check_pin 34
+
 // PS offset
 extern int32_t offset_PS12;
 extern int32_t offset_PS22;
