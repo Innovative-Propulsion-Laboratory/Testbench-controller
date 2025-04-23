@@ -113,6 +113,10 @@ uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {  // to assemble 2 b
   return (static_cast<uint16_t>(highByte) << 8) | static_cast<uint16_t>(lowByte);
 }
 
+int16_t assembleInt16(uint8_t lowByte, uint8_t highByte) {
+  return static_cast<int16_t>((highByte << 8) | lowByte);
+}
+
 void decode(byte* instructions) {
   if (Data.state == 1){
     if (instructions[0] == 0xCC && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC) {
@@ -244,7 +248,7 @@ void decode(byte* instructions) {
       Serial.print("Chilldown OFF duration : ");
       Serial.println(Sequence_data.Chilldown_off_duration);
   
-      Sequence_data.chill_temp = assembleUInt16(instructions[23], instructions[22]);
+      Sequence_data.chill_temp = assembleInt16(instructions[23], instructions[22]);
       Serial.print("Chill temperature (°C) : ");
       Serial.println(Sequence_data.chill_temp);
   
@@ -433,6 +437,10 @@ void Sequence() {
         if (millis() >= (Tchilldown + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
           if (Data.TS12 <= (Sequence_data.chill_temp*10)) {
             debug("✓ Temperature chilldown atteinte");
+            Serial.println("goal temp : ");
+            Serial.println(Sequence_data.chill_temp*10);
+            Serial.println("TS12 temp : ");
+            Serial.println(Data.TS12);
             chill_temp_seems_ok = millis();
             Data.test_step++;
           } else if (Chilldown_count >= Sequence_data.Max_chilldown) {
