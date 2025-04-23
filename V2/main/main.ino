@@ -356,7 +356,7 @@ void count_down() {
     last_send = millis();
     count_down_time += 50;
     byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF) };
-    Serial.println( assembleUInt16((byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)));
+    // Serial.println( assembleUInt16((byte)(count_down_time & 0xFF),(byte)(count_down_time >> 8)));
     reply(message, sizeof(message));
   }
 }

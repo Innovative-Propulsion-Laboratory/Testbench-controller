@@ -37,7 +37,7 @@ sequence_data Sequence_data;
 uint32_t T_confirm;
 uint32_t Chilldown_finished;
 uint32_t last_send;
-int16_t count_down_time;
+int32_t count_down_time;
 uint32_t PS63_duration;
 uint32_t PS63_seems_rise;
 uint32_t Ign_duration;

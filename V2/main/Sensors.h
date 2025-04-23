@@ -118,7 +118,7 @@ extern sequence_data Sequence_data;
 extern uint32_t T_confirm;
 extern uint32_t Chilldown_finished;
 extern uint32_t last_send;
-extern int16_t count_down_time;
+extern int32_t count_down_time;
 extern uint32_t PS63_duration;
 extern uint32_t PS63_seems_rise;
 extern uint32_t Ign_duration;

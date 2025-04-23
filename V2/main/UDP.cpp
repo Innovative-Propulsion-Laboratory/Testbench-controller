@@ -35,6 +35,11 @@ void set_sender_info() {
 // Communication functions
 
 void reply(byte* message, uint16_t size) {  // send the message send
+  // byte* instructions = new byte[size];
+  // for (int j = 0; j < size; j++) {
+  //   instructions[j] = message[j];
+  //   Serial.printf("%#04x ", instructions[j]);
+  // }
   udp.send(senderIP, senderPort, message, size);
 }
 
