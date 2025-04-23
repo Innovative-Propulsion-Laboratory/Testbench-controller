@@ -551,7 +551,7 @@ void Sequence() {
           setValve(SV24, 1);
           debug("→ Ouverture SV24 (bypass)");
           Data.test_step++;
-        } else {
+        } else if (digitalRead(IGN_check_pin) == HIGH){
           Data.test_step = 11;
         }
         count_down();
