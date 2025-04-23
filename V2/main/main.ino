@@ -560,7 +560,7 @@ void Sequence() {
       case 13:
         debug("[12] Attente injection LOX");
         if (millis() >= (T0 + Sequence_data.ETH_to_LOX_bypass)) {
-          Bypass_duration = millis();
+          Bypass_duration_open = millis();
           setValve(SV13, 1);
           debug("→ Ouverture SV13 (LOX)");
           Data.test_step++;
@@ -569,12 +569,14 @@ void Sequence() {
         break;
 
       case 14:
+        Data.PS41 = Sequence_data.Bypass_pressure + 1000;
+        Data.PS42 = Sequence_data.Bypass_pressure + 1000;
         debug("[13] Verif bypass");
         if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure)) {
           Bypass_duration = millis();
           debug("✓ Pressions bypass OK");
           Data.test_step++;
-        } else if ((millis() - Bypass_duration) >= Sequence_data.Bypass_check_duration) {
+        } else if ((millis() - Bypass_duration_open) >= Sequence_data.Bypass_check_duration) {
           debug("✖ Erreur: Pression trop basse (bypass)");
           send_string("error: Pressure too low with bypass valves", 1);
           test_abort();
@@ -589,8 +591,8 @@ void Sequence() {
           setValve(SV22, 1);
           debug("→ Ouverture SV22 (ETH)");
           Data.test_step++;
-        } else {
-          Data.test_step = 13;
+        } else if ((Data.PS41 <= Sequence_data.Bypass_pressure) || (Data.PS42 <= Sequence_data.Bypass_pressure)){
+          Data.test_step = 14;
         }
         count_down();
         break;

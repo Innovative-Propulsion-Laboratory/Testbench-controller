@@ -126,6 +126,7 @@ extern uint32_t Ign_seems_on;
 extern uint32_t T0;
 extern uint32_t ETH_open;
 extern uint32_t Bypass_duration;
+extern uint32_t Bypass_duration_open;
 extern uint32_t Main_seems_rise;
 extern uint32_t Main_duration;
 extern uint32_t Nominal_pressure_reached;

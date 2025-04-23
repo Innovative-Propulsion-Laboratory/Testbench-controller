@@ -45,6 +45,7 @@ uint32_t Ign_seems_on;
 uint32_t T0;
 uint32_t ETH_open;
 uint32_t Bypass_duration;
+uint32_t Bypass_duration_open;
 uint32_t Main_seems_rise;
 uint32_t Main_duration;
 uint32_t Nominal_pressure_reached;
