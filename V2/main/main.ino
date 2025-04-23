@@ -411,12 +411,7 @@ void Sequence() {
         }
         break;
 
-      case 3:
-        if (millis() - time_last_reading >= data_send_rate) {
-        debug("[3] Chilldown ON");
-        time_last_reading = millis();
-        }
-          
+      case 3:          
         if (Chilldown_count == 0) { 
           Chilldown_start = millis();
         } 
@@ -435,7 +430,7 @@ void Sequence() {
         break;
 
       case 5:
-        if (millis() <= (Tchilldown + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
+        if (millis() >= (Tchilldown + Sequence_data.Chilldown_on_duration + Sequence_data.Chilldown_off_duration)) {
           if (Data.TS12 <= (Sequence_data.chill_temp*10)) {
             debug("✓ Temperature chilldown atteinte");
             chill_temp_seems_ok = millis();
