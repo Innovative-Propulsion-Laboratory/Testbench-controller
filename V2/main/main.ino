@@ -454,6 +454,8 @@ void Sequence() {
             test_abort();
           } else {
             debug("↻ Chilldown supplementaire necessaire");
+            Serial.println("Chilldown_off_duration : ");
+            Serial.println(Sequence_data.Chilldown_off_duration);
             Serial.println("Chilldown count : ");
             Serial.println(Chilldown_count);
             Serial.println("TS12 temp : ");
