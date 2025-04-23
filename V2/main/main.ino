@@ -8,7 +8,7 @@ uint32_t BB_check_duration = 30000;
 
 // Sequence
 #define IGN_pin 33
-#define IGN_check_pin 39
+#define IGN_check_pin 34
 #define DEBUG true  // Mettre sur false pour couper les logs
 
 #define debug(msg) if (DEBUG) { Serial.println(msg); }
@@ -26,7 +26,7 @@ void setup() {
     Serial.print(CrashReport);
   }
   pinMode(IGN_pin, OUTPUT);
-  pinMode(IGN_check_pin, INPUT);  // only on PCB V2
+  pinMode(IGN_check_pin, INPUT);
 
   // Disable all CS pins in the setup
   pinMode(1, OUTPUT);
@@ -38,7 +38,7 @@ void setup() {
   pinMode(36, OUTPUT);
   pinMode(37, OUTPUT);
 
-  digitalWrite(2, HIGH);
+  digitalWrite(1, HIGH);
   digitalWrite(10, HIGH);
   digitalWrite(28, HIGH);
   digitalWrite(29, HIGH);
