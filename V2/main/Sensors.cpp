@@ -7,7 +7,7 @@ uint8_t cr0, fault11, fault12, fault41, fault42, fault61, fault62; // Thermocoup
 
 
 uint32_t time_last_reading = 0;
-unsigned long t_last_data_packet = 0, data_send_rate = 50, data_send_rate = 5;
+unsigned long t_last_data_packet = 0, data_send_rate = 50, test_send_rate = 5;
 
 data Data;
 
@@ -34,26 +34,27 @@ int32_t avg_PS11, avg_PS21, avg_PS61, avg_PS62;
 // Sequence_data is used when aborts are triggered in valuesCheck()
 sequence_data Sequence_data;
 
-uint16_t T_confirm;
-uint16_t Chilldown_finished;
-uint16_t last_send;
-uint16_t count_down_time;
-uint16_t PS63_duration;
-uint16_t PS63_seems_rise;
-uint16_t Ign_duration;
-uint16_t Ign_seems_on;
-uint16_t T0;
-uint16_t ETH_open;
-uint16_t Bypass_duration;
-uint16_t Main_seems_rise;
-uint16_t Main_duration;
-uint16_t Nominal_pressure_reached;
-uint16_t T_burn;
-uint16_t Chilldown_start;
-uint16_t Chilldown_count;
-uint16_t chill_temp_seems_ok;
-uint16_t Chilldown_duration;
-uint16_t Chilldown_verified_duration;
+uint32_t T_confirm;
+uint32_t Chilldown_finished;
+uint32_t last_send;
+int16_t count_down_time;
+uint32_t PS63_duration;
+uint32_t PS63_seems_rise;
+uint32_t Ign_duration;
+uint32_t Ign_seems_on;
+uint32_t T0;
+uint32_t ETH_open;
+uint32_t Bypass_duration;
+uint32_t Main_seems_rise;
+uint32_t Main_duration;
+uint32_t Nominal_pressure_reached;
+uint32_t T_burn;
+uint32_t Chilldown_start;
+uint32_t Chilldown_count;
+uint32_t chill_temp_seems_ok;
+uint32_t Chilldown_duration;
+uint32_t Chilldown_verified_duration;
+uint32_t Tchilldown;
 
 // Save data 
 SdFat sd;
@@ -965,11 +966,14 @@ void test_abort() {
       }
     } while (Data.state == 2);
   }
+  Serial.println(Data.state);
   closeFile(); // close the test SD file
   reset_offset_pressure();
   BB_enable(1, 0);
   BB_enable(2, 0);
   BB_enable(6, 0);
+  Data.test_cooling = 0;
+  Data.state =0;
 }
 
 void serialSend() {
@@ -1070,6 +1074,9 @@ void serialSend() {
   Serial.println(Data.LC);
   Serial.print("5V Reference (mV): ");
   Serial.println(Data.ref5V);
+
+  Serial.println("IP :");
+  Serial.println(ip);
 
   Serial.println("--------------------------");
   Serial.println();

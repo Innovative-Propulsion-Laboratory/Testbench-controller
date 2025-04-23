@@ -2,6 +2,7 @@
 
 EthernetUDP udp;
 IPAddress senderIP;
+IPAddress ip;
 uint16_t senderPort = 12345;
 uint32_t kDHCPTimeout = 15000;  //waiting time 15 seconds
 uint16_t kPort = 5190;          // Chat port
@@ -19,7 +20,7 @@ void setupUDP() {
 
   fisrt_message = false;
 
-  IPAddress ip = Ethernet.localIP();
+  ip = Ethernet.localIP();
   Serial.printf("    Local IP     = %u.%u.%u.%u\r\n", ip[0], ip[1], ip[2], ip[3]);
   udp.begin(kPort);
 }

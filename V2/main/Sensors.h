@@ -115,27 +115,27 @@ extern data Data;
 extern sequence_data Sequence_data;
 
 // Variables for the sequence
-extern uint16_t T_confirm;
-extern uint16_t Chilldown_finished;
-extern uint16_t last_send;
-extern uint16_t count_down_time;
-extern uint16_t PS63_duration;
-extern uint16_t PS63_seems_rise;
-extern uint16_t Ign_duration;
-extern uint16_t Ign_seems_on;
-extern uint16_t T0;
-extern uint16_t ETH_open;
-extern uint16_t Bypass_duration;
-extern uint16_t Main_seems_rise;
-extern uint16_t Main_duration;
-extern uint16_t Nominal_pressure_reached;
-extern uint16_t T_burn;
-extern uint16_t Chilldown_start;
-extern uint16_t Chilldown_count;
-extern uint16_t chill_temp_seems_ok;
-extern uint16_t Chilldown_duration;
-extern uint16_t Chilldown_verified_duration;
-extern uint16_t Tchilldown;
+extern uint32_t T_confirm;
+extern uint32_t Chilldown_finished;
+extern uint32_t last_send;
+extern int16_t count_down_time;
+extern uint32_t PS63_duration;
+extern uint32_t PS63_seems_rise;
+extern uint32_t Ign_duration;
+extern uint32_t Ign_seems_on;
+extern uint32_t T0;
+extern uint32_t ETH_open;
+extern uint32_t Bypass_duration;
+extern uint32_t Main_seems_rise;
+extern uint32_t Main_duration;
+extern uint32_t Nominal_pressure_reached;
+extern uint32_t T_burn;
+extern uint32_t Chilldown_start;
+extern uint32_t Chilldown_count;
+extern uint32_t chill_temp_seems_ok;
+extern uint32_t Chilldown_duration;
+extern uint32_t Chilldown_verified_duration;
+extern uint32_t Tchilldown;
 
 // Functions:
 void setupSensors();
