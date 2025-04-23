@@ -912,6 +912,8 @@ void test_abort() {
 
   if (Data.test_step < 10) {
     setValve(SV63, 0); // close SV63
+    setValve(SV36,0);
+    setValve(SV35,0);
     Data.state = 0; // go back to active state
     Data.test_step = 0; // go back to initial state
     Data.test_cooling = 1; // enable cooling cycle valuesCheck again
