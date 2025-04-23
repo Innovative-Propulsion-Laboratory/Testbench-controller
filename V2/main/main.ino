@@ -357,7 +357,7 @@ void count_down() {
   if (millis() - last_send >= 50) {
     last_send = millis();
     count_down_time += 50;
-    byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF) };
+    byte message[8] = { 0xAB, 0xAB, 0xAB, 0xAB,(byte)(count_down_time >> 24),(byte)(count_down_time >> 16) ,(byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF) };
     // Serial.println( assembleUInt16((byte)(count_down_time & 0xFF),(byte)(count_down_time >> 8)));
     reply(message, sizeof(message));
   }
@@ -583,6 +583,8 @@ void Sequence() {
         break;
 
       case 15:
+        Data.PS41 = Sequence_data.Bypass_pressure + 1000;
+        Data.PS42 = Sequence_data.Bypass_pressure + 1000;
         debug("[14] Stabilisation bypass");
         if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure) && ((millis() - Bypass_duration) >= Sequence_data.Bypass_verified_duration)) {
           ETH_open = millis();
@@ -607,6 +609,8 @@ void Sequence() {
         break;
 
       case 17:
+        Data.PS41 = Sequence_data.Main_pressure + 1000;
+        Data.PS42 = Sequence_data.Main_pressure + 1000;
         debug("[16] Verif pression injection");
         if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure)) {
           Main_seems_rise = millis();
@@ -621,10 +625,12 @@ void Sequence() {
         break;
 
       case 18:
+        Data.PS41 = Sequence_data.Main_pressure + 1000;
+        Data.PS42 = Sequence_data.Main_pressure + 1000;
         debug("[17] Stabilisation injection");
         if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure) && ((millis() - Main_seems_rise) >= Sequence_data.Main_verified_duration)) {
           Data.test_step++;
-        } else {
+        } else if ((Data.PS41 <= Sequence_data.Main_pressure) || (Data.PS42 <= Sequence_data.Main_pressure)){
           Data.test_step = 16;
         }
         count_down();
