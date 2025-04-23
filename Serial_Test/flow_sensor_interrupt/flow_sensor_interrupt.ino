@@ -1,9 +1,9 @@
-#define flowSensorPin 2
+#define flowSensorPin 35
 volatile uint32_t flowPulseCount = 0;  // Shared with ISR, must be volatile
 uint32_t lastMeasurementTime = 0;
 uint32_t lastPulseCount = 0;
 const uint32_t flowSensorReadRate = 1000;  // in ms, e.g. 1000 = every 1 second
-const float pulsesPerLiter = 127;               // number of pulses per liter
+const float pulsesPerLiter = 338.39;               // number of pulses per liter
 
 void flowSensorISR() {
   flowPulseCount++;  // Just increment the counter
