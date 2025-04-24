@@ -496,6 +496,7 @@ void Sequence() {
         break;
 
       case 8:
+        Data.PS63 = Sequence_data.cooling_pressure + 100;
         debug("[7] Verif pression refroidissement");
         if (Data.PS63 >= Sequence_data.cooling_pressure) {
           PS63_seems_rise = millis();
@@ -510,6 +511,7 @@ void Sequence() {
         break;
 
       case 9:
+        Data.PS63 = Sequence_data.cooling_pressure + 100;
         debug("[8] Stabilisation refroidissement");
         if ((Data.PS63 >= Sequence_data.cooling_pressure) && ((millis() - PS63_seems_rise) >= Sequence_data.PS63_verified_duration)) {
           Data.test_step++;
