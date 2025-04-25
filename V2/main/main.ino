@@ -493,7 +493,6 @@ void Sequence() {
         break;
 
       case 8:
-        // Data.PS63 = Sequence_data.cooling_pressure + 100;
         debug("[7] Verif pression refroidissement");
         if (Data.PS63 >= Sequence_data.cooling_pressure) {
           PS63_seems_rise = millis();
@@ -508,7 +507,6 @@ void Sequence() {
         break;
 
       case 9:
-        // Data.PS63 = Sequence_data.cooling_pressure + 100;
         debug("[8] Stabilisation refroidissement");
         if ((Data.PS63 >= Sequence_data.cooling_pressure) && ((millis() - PS63_seems_rise) >= Sequence_data.PS63_verified_duration)) {
           Data.test_step++;
@@ -566,8 +564,6 @@ void Sequence() {
         break;
 
       case 14:
-        // Data.PS41 = Sequence_data.Bypass_pressure + 1000;
-        // Data.PS42 = Sequence_data.Bypass_pressure + 1000;
         debug("[13] Verif bypass");
         if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure)) {
           Bypass_duration = millis();
@@ -582,8 +578,6 @@ void Sequence() {
         break;
 
       case 15:
-        // Data.PS41 = Sequence_data.Bypass_pressure + 1000;
-        // Data.PS42 = Sequence_data.Bypass_pressure + 1000;
         debug("[14] Stabilisation bypass");
         if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure) && ((millis() - Bypass_duration) >= Sequence_data.Bypass_verified_duration)) {
           ETH_open = millis();
@@ -608,8 +602,6 @@ void Sequence() {
         break;
 
       case 17:
-        // Data.PS41 = Sequence_data.Main_pressure + 1000;
-        // Data.PS42 = Sequence_data.Main_pressure + 1000;
         debug("[16] Verif pression injection");
         if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure)) {
           Main_seems_rise = millis();
@@ -624,8 +616,6 @@ void Sequence() {
         break;
 
       case 18:
-        // Data.PS41 = Sequence_data.Main_pressure + 1000;
-        // Data.PS42 = Sequence_data.Main_pressure + 1000;
         debug("[17] Stabilisation injection");
         if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure) && ((millis() - Main_seems_rise) >= Sequence_data.Main_verified_duration)) {
           Data.test_step++;
