@@ -85,7 +85,7 @@ int32_t PS22_TLW = 9000, PS22_TUW = 13000;
 int32_t PS31_LW = 20000, PS31_UW = 50000, PS31_UL = 55000;
 int32_t PS41_TLL = 6000, PS41_TLW = 7000, PS41_TUW = 13000, PS41_TUL = 14000;
 int32_t PS42_TLL = 6000, PS42_TLW = 7000, PS42_TUW = 13000, PS42_TUL = 14000;
-int32_t PS51_TLL = 10000, PS51_LW = 40000;
+int32_t PS51_TLL = 1000, PS51_LW = 40000;
 int32_t PS51_UW = 210000;
 int32_t PS_WATER_TLL = 800, PS_WATER_UL = 14000;
 
@@ -419,7 +419,7 @@ int32_t LC_reading(int pin) {
 }
 
 uint16_t ref5V_reading(int pin) {
-  return analogRead(pin);
+  return 66000 * analogRead(pin) / 1023.0;
 }
 
 void valuesCheck() {
@@ -940,11 +940,12 @@ void test_abort() {
   	SV63 closed*/
   Serial.println("abort");
 
-  
+
 
 
   if (Data.test_step < 10) {
     setValve(SV63, 0); // close SV63
+    setValve(SV13,0);
     setValve(SV36,0);
     setValve(SV35,0);
     Data.state = 0; // go back to active state
