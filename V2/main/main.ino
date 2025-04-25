@@ -376,10 +376,7 @@ void Sequence() {
   do {
     BBLoop();
     // Send data at 200Hz
-    if (millis() - time_last_reading >= test_send_rate) {
-      sensorsLoop();
-      time_last_reading = millis();
-    }
+    sensorsLoop();
 
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {decode(p.data);}
