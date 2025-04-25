@@ -210,7 +210,7 @@ void sensorsLoop() {
   Data.valvesState = valvePositions;
   // serialSend();
   // Send data at 20Hz
-  if (millis() - time_last_reading >= 5) {
+  if (millis() - time_last_reading >= test_send_rate) {
     send_data(&Data, sizeof(data));                              //send data to the ground station
     time_last_reading = millis();
   }
@@ -756,8 +756,8 @@ void valuesCheck() {
     PS42_TLL_active = 0;
   }
   
-  if (Data.PS51 >= PS51_UW) {
-    if (Data.test_cooling == 1 && PS51_UW_active == 1 && (millis() - PS51_UW_time) >= PS_oob_max_delay) {
+  if (Data.test_cooling == 1 && Data.PS51 >= PS51_UW) {
+    if (PS51_UW_active == 1 && (millis() - PS51_UW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS51_UW_msg) >= message_delay) {
         send_string("warning: PS51 too high", 0);
         Serial.println("warning: PS51 too high");
@@ -771,8 +771,8 @@ void valuesCheck() {
     PS51_UW_active = 0;
   }
   
-  if (Data.PS51 <= PS51_LW) {
-    if (Data.test_cooling == 1 && PS51_LW_active == 1 && (millis() - PS51_LW_time) >= PS_oob_max_delay) {
+  if (Data.test_cooling == 1 && Data.PS51 <= PS51_LW) {
+    if (PS51_LW_active == 1 && (millis() - PS51_LW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS51_LW_msg) >= message_delay) {
         send_string("warning: PS51 too low", 0);
         Serial.println("warning: PS51 too low");
