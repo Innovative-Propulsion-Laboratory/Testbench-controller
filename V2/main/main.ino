@@ -467,7 +467,7 @@ void Sequence() {
           Chilldown_duration = Chilldown_finished - Chilldown_start;
           debugf("✓ Chilldown termine en %lu ms", Chilldown_duration);
           Data.test_step++;
-          count_down_time = -10000;
+          count_down_time = -15000;
           byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)};
           reply(message, sizeof(message));
           Serial.println("envoie countdown");//debug
