@@ -1008,8 +1008,8 @@ void test_abort() {
   BB_enable(1, 0);
   BB_enable(2, 0);
   BB_enable(6, 0);
-  Data.test_cooling = 0;
-  Data.state =0;
+  Data.test_cooling = 1;
+  Data.state = 0;
 }
 
 void serialSend() {

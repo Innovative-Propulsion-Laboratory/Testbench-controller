@@ -54,7 +54,7 @@ void setup() {
   setupUDP();
   setupSaveData();
 
-  Data.test_cooling = 0;
+  Data.test_cooling = 1;
 }
 
 void loop() {
