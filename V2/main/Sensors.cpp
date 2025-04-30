@@ -35,6 +35,7 @@ int32_t avg_PS11, avg_PS21, avg_PS61, avg_PS62;
 sequence_data Sequence_data;
 
 uint32_t T_confirm;
+uint32_t T_midpurge;
 uint32_t Chilldown_finished;
 uint32_t last_send;
 int32_t count_down_time;
