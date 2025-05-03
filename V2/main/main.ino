@@ -206,128 +206,128 @@ void decode(byte* instructions) {
     }
     */
     if (instructions[0] == 0xAA && instructions[1] == 0xAA && instructions[2] == 0xAA && instructions[3] == 0xAA) {  // Start test
-      uint16_t value1 = assembleUInt16(instructions[1], instructions[0]);
+      uint16_t value1 = assembleUInt16(instructions[5], instructions[4]);
       Serial.print("LOX pressure bangbang set : ");
       Serial.println(value1);
       BB_param_set(1, value1);
       
-      uint16_t value = assembleUInt16(instructions[3], instructions[2]);
+      uint16_t value = assembleUInt16(instructions[7], instructions[6]);
       Serial.print("ETH pressure bangbang set : ");
       Serial.println(value);
       BB_param_set(2, value);
       
-      Data.test_cooling = assembleUInt16(instructions[5], instructions[4]);
+      Data.test_cooling = assembleUInt16(instructions[9], instructions[8]);
       Serial.println("Cooling enable : ");
       Serial.println(Data.test_cooling);
       
-      uint16_t value2 = assembleUInt16(instructions[7], instructions[6]);
+      uint16_t value2 = assembleUInt16(instructions[11], instructions[10]);
       Serial.print("H2O pressure bangbang set : ");
       Serial.println(value2);
       if (Data.test_cooling == 1) {
         BB_param_set(6, value2);
       }
       
-      Sequence_data.tvc_pattern = assembleUInt16(instructions[9], instructions[8]);
+      Sequence_data.tvc_pattern = assembleUInt16(instructions[13], instructions[12]);
       Serial.print("TVC pattern : ");
       Serial.println(Sequence_data.tvc_pattern);
       
-      Sequence_data.Confirm_to_purge_delay = assembleUInt16(instructions[11], instructions[10]);
+      Sequence_data.Confirm_to_purge_delay = assembleUInt16(instructions[15], instructions[14]);
       Serial.print("Confirm to purge delay : ");
       Serial.println(Sequence_data.Confirm_to_purge_delay);
       
-      Sequence_data.Purge_duration1 = assembleUInt16(instructions[13], instructions[12]);
+      Sequence_data.Purge_duration1 = assembleUInt16(instructions[17], instructions[16]);
       Serial.print("Purge duration 1 : ");
       Serial.println(Sequence_data.Purge_duration1);
       
-      Sequence_data.Chilldown_on_duration = assembleUInt16(instructions[15], instructions[14]);
+      Sequence_data.Chilldown_on_duration = assembleUInt16(instructions[19], instructions[18]);
       Serial.print("Chilldown ON duration : ");
       Serial.println(Sequence_data.Chilldown_on_duration);
       
-      Sequence_data.Chilldown_off_duration = assembleUInt16(instructions[17], instructions[16]);
+      Sequence_data.Chilldown_off_duration = assembleUInt16(instructions[21], instructions[20]);
       Serial.print("Chilldown OFF duration : ");
       Serial.println(Sequence_data.Chilldown_off_duration);
       
-      Sequence_data.chill_temp = assembleInt16(instructions[19], instructions[18]);
+      Sequence_data.chill_temp = assembleInt16(instructions[23], instructions[22]);
       Serial.print("Chill temperature (°C) : ");
       Serial.println(Sequence_data.chill_temp);
       
-      Sequence_data.Max_chilldown = assembleUInt16(instructions[21], instructions[20]);
+      Sequence_data.Max_chilldown = assembleUInt16(instructions[25], instructions[24]);
       Serial.print("Max chilldown : ");
       Serial.println(Sequence_data.Max_chilldown);
       
-      Sequence_data.Purge_duration2 = assembleUInt16(instructions[23], instructions[22]);
+      Sequence_data.Purge_duration2 = assembleUInt16(instructions[27], instructions[26]);
       Serial.print("Purge duration 2 : ");
       Serial.println(Sequence_data.Purge_duration2);
       
-      Sequence_data.Chilldown_to_cooling = assembleUInt16(instructions[25], instructions[24]);
+      Sequence_data.Chilldown_to_cooling = assembleUInt16(instructions[29], instructions[28]);
       Serial.print("Chilldown to cooling delay : ");
       Serial.println(Sequence_data.Chilldown_to_cooling);
       
-      Sequence_data.cooling_pressure = assembleUInt16(instructions[27], instructions[26]);
+      Sequence_data.cooling_pressure = assembleUInt16(instructions[31], instructions[30]);
       Serial.print("Cooling pressure : ");
       Serial.println(Sequence_data.cooling_pressure);
       
-      Sequence_data.PS63_check_duration = assembleUInt16(instructions[29], instructions[28]);
+      Sequence_data.PS63_check_duration = assembleUInt16(instructions[33], instructions[32]);
       Serial.print("PS63 check duration : ");
       Serial.println(Sequence_data.PS63_check_duration);
       
-      Sequence_data.PS63_verified_duration = assembleUInt16(instructions[31], instructions[30]);
+      Sequence_data.PS63_verified_duration = assembleUInt16(instructions[35], instructions[34]);
       Serial.print("PS63 verified duration : ");
       Serial.println(Sequence_data.PS63_verified_duration);
       
-      Sequence_data.Ign_to_bypass = assembleUInt16(instructions[33], instructions[32]);
+      Sequence_data.Ign_to_bypass = assembleUInt16(instructions[37], instructions[36]);
       Serial.print("Ign to bypass : ");
       Serial.println(Sequence_data.Ign_to_bypass);
       
-      Sequence_data.burn_duration = assembleUInt16(instructions[35], instructions[34]);
+      Sequence_data.burn_duration = assembleUInt16(instructions[39], instructions[38]);
       Serial.print("Burn duration : ");
       Serial.println(Sequence_data.burn_duration);
       
-      Sequence_data.ETH_to_LOX_bypass = assembleUInt16(instructions[37], instructions[36]);
+      Sequence_data.ETH_to_LOX_bypass = assembleUInt16(instructions[41], instructions[40]);
       Serial.print("ETH to LOX bypass : ");
       Serial.println(Sequence_data.ETH_to_LOX_bypass);
       
-      Sequence_data.Bypass_check_duration = assembleUInt16(instructions[39], instructions[38]);
+      Sequence_data.Bypass_check_duration = assembleUInt16(instructions[43], instructions[42]);
       Serial.print("Bypass check duration : ");
       Serial.println(Sequence_data.Bypass_check_duration);
       
-      Sequence_data.Bypass_pressure = assembleUInt16(instructions[41], instructions[40]);
+      Sequence_data.Bypass_pressure = assembleUInt16(instructions[45], instructions[44]);
       Serial.print("Bypass pressure : ");
       Serial.println(Sequence_data.Bypass_pressure);
       
-      Sequence_data.Bypass_verified_duration = assembleUInt16(instructions[43], instructions[42]);
+      Sequence_data.Bypass_verified_duration = assembleUInt16(instructions[47], instructions[46]);
       Serial.print("Bypass verified duration : ");
       Serial.println(Sequence_data.Bypass_verified_duration);
       
-      Sequence_data.ETH_to_LOX_main = assembleUInt16(instructions[45], instructions[44]);
+      Sequence_data.ETH_to_LOX_main = assembleUInt16(instructions[49], instructions[48]);
       Serial.print("ETH to LOX main : ");
       Serial.println(Sequence_data.ETH_to_LOX_main);
       
-      Sequence_data.Main_check_duration = assembleUInt16(instructions[47], instructions[46]);
+      Sequence_data.Main_check_duration = assembleUInt16(instructions[51], instructions[50]);
       Serial.print("Main check duration : ");
       Serial.println(Sequence_data.Main_check_duration);
       
-      Sequence_data.Main_pressure = assembleUInt16(instructions[49], instructions[48]);
+      Sequence_data.Main_pressure = assembleUInt16(instructions[53], instructions[52]);
       Serial.print("Main pressure : ");
       Serial.println(Sequence_data.Main_pressure);
       
-      Sequence_data.Main_verified_duration = assembleUInt16(instructions[51], instructions[50]);
+      Sequence_data.Main_verified_duration = assembleUInt16(instructions[55], instructions[54]);
       Serial.print("Main verified duration : ");
       Serial.println(Sequence_data.Main_verified_duration);
       
-      Sequence_data.TVC_pattern_duration = assembleUInt16(instructions[53], instructions[52]);
+      Sequence_data.TVC_pattern_duration = assembleUInt16(instructions[57], instructions[56]);
       Serial.print("TVC pattern duration : ");
       Serial.println(Sequence_data.TVC_pattern_duration);
       
-      Sequence_data.LOX_to_ETH_closing_delay = assembleUInt16(instructions[55], instructions[54]);
+      Sequence_data.LOX_to_ETH_closing_delay = assembleUInt16(instructions[59], instructions[58]);
       Serial.print("LOX to ETH closing delay : ");
       Serial.println(Sequence_data.LOX_to_ETH_closing_delay);
       
-      Sequence_data.Purge_duration3 = assembleUInt16(instructions[57], instructions[56]);
+      Sequence_data.Purge_duration3 = assembleUInt16(instructions[61], instructions[60]);
       Serial.print("Purge duration 3 : ");
       Serial.println(Sequence_data.Purge_duration3);
       
-      Sequence_data.Cooling_duration_after_end_burn = assembleUInt16(instructions[59], instructions[58]);
+      Sequence_data.Cooling_duration_after_end_burn = assembleUInt16(instructions[63], instructions[62]);
       Serial.print("Cooling duration after end of burn : ");
       Serial.println(Sequence_data.Cooling_duration_after_end_burn);
       
@@ -479,17 +479,17 @@ void Sequence() {
         }
         break;
       case 7:
-        setValve(SV36, 1);
+        setValve(SV35, 1);
         T_midpurge = millis();
-        debug("→ Ouverture SV36 (purge)");
+        debug("→ Ouverture SV35 (purge)");
         Data.test_step++;
         break;
       
       case 8:
         debug("[2] Purge en cours");
         if (millis() >= (T_midpurge + Sequence_data.Purge_duration2)) {
-          setValve(SV36, 0);
-          debug("→ Fermeture SV36 (fin purge)");
+          setValve(SV35, 0);
+          debug("→ Fermeture SV35 (fin purge)");
           Data.test_step++;
         }
         break;
@@ -502,8 +502,9 @@ void Sequence() {
             PS63_duration = millis();
             Data.test_step++;
           }
-        } else if (millis() >= static_cast<uint32_t>(Chilldown_finished + 10000)) {
-          Data.test_step = 10;
+        } else if (millis() >= static_cast<uint32_t>(Chilldown_finished + Sequence_data.Chilldown_to_cooling)) {
+          Data.test_step = 12;
+          T0 = millis();
         }
         count_down();
         break;
@@ -526,6 +527,7 @@ void Sequence() {
         debug("[8] Stabilisation refroidissement");
         if ((Data.PS63 >= Sequence_data.cooling_pressure) && ((millis() - PS63_seems_rise) >= Sequence_data.PS63_verified_duration)) {
           Data.test_step++;
+          T0 = millis();
         } else if (Data.PS63 < Sequence_data.cooling_pressure) {
           Data.test_step = 8;
         }
@@ -535,7 +537,6 @@ void Sequence() {
       case 12:
         debug("[9] Allumage");
         digitalWrite(IGN_pin, HIGH);
-        T0 = millis();
         if (millis() >= (T0 + Sequence_data.Ign_to_bypass)){
           setValve(SV24, 1);
           debug("→ Ouverture SV24 (bypass)");

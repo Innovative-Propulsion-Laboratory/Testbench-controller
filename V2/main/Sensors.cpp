@@ -904,23 +904,6 @@ void valuesCheck() {
   } else {
     TS62_TUL_active = 0;
   }
-
-  if (Data.state == 1 && Data.test_step <= 9 && digitalRead(IGN_check_pin) == LOW) {
-    if (IGN_CHECK_active == 1 && (millis() - IGN_CHECK_time) >= PS_oob_max_delay) {
-      if ((millis() - last_IGN_CHECK_msg) >= message_delay) {
-        send_string("error: Igniter discontinuity", 1);
-        Serial.println("error: Igniter discontinuity");
-
-        last_IGN_CHECK_msg = millis();
-      }
-      test_abort();
-    } else if (IGN_CHECK_active == 0) {
-      IGN_CHECK_active = 1;
-      IGN_CHECK_time = millis();
-    }
-  } else {
-    IGN_CHECK_active = 0;
-  }
   
 }
 
