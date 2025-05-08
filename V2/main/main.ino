@@ -83,7 +83,7 @@ void loop() {
       if (p.data != nullptr) {delete[] p.data;}
 
       // Send data at 20Hz
-      if (millis() - time_last_reading >= 50) {
+      if (millis() - time_last_reading >= test_send_rate) {
         sensorsLoop();
         time_last_reading = millis();
       }
@@ -469,7 +469,7 @@ void Sequence() {
           debugf("✓ Chilldown termine en %lu ms", Chilldown_duration);
           Data.test_step++;
           if (Data.test_cooling){count_down_time = -Sequence_data.Chilldown_to_cooling - Sequence_data.Ign_to_bypass - 1000;}
-          else{count_down_time = -Sequence_data.Chilldown_to_cooling - Sequence_data.Ign_to_bypass;}
+          else{count_down_time = - Sequence_data.Chilldown_to_cooling - Sequence_data.Ign_to_bypass;}
           byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)};
           reply(message, sizeof(message));
           Serial.println("envoie countdown");//debug
@@ -483,6 +483,7 @@ void Sequence() {
         T_midpurge = millis();
         debug("→ Ouverture SV35 (purge)");
         Data.test_step++;
+        count_down();
         break;
       
       case 8:
@@ -492,6 +493,7 @@ void Sequence() {
           debug("→ Fermeture SV35 (fin purge)");
           Data.test_step++;
         }
+        count_down();
         break;
       case 9:
         if (Data.test_cooling) {
@@ -557,7 +559,7 @@ void Sequence() {
         count_down();
         break;
 
-      case 14:
+      case 14: 
         debug("[13] Verif bypass");
         if ((Data.PS41 >= Sequence_data.Bypass_pressure) && (Data.PS42 >= Sequence_data.Bypass_pressure)) {
           Bypass_duration = millis();
