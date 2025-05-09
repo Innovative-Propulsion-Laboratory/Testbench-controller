@@ -4,7 +4,7 @@ EthernetUDP udp;
 IPAddress senderIP;
 IPAddress ip;
 uint16_t senderPort = 12345;
-uint32_t kDHCPTimeout = 15000;  //waiting time 15 seconds
+uint32_t kDHCPTimeout = 10000;  //waiting time 15 seconds
 uint16_t kPort = 5190;          // Chat port
 int message_size = 0;
 int t;

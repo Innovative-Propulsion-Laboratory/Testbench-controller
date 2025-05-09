@@ -59,14 +59,6 @@ void setup() {
 
 void loop() {
   // Listen to commands
-  if (!UDPactive){ // nouveau 
-    Ethernet.begin();
-    Ethernet.onLinkState([](bool state) {});  // No debug output
-    if (Ethernet.waitForLocalIP(kDHCPTimeout)) {
-      udp.begin(kPort);
-      fisrt_message = false;
-    }
-  }
   Packet p = receivePacket();
 
   if (p.length >= 4 && p.data != nullptr) {
@@ -113,6 +105,16 @@ void loop() {
   }
   // Update BB pressurization more often than sensorsLoop
   BBLoop();
+
+  if (!UDPactive)&&(millis() - (time_last_reading+2000) >= data_send_rate+ 2000){ // nouveau 
+    Ethernet.begin();
+    Ethernet.onLinkState([](bool state) {});  // No debug output
+    if (Ethernet.waitForLocalIP(kDHCPTimeout)) {
+      udp.begin(kPort);
+      fisrt_message = false;
+    }
+  }
+  
 }
 
 uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {  // to assemble 2 byte
