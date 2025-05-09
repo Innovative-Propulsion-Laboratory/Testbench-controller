@@ -403,7 +403,7 @@ void Sequence() {
           Serial.println(millis());
           Serial.println("T_confirm : ");
           Serial.println(T_confirm);
-          Serial.println("Confimr to purge : ");
+          Serial.println("Confirm to purge : ");
           Serial.println(Sequence_data.Confirm_to_purge_delay);
           setValve(SV36, 1);
           debug("→ Ouverture SV36 (purge)");
@@ -483,12 +483,12 @@ void Sequence() {
           else{count_down_time = - Sequence_data.Chilldown_to_cooling - Sequence_data.Ign_to_bypass;}
           byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)};
           reply(message, sizeof(message));
-          Serial.println("envoie countdown");//debug
-          // delay(1000);//debug
+          Serial.println("envoie countdown");
         } else if (Data.TS12 < (Sequence_data.chill_temp*10)) {
           Data.test_step = 4;
         }
         break;
+
       case 7:
         setValve(SV35, 1);
         T_midpurge = millis();
@@ -506,6 +506,7 @@ void Sequence() {
         }
         count_down();
         break;
+        
       case 9:
         if (Data.test_cooling) {
           debug("[6] Demarrage refroidissement");
