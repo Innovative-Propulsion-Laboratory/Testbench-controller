@@ -275,13 +275,13 @@ void decode(byte* instructions) {
       Serial.print("Chilldown to cooling delay : ");
       Serial.println(Sequence_data.Chilldown_to_cooling);
       
-      Sequence_data.cooling_pressure = assembleUInt16(instructions[31], instructions[30]);
-      Serial.print("Cooling pressure : ");
-      Serial.println(Sequence_data.cooling_pressure);
-      
-      Sequence_data.PS63_check_duration = assembleUInt16(instructions[33], instructions[32]);
+      Sequence_data.PS63_check_duration = assembleUInt16(instructions[31], instructions[30]);
       Serial.print("PS63 check duration : ");
       Serial.println(Sequence_data.PS63_check_duration);
+
+      Sequence_data.cooling_pressure = assembleUInt16(instructions[33], instructions[32]);
+      Serial.print("Cooling pressure : ");
+      Serial.println(Sequence_data.cooling_pressure);
       
       Sequence_data.PS63_verified_duration = assembleUInt16(instructions[35], instructions[34]);
       Serial.print("PS63 verified duration : ");
@@ -480,7 +480,7 @@ void Sequence() {
           Chilldown_duration = Chilldown_finished - Chilldown_start;
           debugf("✓ Chilldown termine en %lu ms", Chilldown_duration);
           Data.test_step++;
-          if (Data.test_cooling){count_down_time = -Sequence_data.Chilldown_to_cooling - Sequence_data.Ign_to_bypass - Sequence_data.PS63_verified_duration - 1000;}
+          if (Data.test_cooling){count_down_time = -Sequence_data.Chilldown_to_cooling - Sequence_data.Ign_to_bypass - Sequence_data.PS63_verified_duration - 100;}
           else{count_down_time = - Sequence_data.Chilldown_to_cooling - Sequence_data.Ign_to_bypass;}
           byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)};
           reply(message, sizeof(message));
