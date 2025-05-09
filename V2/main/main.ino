@@ -106,12 +106,13 @@ void loop() {
   // Update BB pressurization more often than sensorsLoop
   BBLoop();
 
-  if ((!UDPactive)&&(millis() - (time_last_reading+2000) >= data_send_rate+ 2000)){ // nouveau 
+  if ((!UDPactive)&&(millis() - (time_last_reading) >= data_send_rate)){ // nouveau 
     Ethernet.begin();
     Ethernet.onLinkState([](bool state) {});  // No debug output
     if (Ethernet.waitForLocalIP(kDHCPTimeout)) {
       udp.begin(kPort);
       fisrt_message = false;
+      UDPactive = true;
     }
   }
   
