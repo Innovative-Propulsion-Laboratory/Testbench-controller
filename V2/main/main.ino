@@ -59,6 +59,14 @@ void setup() {
 
 void loop() {
   // Listen to commands
+  if (!UDPactive){ // nouveau 
+    Ethernet.begin();
+    Ethernet.onLinkState([](bool state) {});  // No debug output
+    if (Ethernet.waitForLocalIP(kDHCPTimeout)) {
+      udp.begin(kPort);
+      fisrt_message = false;
+    }
+  }
   Packet p = receivePacket();
 
   if (p.length >= 4 && p.data != nullptr) {

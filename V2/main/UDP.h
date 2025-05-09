@@ -10,6 +10,10 @@ extern EthernetUDP udp;
 extern IPAddress senderIP;
 extern uint16_t senderPort;
 extern IPAddress ip;
+extern bool UDPactive;
+extern uint32_t kDHCPTimeout;
+extern uint16_t kPort;
+extern bool fisrt_message;
 
 struct Packet {
   byte* data;

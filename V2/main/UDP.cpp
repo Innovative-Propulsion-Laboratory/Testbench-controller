@@ -9,6 +9,7 @@ uint16_t kPort = 5190;          // Chat port
 int message_size = 0;
 int t;
 bool fisrt_message;
+bool UDPactive = false;
 // Setup UDP
 
 void setupUDP() {
@@ -18,6 +19,7 @@ void setupUDP() {
     return;  // Exit if no IP address is assigned
   }
 
+  UDPactive = true;
   fisrt_message = false;
 
   ip = Ethernet.localIP();
