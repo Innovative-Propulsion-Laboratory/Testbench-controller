@@ -24,6 +24,7 @@ void setup() {
     Serial.print(CrashReport);
   }
   pinMode(IGN_pin, OUTPUT);
+  digitalWrite(IGN_pin, LOW);
 
   // Disable all CS pins in the setup
   pinMode(1, OUTPUT);
@@ -468,7 +469,7 @@ void Sequence() {
           Chilldown_duration = Chilldown_finished - Chilldown_start;
           debugf("✓ Chilldown termine en %lu ms", Chilldown_duration);
           Data.test_step++;
-          if (Data.test_cooling){count_down_time = -Sequence_data.Chilldown_to_cooling - Sequence_data.Ign_to_bypass - 1000;}
+          if (Data.test_cooling){count_down_time = -Sequence_data.Chilldown_to_cooling - Sequence_data.Ign_to_bypass - Sequence_data.PS63_verified_duration - 1000;}
           else{count_down_time = - Sequence_data.Chilldown_to_cooling - Sequence_data.Ign_to_bypass;}
           byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)};
           reply(message, sizeof(message));
@@ -531,7 +532,7 @@ void Sequence() {
           Data.test_step++;
           T0 = millis();
         } else if (Data.PS63 < Sequence_data.cooling_pressure) {
-          Data.test_step = 8;
+          Data.test_step = 10;
         }
         count_down();
         break;
@@ -551,6 +552,7 @@ void Sequence() {
       case 13:
         debug("[12] Attente injection LOX");
         if (millis() >= (T0 + Sequence_data.ETH_to_LOX_bypass)) {
+          digitalWrite(IGN_pin, LOW);
           Bypass_duration_open = millis();
           setValve(SV13, 1);
           debug("→ Ouverture SV13 (LOX)");
