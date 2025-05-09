@@ -480,7 +480,7 @@ void valuesCheck() {
     PS11_BBLW_active = 0;
   }
 
-  if (Data.state == 1 && Data.test_step >= 10 && Data.test_step <= 20 && Data.PS12 >= PS12_TUW) {
+  if (Data.state == 1 && Data.test_step >= 12 && Data.test_step <= 22 && Data.PS12 >= PS12_TUW) {
     if (PS12_TUW_active == 1 && (millis() - PS12_TUW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS12_TUW_msg) >= message_delay) {
         send_string("warning: PS12 too high", 0);
@@ -557,7 +557,7 @@ void valuesCheck() {
     PS21_BBLW_active = 0;
   }
 
-  if (Data.state == 1 && Data.test_step >= 10 && Data.test_step <= 20 && Data.PS22 >= PS22_TUW) {
+  if (Data.state == 1 && Data.test_step >= 12 && Data.test_step <= 22 && Data.PS22 >= PS22_TUW) {
     if (PS22_TUW_active == 1 && (millis() - PS22_TUW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS22_TUW_msg) >= message_delay) {
         send_string("warning: PS22 too high", 0);
@@ -633,7 +633,7 @@ void valuesCheck() {
     PS31_LW_active = 0;
   }
 
-  if (Data.state == 1 && Data.test_step >= 10 && Data.test_step <= 20 && Data.PS41 >= PS41_TUL) {
+  if (Data.state == 1 && Data.test_step >= 12 && Data.test_step <= 22 && Data.PS41 >= PS41_TUL) {
     if (PS41_TUL_active == 1 && (millis() - PS41_TUL_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS41_TUL_msg) >= message_delay) {
         send_string("error: PS41 over limit - test aborted", 1);
@@ -649,7 +649,7 @@ void valuesCheck() {
     PS41_TUL_active = 0;
   }
   
-  if (Data.state == 1 && Data.test_step >= 10 && Data.test_step <= 20 && Data.PS41 >= PS41_TUW) {
+  if (Data.state == 1 && Data.test_step >= 12 && Data.test_step <= 22 && Data.PS41 >= PS41_TUW) {
     if (PS41_TUW_active == 1 && (millis() - PS41_TUW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS41_TUW_msg) >= message_delay) {
         send_string("warning: PS41 too high", 0);
@@ -695,7 +695,7 @@ void valuesCheck() {
     PS41_TLL_active = 0;
   }
   
-  if (Data.state == 1 && Data.test_step >= 10 && Data.test_step <= 20 && Data.PS42 >= PS42_TUL) {
+  if (Data.state == 1 && Data.test_step >= 12 && Data.test_step <= 22 && Data.PS42 >= PS42_TUL) {
     if (PS42_TUL_active == 1 && (millis() - PS42_TUL_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS42_TUL_msg) >= message_delay) {
         send_string("error: PS42 over limit - test aborted", 1);
@@ -711,7 +711,7 @@ void valuesCheck() {
     PS42_TUL_active = 0;
   }
   
-  if (Data.state == 1 && Data.test_step >= 10 && Data.test_step <= 20 && Data.PS42 >= PS42_TUW) {
+  if (Data.state == 1 && Data.test_step >= 12 && Data.test_step <= 22 && Data.PS42 >= PS42_TUW) {
     if (PS42_TUW_active == 1 && (millis() - PS42_TUW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS42_TUW_msg) >= message_delay) {
         send_string("warning: PS42 too high", 0);
@@ -803,7 +803,7 @@ void valuesCheck() {
     PS51_TLL_active = 0;
   }
   
-  if (Data.test_cooling == 1 && ((Data.PS61 >= PS_WATER_UL) || (Data.PS62 >= PS_WATER_UL))) {
+  if (((Data.PS61 >= PS_WATER_UL) || (Data.PS62 >= PS_WATER_UL))) {
     if (PS_WATER_UL_active == 1 && (millis() - PS_WATER_UL_time) >= PS_oob_max_delay) {
       setValve(SV61, 1);  //open SV61
       setValve(SV62, 1);  //open SV62
