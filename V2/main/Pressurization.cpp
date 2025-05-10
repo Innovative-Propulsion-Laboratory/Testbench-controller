@@ -24,9 +24,9 @@ void BB_param_set(uint8_t tank, int16_t pressure) {
     if (pressure > PS11_BB_ulim) {
       return;
     } else {
-      PS11_BB_min = pressure - 200;
+      PS11_BB_min = pressure - 100;
       PS11_BBLW = pressure - 1000;
-      PS11_BB_max = pressure + 200;
+      PS11_BB_max = pressure + 100;
       PS11_BBUW = pressure + 1000;
     }
   }
@@ -34,9 +34,9 @@ void BB_param_set(uint8_t tank, int16_t pressure) {
     if (pressure > PS21_BB_ulim) {
       return;
     } else {
-      PS21_BB_min = pressure - 200;
+      PS21_BB_min = pressure - 100;
       PS21_BBLW = pressure - 1000;
-      PS21_BB_max = pressure + 200;
+      PS21_BB_max = pressure + 100;
       PS21_BBUW = pressure + 1000;
       Serial.print(PS21_BB_min);
       Serial.print(PS21_BBLW);
