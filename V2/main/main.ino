@@ -780,10 +780,10 @@ bool check_BB_pressure() {
   // Serial.println(avg_PS62);
 
   if (Data.test_cooling == 1){
-    if (avg_PS11 > (PS11_BB_min - 200) && avg_PS11 < (PS11_BB_max + 200)
-    && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)
-    && avg_PS61 > (WATER_BB_min - 200) && avg_PS61 < (WATER_BB_min + 200)
-    && avg_PS62 > (WATER_BB_min - 200) && avg_PS62 < (WATER_BB_min + 200)){
+    if (avg_PS11 > (PS11_BB_min - 450) && avg_PS11 < (PS11_BB_max + 450)
+    && avg_PS21 > (PS21_BB_min - 450) && avg_PS21 < (PS21_BB_max + 450)
+    && avg_PS61 > (WATER_BB_min - 450) && avg_PS61 < (WATER_BB_min + 450)
+    && avg_PS62 > (WATER_BB_min - 450) && avg_PS62 < (WATER_BB_min + 450)){
       // Serial.println("pressure reached");
       return true;
   }
