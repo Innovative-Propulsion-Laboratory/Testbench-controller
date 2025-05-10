@@ -115,7 +115,6 @@ void loop() {
       UDPactive = true;
     }
   }
-  
 }
 
 uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {  // to assemble 2 byte
@@ -507,7 +506,7 @@ void Sequence() {
         }
         count_down();
         break;
-        
+
       case 9:
         if (Data.test_cooling) {
           debug("[6] Demarrage refroidissement");
@@ -780,16 +779,16 @@ bool check_BB_pressure() {
   // Serial.println(avg_PS62);
 
   if (Data.test_cooling == 1){
-    if (avg_PS11 > (PS11_BB_min - 200) && avg_PS11 < (PS11_BB_max + 200)
-    && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)
-    && avg_PS61 > (WATER_BB_min - 200) && avg_PS61 < (WATER_BB_min + 200)
-    && avg_PS62 > (WATER_BB_min - 200) && avg_PS62 < (WATER_BB_min + 200)){
+    if (avg_PS11 > (PS11_BB_min - 300) && avg_PS11 < (PS11_BB_max + 300)
+    && avg_PS21 > (PS21_BB_min - 300) && avg_PS21 < (PS21_BB_max + 300)
+    && avg_PS61 > (WATER_BB_min - 300) && avg_PS61 < (WATER_BB_min + 300)
+    && avg_PS62 > (WATER_BB_min - 300) && avg_PS62 < (WATER_BB_min + 300)){
       // Serial.println("pressure reached");
       return true;
   }
   }
-  else if (avg_PS11 > (PS11_BB_min - 200) && avg_PS11 < (PS11_BB_max + 200)
-  && avg_PS21 > (PS21_BB_min - 200) && avg_PS21 < (PS21_BB_max + 200)) {
+  else if (avg_PS11 > (PS11_BB_min - 300) && avg_PS11 < (PS11_BB_max + 300)
+  && avg_PS21 > (PS21_BB_min - 300) && avg_PS21 < (PS21_BB_max + 300)) {
     // Serial.println("pressure reached");
     return true;
   }
