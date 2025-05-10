@@ -779,16 +779,16 @@ bool check_BB_pressure() {
   // Serial.println(avg_PS62);
 
   if (Data.test_cooling == 1){
-    if (avg_PS11 > (PS11_BB_min - 450) && avg_PS11 < (PS11_BB_max + 450)
-    && avg_PS21 > (PS21_BB_min - 450) && avg_PS21 < (PS21_BB_max + 450)
-    && avg_PS61 > (WATER_BB_min - 450) && avg_PS61 < (WATER_BB_min + 450)
-    && avg_PS62 > (WATER_BB_min - 450) && avg_PS62 < (WATER_BB_min + 450)){
+    if (avg_PS11 > (PS11_BB_min - 400) && avg_PS11 < (PS11_BB_max + 400)
+    && avg_PS21 > (PS21_BB_min - 400) && avg_PS21 < (PS21_BB_max + 400)
+    && avg_PS61 > (WATER_BB_min - 400) && avg_PS61 < (WATER_BB_min + 400)
+    && avg_PS62 > (WATER_BB_min - 400) && avg_PS62 < (WATER_BB_min + 400)){
       // Serial.println("pressure reached");
       return true;
   }
   }
-  else if (avg_PS11 > (PS11_BB_min - 300) && avg_PS11 < (PS11_BB_max + 300)
-  && avg_PS21 > (PS21_BB_min - 300) && avg_PS21 < (PS21_BB_max + 300)) {
+  else if (avg_PS11 > (PS11_BB_min - 400) && avg_PS11 < (PS11_BB_max + 400)
+  && avg_PS21 > (PS21_BB_min - 400) && avg_PS21 < (PS21_BB_max + 400)) {
     // Serial.println("pressure reached");
     return true;
   }
