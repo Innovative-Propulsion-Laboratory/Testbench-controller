@@ -310,6 +310,7 @@ void updateData() {
 
   // Read 5V reference
   Data.ref5V = ref5V_reading(PSalim_pin);
+  
 
   // Read load cell
   Data.LC = LC_reading(LC01_pin);
@@ -395,6 +396,7 @@ void read_atm_pressure(){
   Data.PS63 = PS_25bar_reading(PS12_pin);
   Data.PS64 = PS_25bar_reading(PS12_pin);
 }
+
 uint16_t FM11_reading(int pin) {
   // Serial.print("FM11: ");
   // Serial.print(analogRead(pin));

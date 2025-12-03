@@ -375,7 +375,6 @@ void count_down() {
   }
 }
 
-
 void Sequence() {
   newFile(); // Create a new SD file at each test
   T_confirm = millis();
