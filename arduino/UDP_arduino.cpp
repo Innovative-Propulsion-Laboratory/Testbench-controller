@@ -2,7 +2,7 @@
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 
-// test344
+//test laptop
 //test desktop
 
 // Configuration réseau
