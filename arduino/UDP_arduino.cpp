@@ -4,6 +4,7 @@
 
 // test Corentin 2
 // test Elias 2
+// test Claire 2
 
 // Configuration réseau
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
