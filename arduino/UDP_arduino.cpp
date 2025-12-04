@@ -2,7 +2,8 @@
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 
-//test Claire
+//test laptop
+//test desktop
 
 // Configuration réseau
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
