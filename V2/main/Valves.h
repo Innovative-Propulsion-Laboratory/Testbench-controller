@@ -13,19 +13,20 @@
 #define SV21 3
 #define SV22 4
 #define SV24 5
-#define SV31 6
-#define SV32 7
-#define SV33 8
-#define SV34 9
-#define SV35 10
-#define SV36 11
-#define SV51 12
-#define SV52 13
-#define SV53 14
-#define SV61 15
-#define SV62 16
-#define SV63 17
-#define SVXX 18
+#define SV25 6
+#define SV31 7 
+#define SV32 8 
+#define SV33 9 
+#define SV34 10 
+#define SV35 11 
+#define SV36 12 
+#define SV51 13 
+#define SV52 14 
+#define SV53 15 
+#define SV61 16 
+#define SV62 17 
+#define SV63 18 
+#define SV71 19
 
 extern uint32_t valvePositions;
 
