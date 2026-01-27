@@ -19,6 +19,129 @@ void count_down() {
   }
 }
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+// Début séquence allumeur
+
+void Sequence_allumeur() {
+  newFile();
+  T_confirm = millis();
+  Serial.println(millis());
+  Data.test_step = 1;
+  Chilldown_count = 0;
+  set_offset_pressure();
+  debug("=== Debut de la sequence allumeur ===");
+  do {
+
+    BBLoop();
+    sensorsLoop();
+
+    Packet p = receivePacket();
+    if (p.length >= 4 && p.data != nullptr) {decode(p.data);}
+    if (p.data != nullptr) {delete[] p.data;}
+
+    switch (Data.test_step) {
+      case 1:
+        debug("[1] Attente avant purge");
+        if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay)) {
+          Serial.println("Activation : ");
+          Serial.println(millis());
+          Serial.println("T_confirm : ");
+          Serial.println(T_confirm);
+          Serial.println("Confirm to purge : ");
+          Serial.println(Sequence_data.Confirm_to_purge_delay);
+          setValve(SV35, 1);
+          debug("→ Ouverture SV35 (purge)");
+          Data.test_step++;
+        }
+        break;
+
+      case 2:
+        debug("[2] Purge en cours");
+        if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
+          // Durée de purge à vérifier
+          setValve(SV35, 0);
+          debug("→ Fermeture SV35 (fin purge)");
+          Serial.println("Activation : ");
+          Serial.println(millis());
+          
+          digitalWrite(IGN_pin, HIGH);                // Commande allumage glowplug
+
+          debug("→ Allumage glowplug");
+          heat_start = millis();
+          Data.test_step++;
+        }
+        break;
+
+      case 3:
+        debug("[3] Chauffage glowplug en cours");
+        if ((Data.glowplug_current >= Sequence_data.GP_current) && ((millis() - heat_start) >= (Sequence_data.Glowplug_heat_before_duration))) {
+          // Temps et commande d'acquisition de courant à vérifier
+          setValve(SV25, 1);
+          debug("→ Ouverture SV25 (ETH)");
+          Serial.println("Activation : ");
+          Serial.println(millis());
+          igniter_burn_duration = millis()
+          Data.test_step++;
+        } else if ((Data.glowplug_current < Sequence_data.GP_current) && ((millis() - heat_start) >= Sequence_data.Current_raising))  {
+          debug("✖ Erreur: Courant trop faible dans le GP");
+          send_string("error: Current not detected", 1);
+          test_abort();
+        }
+        break;
+
+      case 4:
+        debug("[4] Injection des ergols");
+        if ((Data.glowplug_current >= Sequence_data.GP_current) && (millis() >= (Sequence_data.ETH_to_GOX))) {
+          setValve(SV71, 1);
+          debug("→ Ouverture SV71 (GOX)");
+          Serial.println("Activation : ");
+          Serial.println(millis());
+          Igniter_duration_open = millis()
+          Data.test_step++;
+        }
+        count_down();
+        break;        
+
+      case 5:
+        debug("[5] Verification pression allumeur");
+        if ((Data.PS81 >= Sequence_data.Igniter_chamber_pressure)) {
+          Igniter_duration = millis();
+          debug("✓ Pressions allumeur OK");
+          Data.test_step++;
+        } else if ((millis() - Igniter_duration_open) >= Sequence_data.Igniter_check_duration) {
+          debug("✖ Erreur: Pression trop basse (allumeur)");
+          send_string("error: Pressure too low in igniter pressure chamber", 1);
+          test_abort();
+        }
+        count_down();
+        break;
+
+      case 6:
+        debug("[6] Stabilisation pression allumeur");
+        if ((Data.PS81 >= Sequence_data.Igniter_chamber_pressure) && ((millis() - Igniter_duration_open) >= Sequence_data.Igniter_verified_duration)) {
+          Data.test_step++;
+        } else if (Data.PS81 <= Sequence_data.Igniter_chamber_pressure) {
+          Data.test_step = 5;
+        }
+        count_down();
+        break;
+    }
+  } while (Data.state == 1);
+  debug("=== Fin de sequence allumeur ===");
+  reset_offset_pressure();
+  Data.test_cooling = 0;
+  BB_enable(1, 0);
+  BB_enable(2, 0);
+  BB_enable(6, 0);
+  byte message[4] = {0xAB, 0xCD, 0xAB, 0xCD};
+  reply(message, sizeof(message));
+  test_will_begin = false;
+  Serial.println("sortie de boucle");
+}
+
+// Fin séquence allumeur
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 void Sequence() {
   newFile(); // Create a new SD file at each test
   T_confirm = millis();
