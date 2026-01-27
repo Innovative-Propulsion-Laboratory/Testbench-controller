@@ -1248,8 +1248,6 @@ String generate_csv_line() {
 //                        Current reading INA219
 //////////////////////////////////////////////////////////////////////
 
-Data.glowplug_current = GP_current_reading(GP_ignite_pin);
-
 void setup_current_reading() {
   Wire.begin();
 
