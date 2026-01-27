@@ -6,6 +6,8 @@
 #include <Arduino.h>
 #include <Adafruit_MAX31856.h>  // https://github.com/adafruit/Adafruit_MAX31856
 #include <MCP3208.h>
+#include <INA219.h>
+#include <Wire.h>
 
 
 // ------------------------ PIN CONFIGURATION ----------------------------------

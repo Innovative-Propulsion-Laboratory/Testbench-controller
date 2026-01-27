@@ -153,7 +153,10 @@ uint32_t last_TS62_UW_msg, last_TS62_TUL_msg;
 // Igniter:
 uint32_t last_IGN_CHECK_msg;
 
-
+/////////////////////////////////////////////////////////////////////
+//                        Initialize INA
+//////////////////////////////////////////////////////////////////////
+INA219 ina(0x40, &Wire);
 
 // ------------------------------ SETUP ----------------------------------------
 void setupSensors() {
@@ -333,6 +336,9 @@ void updateData() {
 
   // Read 5V reference
   Data.ref5V = ref5V_reading(PSalim_pin);
+
+  //Read glowpluf current through INA219
+  Data.glowplug_current = GP_current_reading(GP_ignite_pin);
   
 
   // Read load cell
@@ -1237,6 +1243,41 @@ String generate_csv_line() {
                 String(Data.test_cooling ? 1 : 0);
   return line;
 }
+
+/////////////////////////////////////////////////////////////////////
+//                        Current reading INA219
+//////////////////////////////////////////////////////////////////////
+
+Data.glowplug_current = GP_current_reading(GP_ignite_pin);
+
+void setup_current_reading() {
+  Wire.begin();
+
+  bool initialise = ina.begin();   // Initialisation du capteur + classe
+  
+  bool connecte = ina.isConnected();  // Vérification de la connexion
+
+  if (initialise && connecte) {
+    Serial.println("INA219 initialisé et connecté !");
+  } else {
+    if (!initialise) {
+      Serial.println("Erreur : INA219 non initialisé.");
+    } else {
+      Serial.println("Erreur : INA219 non connecté");
+    }
+  }
+
+  bool success = ina.setMaxCurrentShunt(20.0, 0.002);
+
+}
+
+
+// Lecture des mesures
+float GP_current_reading() {
+  return ina.getCurrent_mA();
+}
+
+
 
 void testcapteur(){
   Serial.println("Starting sensor test...");
