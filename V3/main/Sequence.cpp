@@ -67,6 +67,8 @@ void Sequence_allumeur() {
           digitalWrite(IGN_pin, HIGH);                // Commande allumage glowplug
 
           debug("→ Allumage glowplug");
+          Serial.println("Activation : ");
+          Serial.println(millis());
           heat_start = millis();
           Data.test_step++;
         }
@@ -119,9 +121,50 @@ void Sequence_allumeur() {
       case 6:
         debug("[6] Stabilisation pression allumeur");
         if ((Data.PS81 >= Sequence_data.Igniter_chamber_pressure) && ((millis() - Igniter_duration_open) >= Sequence_data.Igniter_verified_duration)) {
+          digitalWrite(IGN_pin, LOW);
+          debug("→ Desactivation glowplug");
+          Serial.println("Activation : ");
+          Serial.println(millis());
           Data.test_step++;
         } else if (Data.PS81 <= Sequence_data.Igniter_chamber_pressure) {
           Data.test_step = 5;
+        }
+        count_down();
+        break;
+
+      case 7:
+        debug("[7] Arrêt allumeur");
+        if ((millis() - igniter_burn_duration) >= Sequence_data.Igniter_burn_time) {
+          setValve(SV71, 0);
+          debug("→ Fermeture SV71 (GOX)");
+          Serial.println("Activation : ");
+          Serial.println(millis());
+          Data.test_step++
+        }
+        break;
+
+      case 8:
+        debug('[8] Purge en cours');
+        if ((millis() - igniter_burn_duration) >= (Sequence_data.Igniter_burn_time + Sequence_data.GOX_to_ETH_delay)) {
+          setValve(SV25, 0);
+          debug("→ Fermeture SV25 (ETH)");
+          Serial.println("Activation : ");
+          Serial.println(millis());
+          setValve(SV35, 1);
+          debug("→ Ouverture SV35 (purge)");
+          Serial.println("Activation : ");
+          Serial.println(millis());
+          Data.test_step++
+        }
+        break;
+
+      case 9:
+        debug('[8] Fin de purge');
+        if ((millis() - igniter_burn_duration) >= (Sequence_data.Igniter_burn_time + Sequence_data.GOX_to_ETH_delay + Sequence_data.purge_after_duration)) {
+          debug("→ Fermeture SV35 (purge)");
+          Serial.println("Activation : ");
+          Serial.println(millis());
+          Data.state = 0;
         }
         count_down();
         break;
