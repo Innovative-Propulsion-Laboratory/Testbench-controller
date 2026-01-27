@@ -217,7 +217,9 @@ void sensorsLoop() {
   valuesCheck();                                                 //check if values are within limits
   BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
   Serial.println("-------------------------------------");
-  Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d",PS21_BB_max,PS11_BB_max,WATER_BB_max);
+  Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d\n",PS21_BB_max,PS11_BB_max,WATER_BB_max);
+  Serial.println("-------------------------------------");
+  Serial.printf("BB pressuriation state ETH : %d, pressuriation state LOX : %d  pressuriation state H20: %d\n",ETH_BB,LOX_BB,WATER_BB);
   Serial.println("-------------------------------------");
   Data.valvesState = valvePositions;
   serialSend();
@@ -326,8 +328,6 @@ void updateData() {
   Data.PS62 = PS_25bar_reading(PS62_pin);
   // Data.PS63 = PS_25bar_ADCreading(PS63_pin) - offset_PS63;
   // Data.PS64 = PS_25bar_ADCreading(PS64_pin) - offset_PS64;
-  // Data.PS63 = PS_25bar_ADCreading(PS63_pin);
-  // Data.PS64 = PS_25bar_ADCreading(PS64_pin);
   // Data.PS71 = PS_25bar_ADCreading(PS71_pin);
   // Data.PS81 = PS_25bar_ADCreading(PS81_pin);
 
@@ -1134,6 +1134,8 @@ void serialSend() {
   Serial.println(Data.LC);
   Serial.print("5V Reference (mV): ");
   Serial.println(Data.ref5V);
+  Serial.print("Current reading (mA) : ");
+  Serial.println(Data.curren);
 
   Serial.println("IP :");
   Serial.println(ip);

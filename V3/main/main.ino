@@ -38,14 +38,15 @@ void setup() {
   digitalWrite(37, HIGH);
 
   setupValves();
+
   Set_valve_position();
   setValve(SV21,0);
   setValve(SV32,0);
+
   setupSensors();
 
   delay(50);
 
-  test();
   setupUDP();
   setupSaveData();
 
@@ -54,7 +55,7 @@ void setup() {
 
 void loop() {
   // Listen to commands
-  // Packet p = receivePacket();
+  Packet p = receivePacket();
   serial_loop();
   // if (p.length >= 4 && p.data != nullptr) {
   //   decode(p.data);
@@ -102,15 +103,15 @@ void loop() {
   // Update BB pressurization more often than sensorsLoop
   BBLoop();
 
-  // if ((!UDPactive)&&(millis() - (time_last_reading) >= data_send_rate)){ // nouveau 
-  //   Ethernet.begin();
-  //   Ethernet.onLinkState([](bool state) {});  // No debug output
-  //   if (Ethernet.waitForLocalIP(kDHCPTimeout)) {
-  //     udp.begin(kPort);
-  //     fisrt_message = false;
-  //     UDPactive = true;
-  //   }
-  // }
+  if ((!UDPactive)&&(millis() - (time_last_reading) >= data_send_rate)){ // nouveau 
+    Ethernet.begin();
+    Ethernet.onLinkState([](bool state) {});  // No debug output
+    if (Ethernet.waitForLocalIP(kDHCPTimeout)) {
+      udp.begin(kPort);
+      fisrt_message = false;
+      UDPactive = true;
+    }
+  }
 }
 
 
@@ -163,5 +164,5 @@ void test(){
   // testValves();
   // set_pilot_light(false);
   // digitalWrite(IGN_pin, LOW);
-  testcapteur();
+  // testcapteur();
 }
