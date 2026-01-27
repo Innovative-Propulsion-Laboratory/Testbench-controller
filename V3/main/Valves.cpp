@@ -1,7 +1,7 @@
 #include "Valves.h"
 
 uint32_t valvePositions =   0b01100100001000100001;    // read from right to left
-const uint32_t valveTypes = 0b01100100001001100001;  // read from right to left
+const uint32_t valveTypes = 0b01100100001010100001;  // read from right to left
 const int valvePins[NUM_VALVES] = {6, 7, 8, 9, 29, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
 Adafruit_MCP23X17 mcp;
 
