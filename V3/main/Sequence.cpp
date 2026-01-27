@@ -58,15 +58,13 @@ void Sequence_allumeur() {
       case 2:
         debug("[2] Purge en cours");
         if (millis() >= (T_confirm + Sequence_data.Confirm_to_purge_delay + Sequence_data.Purge_duration1)) {
-          
           // Durée de purge à vérifier
-          
           setValve(SV35, 0);
           debug("→ Fermeture SV35 (fin purge)");
           Serial.println("Activation : ");
           Serial.println(millis());
           
-          digitalWrite(IGN_pin, HIGH);                    // Commande allumage glowplug à vérifier
+          digitalWrite(IGN_pin, HIGH);                // Commande allumage glowplug
 
           debug("→ Allumage glowplug");
           heat_start = millis();
@@ -82,9 +80,11 @@ void Sequence_allumeur() {
           debug("→ Ouverture SV25 (ETH)");
           Serial.println("Activation : ");
           Serial.println(millis());
+          igniter_burn_duration = millis()
           Data.test_step++;
-        } else if ((Data.glowplug_current < Sequence_data.GP_current) && ((millis() - heat_start) >= ))  {
+        } else if ((Data.glowplug_current < Sequence_data.GP_current) && ((millis() - heat_start) >= Sequence_data.Current_raising))  {
           debug("✖ Erreur: Courant trop faible dans le GP");
+          send_string("error: Current not detected", 1);
           test_abort();
         }
         break;
@@ -92,26 +92,36 @@ void Sequence_allumeur() {
       case 4:
         debug("[4] Injection des ergols");
         if ((Data.glowplug_current >= Sequence_data.GP_current) && (millis() >= (Sequence_data.ETH_to_GOX))) {
-          // Conditions à vérifier
           setValve(SV71, 1);
           debug("→ Ouverture SV71 (GOX)");
           Serial.println("Activation : ");
           Serial.println(millis());
+          Igniter_duration_open = millis()
           Data.test_step++;
         }
-        
+        count_down();
         break;        
 
       case 5:
-        debug("[16] Verif pression injection");
-        if ((Data.PS41 >= Sequence_data.Main_pressure) && (Data.PS42 >= Sequence_data.Main_pressure)) {
-          Main_seems_rise = millis();
-          debug("✓ Pressions injection OK");
+        debug("[5] Verification pression allumeur");
+        if ((Data.PS81 >= Sequence_data.Igniter_chamber_pressure)) {
+          Igniter_duration = millis();
+          debug("✓ Pressions allumeur OK");
           Data.test_step++;
-        } else if ((millis() - Main_duration) >= Sequence_data.Main_check_duration) {
-          debug("✖ Erreur: Pression injection trop faible");
-          send_string("error: Pressure too low with main valves", 1);
+        } else if ((millis() - Igniter_duration_open) >= Sequence_data.Igniter_check_duration) {
+          debug("✖ Erreur: Pression trop basse (allumeur)");
+          send_string("error: Pressure too low in igniter pressure chamber", 1);
           test_abort();
+        }
+        count_down();
+        break;
+
+      case 6:
+        debug("[6] Stabilisation pression allumeur");
+        if ((Data.PS81 >= Sequence_data.Igniter_chamber_pressure) && ((millis() - Igniter_duration_open) >= Sequence_data.Igniter_verified_duration)) {
+          Data.test_step++;
+        } else if (Data.PS81 <= Sequence_data.Igniter_chamber_pressure) {
+          Data.test_step = 5;
         }
         count_down();
         break;
