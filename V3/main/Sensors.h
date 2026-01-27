@@ -76,9 +76,9 @@ struct __attribute__((packed)) data {
   int32_t PS51;
   int16_t PS61, PS62, PS63, PS64, PS71, PS81;
   int16_t TS11, TS12, TS41, TS42, TS61, TS62;                                      // Thermocouples in °C
-  uint16_t FM11, FM21, FM61;                                                        // Flow in mL/s
+  uint16_t FM11, FM21, FM61;                                                       // Flow in mL/s
   int32_t LC;                                                                      // Load cell (N)
-  uint16_t ref5V;                                                                   // 5V reference (mV)
+  uint16_t ref5V, glowplug_current;                                                // 5V reference (mV)
 
   uint32_t valvesState;
   uint8_t actLPos = 0, actRPos = 0;  // Actuator positions (0-255)
