@@ -230,8 +230,9 @@ void sensorsLoop() {
   // Serial.println("-------------------------------------");
   // Serial.printf("BB pressuriation state ETH : %d, pressuriation state LOX : %d  pressuriation state H20: %d\n",ETH_BB,LOX_BB,WATER_BB);
   // Serial.println("-------------------------------------");
-  // Data.valvesState = valvePositions;
   // serialSend();
+  Data.valvesState = valvePositions;
+  
   // Send data at 20Hz
   if (millis() - time_last_reading >= test_send_rate) {
     send_data(&Data, sizeof(data));                              //send data to the ground station
@@ -337,8 +338,8 @@ void updateData() {
   Data.PS62 = PS_25bar_reading(PS62_pin);
   Data.PS63 = 1;   //PS_25bar_ADCreading(PS63_pin) - offset_PS63;
   Data.PS64 = 2;   //PS_25bar_ADCreading(PS64_pin) - offset_PS64;
-  Data.PS71 = 8500;   //PS_25bar_ADCreading(PS71_pin);
-  Data.PS81 = 4;   //PS_25bar_ADCreading(PS81_pin);
+  Data.PS71 = 3;   //PS_25bar_ADCreading(PS71_pin);
+  Data.PS81 = 8500;   //PS_25bar_ADCreading(PS81_pin);
 
   // Read 5V reference
   Data.ref5V = ref5V_reading(PSalim_pin);

@@ -42,7 +42,7 @@
     Current_raising, 
     ETH_to_GOX, 
     Igniter_chamber_pressure, 
-    Igniter_pressure_time, 
+    Igniter_pressure_timemax, 
     Igniter_Highpressure_time, 
     Igniter_burn_duration, 
     GOX_to_ETH, Purge_after_duration)
