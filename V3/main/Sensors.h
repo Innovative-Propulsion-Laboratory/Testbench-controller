@@ -120,13 +120,14 @@ struct __attribute__((packed)) sequence_data {
   uint16_t Purge_duration3;
   uint16_t Cooling_duration_after_end_burn;
 
-  uint8_t GP_current;
+  // Ignter 
+  uint16_t GP_current;
   uint16_t Glowplug_heat_before_duration;
   uint16_t Current_raising;
   uint16_t ETH_to_GOX;
   float Igniter_chamber_pressure;
   uint16_t Igniter_pressure_time;
-  uint16_t Igniter_verified_duration;
+  uint16_t Igniter_Highpressure_time;
   uint16_t Igniter_burn_duration;
   uint16_t GOX_to_ETH;
   uint16_t Purge_after_duration;
@@ -173,7 +174,7 @@ void valuesCheck();
 void trigger_TS();
 void updateData();
 void serialSend();
-void test_abort();
+void test_abort(int type);
 
 // Sensor reading functions
 int16_t PS_25bar_reading(int pin);

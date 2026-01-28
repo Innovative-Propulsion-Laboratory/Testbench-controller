@@ -7,6 +7,7 @@
 void set_offset_pressure();
 float average(int32_t* L, int length);
 void Sequence();
+void Sequence_allumeur();
 void count_down();
 
 #endif

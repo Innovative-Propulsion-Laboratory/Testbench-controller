@@ -2,7 +2,8 @@
 #define SERIAL_CONTROLER_H
 
 #include "Sensors.h"
-
+#include "Decoder.h"
+#include "Sequence.h"
 struct ValveMap { const char* name; uint8_t id; };
 
 static const ValveMap valveMap[] = {
