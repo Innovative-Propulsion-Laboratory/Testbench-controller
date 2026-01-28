@@ -32,7 +32,7 @@
 #define PSalim_pin A14      // Pressure sensors alimentation
 
 // Igniter
-#define IGN_pin 33
+#define GP_ignite_pin 33
 
 // PS offset
 extern int32_t offset_PS12;
@@ -180,6 +180,10 @@ void saveData();
 void save_spe_Data();
 void closeFile();
 String generate_csv_line();
+
+// INA reading current
+void setup_current_reading();
+uint16_t GP_current_reading();
 
 void testcapteur();
 

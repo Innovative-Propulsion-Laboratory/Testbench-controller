@@ -18,9 +18,9 @@ void setup() {
     Serial.println("CrashReport:");
     Serial.print(CrashReport);
   }
-  pinMode(IGN_pin, OUTPUT);
+  pinMode(GP_ignite_pin, OUTPUT);
   pinMode(PL_pin, OUTPUT);
-  digitalWrite(IGN_pin, LOW);
+  digitalWrite(GP_ignite_pin, LOW);
 
   // Disable all CS pins in the setup
   pinMode(1, OUTPUT);
@@ -41,6 +41,7 @@ void setup() {
 
   Set_valve_position();
   setValve(SV21,0);
+  setValve(SV25,1);
   setValve(SV32,0);
 
   setupSensors();
@@ -57,12 +58,12 @@ void loop() {
   // Listen to commands
   Packet p = receivePacket();
   serial_loop();
-  // if (p.length >= 4 && p.data != nullptr) {
-  //   decode(p.data);
-  // }
-  // if (p.data != nullptr) {
-  //   delete[] p.data;
-  // }
+  if (p.length >= 4 && p.data != nullptr) {
+    decode(p.data);
+  }
+  if (p.data != nullptr) {
+    delete[] p.data;
+  }
 
   // Send data at 20Hz
   if (millis() - time_last_reading >= data_send_rate) {

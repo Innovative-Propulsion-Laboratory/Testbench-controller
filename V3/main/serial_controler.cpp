@@ -102,7 +102,7 @@ void serial_loop() {
   }
   if (discharge_test!=0){
     if ((millis()-time_test_begin) >= duration_test){
-      setValve(SV25,0);
+      setValve(SV71,0);
       BB_enable(2,0);
       discharge_test = 0;
       state_test_spe = 0;
@@ -186,7 +186,7 @@ void processCommand(String command) {
       return;
     }
 
-    digitalWrite(IGN_pin, state);
+    digitalWrite(GP_ignite_pin, state);
 
     Serial.print("Set glowplug to ");
     Serial.println(state);
@@ -222,7 +222,7 @@ void processCommand(String command) {
     time_test_begin = millis();
     state_test_spe = 1;
     bool_file = 0;
-    setValve(SV25, 1);
+    setValve(SV71, 1);
   }
   // Add more command parsing as needed
 }

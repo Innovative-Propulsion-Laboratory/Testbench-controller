@@ -166,6 +166,8 @@ void setupSensors() {
   // ADC setup
   // adc.begin(13, 11, 12, 37); //bool begin(sck, mosi, miso, cs);
 
+  setup_current_reading();
+
   // // Thermocouples setup
   // thermo12.begin();
   // thermo41.begin();
@@ -329,25 +331,25 @@ void updateData() {
   Data.PS51 = PS_350bar_reading(PS51_pin);
   Data.PS61 = PS_25bar_reading(PS61_pin);
   Data.PS62 = PS_25bar_reading(PS62_pin);
-  // Data.PS63 = PS_25bar_ADCreading(PS63_pin) - offset_PS63;
-  // Data.PS64 = PS_25bar_ADCreading(PS64_pin) - offset_PS64;
-  // Data.PS71 = PS_25bar_ADCreading(PS71_pin);
-  // Data.PS81 = PS_25bar_ADCreading(PS81_pin);
+  Data.PS63 = 1//PS_25bar_ADCreading(PS63_pin) - offset_PS63;
+  Data.PS64 = 2//PS_25bar_ADCreading(PS64_pin) - offset_PS64;
+  Data.PS71 = 3//PS_25bar_ADCreading(PS71_pin);
+  Data.PS81 = 4//PS_25bar_ADCreading(PS81_pin);
 
   // Read 5V reference
   Data.ref5V = ref5V_reading(PSalim_pin);
 
   //Read glowpluf current through INA219
-  Data.glowplug_current = GP_current_reading(GP_ignite_pin);
+  Data.glowplug_current = GP_current_reading();
   
 
   // Read load cell
   Data.LC = LC_reading(LC01_pin);
 
   // Read flow meters
-  // Data.FM11 = FM11_reading(FM11_pin);
-  // Data.FM21 = FM21_reading(FM21_pin);
-  // Data.FM61 = FM61_reading(FM61_pin);
+  Data.FM11 =  1//FM11_reading(FM11_pin);
+  Data.FM21 =  2//FM21_reading(FM21_pin);
+  Data.FM61 =  3//FM61_reading(FM61_pin);
 
   // // getting data from the thermocouples if ready
   // if (TS11_waiting && thermo11.conversionComplete()) {
@@ -1141,7 +1143,7 @@ void serialSend() {
   Serial.print("5V Reference (mV): ");
   Serial.println(Data.ref5V);
   Serial.print("Current reading (mA) : ");
-  Serial.println(Data.curren);
+  Serial.println(Data.glowplug_current);
 
   Serial.println("IP :");
   Serial.println(ip);
@@ -1267,13 +1269,13 @@ void setup_current_reading() {
     }
   }
 
-  bool success = ina.setMaxCurrentShunt(20.0, 0.002);
+  ina.setMaxCurrentShunt(20.0, 0.002);
 
 }
 
 
 // Lecture des mesures
-float GP_current_reading() {
+uint16_t GP_current_reading() {
   return ina.getCurrent_mA();
 }
 

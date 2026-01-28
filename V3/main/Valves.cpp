@@ -54,8 +54,8 @@ void setValve(uint8_t ID, bool command) {
   command: 1 -> open
   command: 0 -> close
   */
-  Serial.printf("ID:%d\n",ID);
-  Serial.printf("Pin:%d\n",valvePins[ID]);
+  // Serial.printf("ID:%d\n",ID);
+  // Serial.printf("Pin:%d\n",valvePins[ID]);
   if (ID < 0){Serial.println("ID incorrrect");return;} // Check if ID correct
 
   bool state = ((valveTypes >> ID) & 1) ? !command : command; // Check if the valve is NO or NC
