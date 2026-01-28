@@ -16,7 +16,7 @@ void decode(byte* instructions) {
   if (Data.state == 1){
     if (instructions[0] == 0xCC && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC) {
       Data.state = 0;
-      test_abort();
+      test_abort(1);
     }
   }
   else {

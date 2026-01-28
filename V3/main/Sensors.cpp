@@ -59,6 +59,10 @@ uint32_t Chilldown_duration;
 uint32_t Chilldown_verified_duration;
 uint32_t Tchilldown;
 
+uint32_t Heat_start;
+uint32_t Igniter_burn_duration;
+uint32_t Igniter_open_duration;
+
 // Save data 
 SdFs sd;
 FsFile fp;
@@ -220,14 +224,14 @@ void sensorsLoop() {
 
   updateData();                                                  //read the sensors
   valuesCheck();                                                 //check if values are within limits
-  BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
-  Serial.println("-------------------------------------");
-  Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d\n",PS21_BB_max,PS11_BB_max,WATER_BB_max);
-  Serial.println("-------------------------------------");
-  Serial.printf("BB pressuriation state ETH : %d, pressuriation state LOX : %d  pressuriation state H20: %d\n",ETH_BB,LOX_BB,WATER_BB);
-  Serial.println("-------------------------------------");
-  Data.valvesState = valvePositions;
-  serialSend();
+  // BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
+  // Serial.println("-------------------------------------");
+  // Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d\n",PS21_BB_max,PS11_BB_max,WATER_BB_max);
+  // Serial.println("-------------------------------------");
+  // Serial.printf("BB pressuriation state ETH : %d, pressuriation state LOX : %d  pressuriation state H20: %d\n",ETH_BB,LOX_BB,WATER_BB);
+  // Serial.println("-------------------------------------");
+  // Data.valvesState = valvePositions;
+  // serialSend();
   // Send data at 20Hz
   if (millis() - time_last_reading >= test_send_rate) {
     send_data(&Data, sizeof(data));                              //send data to the ground station
@@ -333,14 +337,14 @@ void updateData() {
   Data.PS62 = PS_25bar_reading(PS62_pin);
   Data.PS63 = 1;   //PS_25bar_ADCreading(PS63_pin) - offset_PS63;
   Data.PS64 = 2;   //PS_25bar_ADCreading(PS64_pin) - offset_PS64;
-  Data.PS71 = 3;   //PS_25bar_ADCreading(PS71_pin);
+  Data.PS71 = 8500;   //PS_25bar_ADCreading(PS71_pin);
   Data.PS81 = 4;   //PS_25bar_ADCreading(PS81_pin);
 
   // Read 5V reference
   Data.ref5V = ref5V_reading(PSalim_pin);
 
   //Read glowpluf current through INA219
-  Data.glowplug_current = GP_current_reading();
+  Data.glowplug_current = 8100;//GP_current_reading();
   
 
   // Read load cell
@@ -679,7 +683,7 @@ void valuesCheck() {
         Serial.println("error: PS41 over limit - test aborted");
         last_PS41_TUL_msg = millis();
       }
-      test_abort();
+      test_abort(1);
     } else if (PS41_TUL_active == 0) {
       PS41_TUL_active = 1;
       PS41_TUL_time = millis();
@@ -725,7 +729,7 @@ void valuesCheck() {
         Serial.println("error: PS41 below limit - test aborted");
         last_PS41_TLL_msg = millis();
       }
-      test_abort();
+      test_abort(1);
     } else if (PS41_TLL_active == 0) {
       PS41_TLL_active = 1;
       PS41_TLL_time = millis();
@@ -741,7 +745,7 @@ void valuesCheck() {
         Serial.println("error: PS42 over limit - test aborted");
         last_PS42_TUL_msg = millis();
       }
-      test_abort();
+      test_abort(1);
     } else if (PS42_TUL_active == 0) {
       PS42_TUL_active = 1;
       PS42_TUL_time = millis();
@@ -787,7 +791,7 @@ void valuesCheck() {
         Serial.println("error: PS42 below limit - test aborted");
         last_PS42_TLL_msg = millis();
       }
-      test_abort();
+      test_abort(1);
     } else if (PS42_TLL_active == 0) {
       PS42_TLL_active = 1;
       PS42_TLL_time = millis();
@@ -833,7 +837,7 @@ void valuesCheck() {
         Serial.println("error: PS51 below limit - test aborted");
         last_PS51_TLL_msg = millis();
       }
-      test_abort();
+      test_abort(1);
     } else if (PS51_TLL_active == 0) {
       PS51_TLL_active = 1;
       PS51_TLL_time = millis();
@@ -935,7 +939,7 @@ void valuesCheck() {
         Serial.println("error: TS62 over limit - test aborted");
         last_TS62_TUL_msg = millis();
       }
-      test_abort();
+      test_abort(1);
     } else if (TS62_TUL_active == 0) {
       TS62_TUL_active = 1;
       TS62_TUL_time = millis();
@@ -946,7 +950,7 @@ void valuesCheck() {
   
 }
 
-void test_abort() {
+void test_abort(int type) {
     /*abort from IHM or if UL or LL during test is detected or if check in sequence not reached:
   - before Igniter ON:
   	close SV63 (if test_cooling is enabled)
@@ -965,74 +969,128 @@ void test_abort() {
 
 
 
+  if(type ==1){
+    if (Data.test_step < 10) {
+      setValve(SV63, 0); // close SV63
+      setValve(SV13,0);
+      setValve(SV36,0);
+      setValve(SV35,0);
+      Data.state = 0; // go back to active state
+      Data.test_step = 0; // go back to initial state
+      Data.test_cooling = 1; // enable cooling cycle valuesCheck again
+    }
 
-  if (Data.test_step < 10) {
-    setValve(SV63, 0); // close SV63
-    setValve(SV13,0);
-    setValve(SV36,0);
-    setValve(SV35,0);
-    Data.state = 0; // go back to active state
-    Data.test_step = 0; // go back to initial state
-    Data.test_cooling = 1; // enable cooling cycle valuesCheck again
-  }
+    else if (Data.test_step >= 10){
+      Data.test_step = 21; // go to purge step
+      Data.state = 2; // set emergency state
+      T0 = millis(); // reset timer
+      do {
+        sensorsLoop();
+        switch (Data.test_step) {
+          ////// stop main injection and purge //////
+          case 21:
+          {
 
-  else if (Data.test_step >= 10){
-    Data.test_step = 21; // go to purge step
-    Data.state = 2; // set emergency state
-    T0 = millis(); // reset timer
-    do {
-      sensorsLoop();
-      switch (Data.test_step) {
-        ////// stop main injection and purge //////
-        case 21:
-        {
-
-          setValve(SV12, 0);
-          setValve(SV13, 0);
-          setValve(SV36, 1);
-          Data.test_step++;
-          break;
-        }
-      case 22:
-        {
-          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay)) {
-            setValve(SV22, 0);
-            setValve(SV24, 0);
-            setValve(SV35, 1);
+            setValve(SV12, 0);
+            setValve(SV13, 0);
+            setValve(SV36, 1);
             Data.test_step++;
+            break;
           }
-          break;
-        }
-      case 23:
-        {
-          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2)) {
-            setValve(SV36, 0);
-            setValve(SV35, 0);
-            Data.test_step++;
+        case 22:
+          {
+            if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay)) {
+              setValve(SV22, 0);
+              setValve(SV24, 0);
+              setValve(SV35, 1);
+              Data.test_step++;
+            }
+            break;
           }
-          break;
-        }
-      ////// stop cooling //////
-      case 24:
-        {
-          if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2 + Sequence_data.Cooling_duration_after_end_burn)) {
-            setValve(SV63, 0);
-            Data.state = 0;
-            Data.test_step = 0;
+        case 23:
+          {
+            if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2)) {
+              setValve(SV36, 0);
+              setValve(SV35, 0);
+              Data.test_step++;
+            }
+            break;
           }
-          break;
+        ////// stop cooling //////
+        case 24:
+          {
+            if (millis() >= static_cast<uint32_t>(T0 + Sequence_data.LOX_to_ETH_closing_delay + Sequence_data.Purge_duration2 + Sequence_data.Cooling_duration_after_end_burn)) {
+              setValve(SV63, 0);
+              Data.state = 0;
+              Data.test_step = 0;
+            }
+            break;
+          }
         }
-      }
-    } while (Data.state == 2);
+      } while (Data.state == 2);
+    }
+    Serial.println(Data.state);
+    closeFile(); // close the test SD file
+    reset_offset_pressure();
+    BB_enable(1, 0);
+    BB_enable(2, 0);
+    BB_enable(6, 0);
+    Data.test_cooling = 1;
+    Data.state = 0;
   }
-  Serial.println(Data.state);
-  closeFile(); // close the test SD file
-  reset_offset_pressure();
-  BB_enable(1, 0);
-  BB_enable(2, 0);
-  BB_enable(6, 0);
-  Data.test_cooling = 1;
-  Data.state = 0;
+  else if(type == 0){
+
+    if(Data.test_step <= 3){
+      Data.state = 0; // go back to active state
+      Data.test_step = 0; // go back to initial state
+      digitalWrite(GP_ignite_pin,LOW);
+    }
+    else if(3< Data.test_step && Data.test_step <=6){
+      Data.state = 2; // go back to active state
+      Data.test_step = 7; // go back to initial state
+      digitalWrite(GP_ignite_pin,LOW);
+
+      do {
+        switch (Data.test_step){
+          case 7:
+            setValve(SV71, 0);
+            T0 = millis(); // reset timer
+            Serial.println("Fermer SV71 : ");
+            Serial.println(millis());
+            Data.test_step++;
+          break;
+
+          case 8:
+            if ((millis() - T0) >= (Sequence_data.GOX_to_ETH)) {
+              setValve(SV25, 0);
+              Serial.println("Fermeture SV25 :");
+              Serial.println(millis());
+              setValve(SV35, 1);
+              Serial.println("Ouverture Purge : ");
+              Serial.println(millis());
+              Data.test_step++;
+            }
+            break;
+
+          case 9:
+            if ((millis() - T0) >= static_cast<uint32_t>(Sequence_data.GOX_to_ETH + Sequence_data.Purge_after_duration)) {
+              setValve(SV35, 0);          
+              Serial.println("Fermeture purge : ");
+              Serial.println(millis());
+              Data.state = 0;
+            }
+            break;
+        }
+      }while (Data.state == 2);
+      reset_offset_pressure();
+      closeFile();
+      BB_enable(2, 0);
+      Data.state = 0; // go back to active state
+      byte message[4] = {0xAB, 0xCD, 0xAB, 0xCD};
+      reply(message, sizeof(message));
+      Serial.println("sortie de boucle");
+    }
+  }
 }
 
 void serialSend() {
@@ -1108,26 +1166,6 @@ void serialSend() {
   Serial.print("TS62: ");
   Serial.println(Data.TS62);
 
-  // Serial.println("Thermocouples faults:");
-  // Serial.print("TS11: ");
-  // printFault(thermo11.readFault());
-  // Serial.print("\t");
-  // Serial.print("TS12: ");
-  // printFault(thermo12.readFault());
-  // Serial.print("\t");
-  // Serial.print("TS41: ");
-  // printFault(thermo41.readFault());
-  // Serial.print("\t");
-  // Serial.print("TS42: ");
-  // printFault(thermo42.readFault());
-  // Serial.print("\t");
-  // Serial.print("TS61: ");
-  // printFault(thermo61.readFault());
-  // Serial.print("\t");
-  // Serial.print("TS62: ");
-  // printFault(thermo62.readFault());
-  // Serial.println("");
-
   Serial.println("Flow Meters (mL/s):");
   Serial.print("FM11: ");
   Serial.print(Data.FM11);
@@ -1147,6 +1185,53 @@ void serialSend() {
 
   Serial.println("IP :");
   Serial.println(ip);
+
+  // ===== AJOUT : affichage des paramètres de séquence (Ignitertest) =====
+  Serial.println("------ Sequence Data (Ignitertest) ------");
+
+  // Si tu as un "tank" global (sinon supprime ces 2 lignes)
+  // Serial.print("tank: ");
+  // Serial.println(tank);
+  Serial.print("Data.state : ");
+  Serial.println(Data.state);
+
+  Serial.print("Confirm_to_purge_delay (ms): ");
+  Serial.println(Sequence_data.Confirm_to_purge_delay);
+
+  Serial.print("Purge_duration1 (ms): ");
+  Serial.println(Sequence_data.Purge_duration1);
+
+  Serial.print("Glowplug_heat_before_duration (ms): ");
+  Serial.println(Sequence_data.Glowplug_heat_before_duration);
+
+  Serial.print("GP_current: ");
+  Serial.println(Sequence_data.GP_current);
+
+  Serial.print("Current_raising (ms): ");
+  Serial.println(Sequence_data.Current_raising);
+
+  Serial.print("ETH_to_GOX (ms): ");
+  Serial.println(Sequence_data.ETH_to_GOX);
+
+  Serial.print("Igniter_chamber_pressure: ");
+  Serial.println(Sequence_data.Igniter_chamber_pressure);
+
+  Serial.print("Igniter_pressure_time (ms): ");
+  Serial.println(Sequence_data.Igniter_pressure_time);
+
+  Serial.print("Igniter_Highpressure_time (ms): ");
+  Serial.println(Sequence_data.Igniter_Highpressure_time);
+
+  Serial.print("Igniter_burn_duration (ms): ");
+  Serial.println(Sequence_data.Igniter_burn_duration);
+
+  Serial.print("GOX_to_ETH (ms): ");
+  Serial.println(Sequence_data.GOX_to_ETH);
+
+  Serial.print("Purge_after_duration (ms): ");
+  Serial.println(Sequence_data.Purge_after_duration);
+
+  Serial.println("----------------------------------------");
 
   Serial.println("--------------------------");
   Serial.println();
