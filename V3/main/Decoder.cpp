@@ -77,12 +77,12 @@ void decode(byte* instructions) {
       }
     }
     if (instructions[0] == 0xFF && instructions[1] == 0xFF && instructions[2] == 0xAA && instructions[3] == 0xAA) { //open/close glow plug
-      if (instruction[4] == 0) {
-        digitalWrite(GP_pin, LOW); //turn off glow plug
+      if (instructions[4] == 0) {
+        digitalWrite(GP_ignite_pin, LOW); //turn off glow plug
         Serial.println("Glowplug OFF");
       }
-      if (instruction[4] == 1) {
-        digitalWrite(GP_pin, HIGH); //turn on glow plug
+      if (instructions[4] == 1) {
+        digitalWrite(GP_ignite_pin, HIGH); //turn on glow plug
         Serial.println("Glowplug ON");
       }
     }
