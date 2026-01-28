@@ -642,7 +642,7 @@ void valuesCheck() {
     PS22_TLW_active = 0;
   }
 
-if (Data.state == 1 && Data.test_step >= 4 && Data.test_step <= 7 && Data.PS23 >= PS23_TUW) {
+  if (Data.state == 1 && Data.test_step >= 4 && Data.test_step <= 7 && Data.PS23 >= PS23_TUW) {
     if (PS23_TUW_active == 1 && (millis() - PS23_TUW_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS23_TUW_msg) >= message_delay) {
         send_string("warning: PS23 too high", 0);
