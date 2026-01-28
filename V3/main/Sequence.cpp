@@ -66,13 +66,13 @@ void count_down() {
           
 //           digitalWrite(IGN_pin, HIGH);                // Commande allumage glowplug
 
-          debug("→ Allumage glowplug");
-          Serial.println("Activation : ");
-          Serial.println(millis());
-          heat_start = millis();
-          Data.test_step++;
-        }
-        break;
+        //   debug("→ Allumage glowplug");
+        //   Serial.println("Activation : ");
+        //   Serial.println(millis());
+        //   heat_start = millis();
+        //   Data.test_step++;
+        // }
+        // break;
 
 //       case 3:
 //         debug("[3] Chauffage glowplug en cours");
