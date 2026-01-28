@@ -119,6 +119,17 @@ struct __attribute__((packed)) sequence_data {
   uint16_t LOX_to_ETH_closing_delay;
   uint16_t Purge_duration3;
   uint16_t Cooling_duration_after_end_burn;
+
+  uint8_t GP_current;
+  uint16_t Glowplug_heat_before_duration;
+  uint16_t Current_raising;
+  uint16_t ETH_to_GOX;
+  float Igniter_chamber_pressure;
+  uint16_t Igniter_pressure_time;
+  uint16_t Igniter_verified_duration;
+  uint16_t Igniter_burn_duration;
+  uint16_t GOX_to_ETH;
+  uint16_t Purge_after_duration;
 };
 
 // External variable declarations
@@ -149,6 +160,10 @@ extern uint32_t chill_temp_seems_ok;
 extern uint32_t Chilldown_duration;
 extern uint32_t Chilldown_verified_duration;
 extern uint32_t Tchilldown;
+
+extern uint32_t Heat_start;
+extern uint32_t Igniter_burn_duration;
+extern uint32_t Igniter_open_duration;
 
 // Functions:
 void setupSensors();
