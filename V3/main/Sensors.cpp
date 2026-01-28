@@ -92,11 +92,14 @@ int32_t PS11_UL = 25000;
 int32_t PS12_TLW = 9000, PS12_TUW = 13000;
 int32_t PS21_UL = 25000;
 int32_t PS22_TLW = 9000, PS22_TUW = 13000;
+int32_t PS23_TLW = 9000, PS23_TUW = 13000;
 int32_t PS31_LW = 20000, PS31_UW = 50000, PS31_UL = 55000;
 int32_t PS41_TLL = 6000, PS41_TLW = 7000, PS41_TUW = 13000, PS41_TUL = 14000;
 int32_t PS42_TLL = 6000, PS42_TLW = 7000, PS42_TUW = 13000, PS42_TUL = 14000;
 int32_t PS51_TLL = 10000, PS51_LW = 40000;
 int32_t PS51_UW = 210000;
+int32_t PS71_TLW = 11000, PS71_TUW = 16000;
+int32_t PS81_TLW = 7500, PS81_TUW = 10000;
 int32_t PS_WATER_TLL = 3000, PS_WATER_UL = 14000;
 
 // Thermocouples:
@@ -110,10 +113,13 @@ bool PS11_UL_active = 0, PS11_BBLW_active = 0, PS11_BBUW_active = 0;
 bool PS12_TLW_active = 0, PS12_TUW_active = 0;
 bool PS21_UL_active = 0, PS21_BBLW_active = 0, PS21_BBUW_active = 0;
 bool PS22_TLW_active = 0, PS22_TUW_active = 0;
+bool PS23_TLW_active = 0, PS23_TUW_active = 0;
 bool PS31_LW_active = 0, PS31_UW_active = 0, PS31_UL_active = 0;
 bool PS41_TLL_active = 0, PS41_TLW_active = 0, PS41_TUW_active = 0, PS41_TUL_active = 0;
 bool PS42_TLL_active = 0, PS42_TLW_active = 0, PS42_TUW_active = 0, PS42_TUL_active = 0;
 bool PS51_TLL_active = 0, PS51_LW_active = 0, PS51_UW_active = 0;
+bool PS71_TLW_active = 0, PS71_TUW_active = 0;
+bool PS81_TLW_active = 0, PS81_TUW_active = 0;
 bool PS_WATER_TLL_active = 0, PS_WATER_BBLW_active = 0, PS_WATER_BBUW_active = 0, PS_WATER_UL_active = 0;
 
 // Thermocouples:
@@ -127,10 +133,13 @@ uint32_t PS11_UL_time = 0, PS11_BBLW_time = 0, PS11_BBUW_time = 0;
 uint32_t PS12_TLW_time = 0, PS12_TUW_time = 0;
 uint32_t PS21_UL_time = 0, PS21_BBLW_time = 0, PS21_BBUW_time = 0;
 uint32_t PS22_TLW_time = 0, PS22_TUW_time = 0;
+uint32_t PS23_TLW_time = 0, PS23_TUW_time = 0;
 uint32_t PS31_LW_time = 0, PS31_UW_time = 0, PS31_UL_time = 0;
 uint32_t PS41_TLL_time = 0, PS41_TLW_time = 0, PS41_TUW_time = 0, PS41_TUL_time = 0;
 uint32_t PS42_TLL_time = 0, PS42_TLW_time = 0, PS42_TUW_time = 0, PS42_TUL_time = 0;
 uint32_t PS51_TLL_time = 0, PS51_LW_time = 0, PS51_UW_time = 0;
+uint32_t PS71_TLW_time = 0, PS71_TUW_time = 0;
+uint32_t PS81_TLW_time = 0, PS81_TUW_time = 0;
 uint32_t PS_WATER_TLL_time = 0, PS_WATER_BBLW_time = 0, PS_WATER_BBUW_time = 0, PS_WATER_UL_time = 0;
 
 // Thermocouples:
@@ -145,10 +154,13 @@ uint32_t last_PS11_UL_msg, last_PS11_BBUW_msg, last_PS11_BBLW_msg;
 uint32_t last_PS12_TUW_msg, last_PS12_TLW_msg;
 uint32_t last_PS21_UL_msg, last_PS21_BBUW_msg, last_PS21_BBLW_msg;
 uint32_t last_PS22_TUW_msg, last_PS22_TLW_msg;
+uint32_t last_PS23_TUW_msg, last_PS23_TLW_msg;
 uint32_t last_PS31_UL_msg, last_PS31_UW_msg, last_PS31_LW_msg;
 uint32_t last_PS41_TUL_msg, last_PS41_TUW_msg, last_PS41_TLW_msg, last_PS41_TLL_msg;
 uint32_t last_PS42_TUL_msg, last_PS42_TUW_msg, last_PS42_TLW_msg, last_PS42_TLL_msg;
 uint32_t last_PS51_UW_msg, last_PS51_LW_msg, last_PS51_TLL_msg;
+uint32_t last_PS71_TUW_msg, last_PS71_TLW_msg;
+uint32_t last_PS81_TUW_msg, last_PS81_TLW_msg;
 uint32_t last_PSWATER_UL_msg, last_PSWATER_BBUW_msg, last_PSWATER_BBLW_msg, last_PSWATER_TLL_msg;
 
 // Thermocouples:
@@ -631,6 +643,36 @@ void valuesCheck() {
     PS22_TLW_active = 0;
   }
 
+  if (Data.state == 1 && Data.test_step >= 4 && Data.test_step <= 7 && Data.PS23 >= PS23_TUW) {
+    if (PS23_TUW_active == 1 && (millis() - PS23_TUW_time) >= PS_oob_max_delay) {
+      if ((millis() - last_PS23_TUW_msg) >= message_delay) {
+        send_string("warning: PS23 too high", 0);
+        Serial.println("warning: PS23 too high");
+        last_PS23_TUW_msg = millis();
+      }
+    } else if (PS23_TUW_active == 0) {
+      PS23_TUW_active = 1;
+      PS23_TUW_time = millis();
+    }
+  } else {
+    PS23_TUW_active = 0;
+  }
+
+  if (Data.state == 1 && Data.test_step >= 4 && Data.test_step <= 7 && Data.PS23 <= PS23_TLW) {
+    if (PS23_TLW_active == 1 && (millis() - PS23_TLW_time) >= PS_oob_max_delay) {
+      if ((millis() - last_PS23_TLW_msg) >= message_delay) {
+        send_string("warning: PS23 too low", 0);
+        Serial.println("warning: PS23 too low");
+        last_PS23_TLW_msg = millis();
+      }
+    } else if (PS23_TLW_active == 0) {
+      PS23_TLW_active = 1;
+      PS23_TLW_time = millis();
+    }
+  } else {
+    PS23_TLW_active = 0;
+  }
+
   if (Data.PS31 >= PS31_UL) {
     if (PS31_UL_active == 1 && (millis() - PS31_UL_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS31_UL_msg) >= message_delay) {
@@ -948,7 +990,66 @@ void valuesCheck() {
   } else {
     TS62_TUL_active = 0;
   }
-  
+
+  if (Data.state == 1 && Data.test_step >= 5 && Data.test_step <= 6 && Data.PS71 >= PS71_TUW) {
+    if (PS71_TUW_active == 1 && (millis() - PS71_TUW_time) >= PS_oob_max_delay) {
+      if ((millis() - last_PS71_TUW_msg) >= message_delay) {
+        send_string("warning: PS71 too high", 0);
+        Serial.println("warning: PS71 too high");
+        last_PS71_TUW_msg = millis();
+      }
+    } else if (PS71_TUW_active == 0) {
+      PS71_TUW_active = 1;
+      PS71_TUW_time = millis();
+    }
+  } else {
+    PS71_TUW_active = 0;
+  }
+
+  if (Data.state == 1 && Data.test_step >= 5 && Data.test_step <= 6 && Data.PS71 <= PS71_TLW) {
+    if (PS71_TLW_active == 1 && (millis() - PS71_TLW_time) >= PS_oob_max_delay) {
+      if ((millis() - last_PS71_TLW_msg) >= message_delay) {
+        send_string("warning: PS71 too low", 0);
+        Serial.println("warning: PS71 too low");
+        last_PS71_TLW_msg = millis();
+      }
+    } else if (PS71_TLW_active == 0) {
+      PS71_TLW_active = 1;
+      PS71_TLW_time = millis();
+    }
+  } else {
+    PS71_TLW_active = 0;
+  }
+
+ if (Data.state == 1 && Data.test_step >= 5 && Data.test_step <= 6 && Data.PS81 >= PS81_TUW) {
+    if (PS81_TUW_active == 1 && (millis() - PS81_TUW_time) >= PS_oob_max_delay) {
+      if ((millis() - last_PS81_TUW_msg) >= message_delay) {
+        send_string("warning: PS81 too high", 0);
+        Serial.println("warning: PS81 too high");
+        last_PS81_TUW_msg = millis();
+      }
+    } else if (PS81_TUW_active == 0) {
+      PS81_TUW_active = 1;
+      PS81_TUW_time = millis();
+    }
+  } else {
+    PS81_TUW_active = 0;
+  }
+
+  if (Data.state == 1 && Data.test_step >= 5 && Data.test_step <= 6 && Data.PS81 <= PS81_TLW) {
+    if (PS81_TLW_active == 1 && (millis() - PS81_TLW_time) >= PS_oob_max_delay) {
+      if ((millis() - last_PS81_TLW_msg) >= message_delay) {
+        send_string("warning: PS81 too low", 0);
+        Serial.println("warning: PS81 too low");
+        last_PS81_TLW_msg = millis();
+      }
+    } else if (PS81_TLW_active == 0) {
+      PS81_TLW_active = 1;
+      PS81_TLW_time = millis();
+    }
+  } else {
+    PS81_TLW_active = 0;
+  } 
 }
 
 void test_abort(int type) {
