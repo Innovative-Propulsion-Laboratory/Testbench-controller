@@ -565,36 +565,6 @@ void valuesCheck() {
     PS12_TLW_active = 0;
   }
 
-  if (Data.state == 1 && Data.test_step >= 4 && Data.test_step <= 7 && Data.PS23 >= PS23_TUW) {
-    if (PS23_TUW_active == 1 && (millis() - PS23_TUW_time) >= PS_oob_max_delay) {
-      if ((millis() - last_PS23_TUW_msg) >= message_delay) {
-        send_string("warning: PS23 too high", 0);
-        Serial.println("warning: PS23 too high");
-        last_PS23_TUW_msg = millis();
-      }
-    } else if (PS23_TUW_active == 0) {
-      PS23_TUW_active = 1;
-      PS23_TUW_time = millis();
-    }
-  } else {
-    PS23_TUW_active = 0;
-  }
-
-  if (Data.state == 1 && Data.test_step >= 4 && Data.test_step <= 7 && Data.PS23 <= PS23_TLW) {
-    if (PS23_TLW_active == 1 && (millis() - PS23_TLW_time) >= PS_oob_max_delay) {
-      if ((millis() - last_PS23_TLW_msg) >= message_delay) {
-        send_string("warning: PS23 too low", 0);
-        Serial.println("warning: PS23 too low");
-        last_PS23_TLW_msg = millis();
-      }
-    } else if (PS23_TLW_active == 0) {
-      PS23_TLW_active = 1;
-      PS23_TLW_time = millis();
-    }
-  } else {
-    PS23_TLW_active = 0;
-  }
-
   if (Data.PS21 >= PS21_UL) {
     if (PS21_UL_active == 1 && (millis() - PS21_UL_time) >= PS_oob_max_delay) {
       if ((millis() - last_PS21_UL_msg) >= message_delay) {
@@ -670,6 +640,36 @@ void valuesCheck() {
     }
   } else {
     PS22_TLW_active = 0;
+  }
+
+if (Data.state == 1 && Data.test_step >= 4 && Data.test_step <= 7 && Data.PS23 >= PS23_TUW) {
+    if (PS23_TUW_active == 1 && (millis() - PS23_TUW_time) >= PS_oob_max_delay) {
+      if ((millis() - last_PS23_TUW_msg) >= message_delay) {
+        send_string("warning: PS23 too high", 0);
+        Serial.println("warning: PS23 too high");
+        last_PS23_TUW_msg = millis();
+      }
+    } else if (PS23_TUW_active == 0) {
+      PS23_TUW_active = 1;
+      PS23_TUW_time = millis();
+    }
+  } else {
+    PS23_TUW_active = 0;
+  }
+
+  if (Data.state == 1 && Data.test_step >= 4 && Data.test_step <= 7 && Data.PS23 <= PS23_TLW) {
+    if (PS23_TLW_active == 1 && (millis() - PS23_TLW_time) >= PS_oob_max_delay) {
+      if ((millis() - last_PS23_TLW_msg) >= message_delay) {
+        send_string("warning: PS23 too low", 0);
+        Serial.println("warning: PS23 too low");
+        last_PS23_TLW_msg = millis();
+      }
+    } else if (PS23_TLW_active == 0) {
+      PS23_TLW_active = 1;
+      PS23_TLW_time = millis();
+    }
+  } else {
+    PS23_TLW_active = 0;
   }
 
   if (Data.PS31 >= PS31_UL) {
