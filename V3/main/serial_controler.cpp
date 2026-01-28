@@ -224,6 +224,24 @@ void processCommand(String command) {
     bool_file = 0;
     setValve(SV71, 1);
   }
+  else if (command.startsWith("Ignitertest")) {
+    int openParen  = command.indexOf('(');
+    int comma1     = command.indexOf(',', openParen + 1);
+    int comma2     = command.indexOf(',', comma1 + 1);
+    int comma3     = command.indexOf(',', comma2 + 1);
+    int comma4     = command.indexOf(',', comma3 + 1);
+    int comma5     = command.indexOf(',', comma4 + 1);
+    int comma6     = command.indexOf(',', comma5 + 1);
+    int comma7     = command.indexOf(',', comma6 + 1);
+    int comma8     = command.indexOf(',', comma7 + 1);
+    int comma9     = command.indexOf(',', comma8 + 1);
+    int closeParen = command.indexOf(')', comma9 + 1);
+
+    if (openParen < 0 || comma1 < 0 || comma2 < 0 || comma3 < 0 || comma4 < 0 || comma5 < 0 || comma6 < 0 || comma7 < 0 || comma8 < 0 || comma9 < 0 || closeParen < 0) {
+      Serial.println("Bad command format");
+      return;
+    }
+  }
   // Add more command parsing as needed
 }
 
