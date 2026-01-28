@@ -76,6 +76,16 @@ void decode(byte* instructions) {
         }
       }
     }
+    if (instructions[0] == 0xFF && instructions[1] == 0xFF && instructions[2] == 0xAA && instructions[3] == 0xAA) { //open/close glow plug
+      if (instruction[4] == 0) {
+        digitalWrite(GP_pin, LOW); //turn off glow plug
+        Serial.println("Glowplug OFF");
+      }
+      if (instruction[4] == 1) {
+        digitalWrite(GP_pin, HIGH); //turn on glow plug
+        Serial.println("Glowplug ON");
+      }
+    }
     /* To be implemented when the digital potentiometers are ready
     if (instructions[0] == 0xEE && instructions[1] == 0xEE && instructions[2] == 0xEE && instructions[3] == 0xEE) {  // Actuators
       if (instructions[4] == 0) {
