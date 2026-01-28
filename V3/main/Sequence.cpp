@@ -90,7 +90,7 @@ void Sequence_allumeur() {
 
       case 4:
         debug("[4] Injection des ergols");
-        if ((Data.glowplug_current >= Sequence_data.GP_current) && ((Igniter_burn_duration - millis()) >= Sequence_data.ETH_to_GOX)) {
+        if ((Data.glowplug_current >= Sequence_data.GP_current) && ((millis() - Igniter_burn_duration) >= Sequence_data.ETH_to_GOX)) {
           setValve(SV71, 1);
           debug("→ Ouverture SV71 (GOX)");
           Serial.println("Activation : ");
