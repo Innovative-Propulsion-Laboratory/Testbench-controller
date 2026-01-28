@@ -1,5 +1,5 @@
-#include "Decoder.h"
-#include "Sequence.h"
+#include "serial_controler.h"
+
 
 // main variable
 
@@ -41,7 +41,7 @@ void setup() {
 
   Set_valve_position();
   setValve(SV21,0);
-  setValve(SV25,1);
+  // setValve(SV25,1);
   setValve(SV32,0);
 
   setupSensors();
@@ -84,8 +84,10 @@ void loop() {
       // Send data at 20Hz
       if (millis() - time_last_reading >= test_send_rate) {
         sensorsLoop();
+        serial_loop();
         time_last_reading = millis();
       }
+
     }
 
     if (check_BB_pressure() == true){

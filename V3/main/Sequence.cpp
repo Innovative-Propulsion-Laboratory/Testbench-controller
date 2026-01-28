@@ -24,14 +24,16 @@ void Sequence_allumeur() {
   T_confirm = millis();
   Serial.println(millis());
   Data.test_step = 1;
-  Chilldown_count = 0;
   set_offset_pressure();
   debug("=== Debut de la sequence allumeur ===");
   do {
 
     BBLoop();
     sensorsLoop();
-
+    // serialSend();
+    Serial.println("----------------------------------------");
+    Serial.println("-----------------Sequence---------------");
+    Serial.println("----------------------------------------");
     Packet p = receivePacket();
     if (p.length >= 4 && p.data != nullptr) {decode(p.data);}
     if (p.data != nullptr) {delete[] p.data;}
@@ -82,7 +84,7 @@ void Sequence_allumeur() {
         } else if ((Data.glowplug_current < Sequence_data.GP_current) && ((millis() - Heat_start) >= Sequence_data.Current_raising))  {
           debug("✖ Erreur: Courant trop faible dans le GP");
           send_string("error: Current not detected", 1);
-          test_abort();
+          test_abort(0);
         }
         break;
 
@@ -107,14 +109,14 @@ void Sequence_allumeur() {
         } else if ((millis() - Igniter_open_duration) >= Sequence_data.Igniter_pressure_time) {  // changer igniter_check_duration
           debug("✖ Erreur: Pression trop basse (allumeur)");
           send_string("error: Pressure too low in igniter pressure chamber", 1);
-          test_abort();
+          test_abort(0);
         }
         count_down();
         break;
 
       case 6:
         debug("[6] Stabilisation pression allumeur");
-        if ((Data.PS81 >= Sequence_data.Igniter_chamber_pressure) && ((millis() - Igniter_open_duration) >= Sequence_data.Igniter_verified_duration)) {
+        if ((Data.PS81 >= Sequence_data.Igniter_chamber_pressure) && ((millis() - Igniter_open_duration) >= Sequence_data.Igniter_Highpressure_time)) {
           
           digitalWrite(GP_ignite_pin, LOW);
 
@@ -256,7 +258,7 @@ void Sequence() {
           } else if (Chilldown_count >= Sequence_data.Max_chilldown) {
             debug("✖ Chilldown echoue");
             send_string("error: Chilldown failed", 1);
-            test_abort();
+            test_abort(1);
           } else {
             debug("↻ Chilldown supplementaire necessaire");
             Serial.println("Chilldown_off_duration : ");
@@ -335,7 +337,7 @@ void Sequence() {
         } else if ((millis() - PS63_duration) >= Sequence_data.PS63_check_duration) {
           debug("✖ Erreur: Refroidissement non detecte");
           send_string("error: Cooling not detected", 1);
-          test_abort();
+          test_abort(1);
         }
         count_down();
         break;
@@ -384,7 +386,7 @@ void Sequence() {
         } else if ((millis() - Bypass_duration_open) >= Sequence_data.Bypass_check_duration) {
           debug("✖ Erreur: Pression trop basse (bypass)");
           send_string("error: Pressure too low with bypass valves", 1);
-          test_abort();
+          test_abort(1);
         }
         count_down();
         break;
@@ -422,7 +424,7 @@ void Sequence() {
         } else if ((millis() - Main_duration) >= Sequence_data.Main_check_duration) {
           debug("✖ Erreur: Pression injection trop faible");
           send_string("error: Pressure too low with main valves", 1);
-          test_abort();
+          test_abort(1);
         }
         count_down();
         break;
