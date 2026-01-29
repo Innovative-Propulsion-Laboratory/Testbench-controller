@@ -117,7 +117,6 @@ void loop() {
   }
 }
 
-
 bool check_BB_pressure() {
   const int N = 100;
   int32_t average_PS11_data[N];

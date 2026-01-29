@@ -97,6 +97,7 @@ void Sequence_allumeur() {
           Serial.println(millis());
           Igniter_open_duration = millis();
           Data.test_step++;
+          Data.PS81 = Data.PS81- 1000;
         }
         count_down();
         break;        
@@ -105,6 +106,7 @@ void Sequence_allumeur() {
         debug("[5] Verification pression allumeur");
         if ((Data.PS81 >= Sequence_data.Igniter_chamber_pressure)) {
           debug("✓ Pressions allumeur OK");
+          
           Data.test_step++;
         } else if ((millis() - Igniter_open_duration) >= Sequence_data.Igniter_pressure_time) {  // changer pour Igniter_pressure_timemax
           debug("✖ Erreur: Pression trop basse (allumeur)");
@@ -126,6 +128,7 @@ void Sequence_allumeur() {
           Data.test_step++;
         } else if (Data.PS81 <= Sequence_data.Igniter_chamber_pressure) {
           Data.test_step = 5;
+          // Data.PS81 = Data.PS81 + 1000;
         }
         count_down();
         break;

@@ -236,7 +236,7 @@ void sensorsLoop() {
 
   updateData();                                                  //read the sensors
   valuesCheck();                                                 //check if values are within limits
-  // BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
+  BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62); //bang-bang pressurization of the tanks if enabled
   // Serial.println("-------------------------------------");
   // Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d\n",PS21_BB_max,PS11_BB_max,WATER_BB_max);
   // Serial.println("-------------------------------------");
@@ -351,7 +351,7 @@ void updateData() {
   Data.PS63 = 1;   //PS_25bar_ADCreading(PS63_pin) - offset_PS63;
   Data.PS64 = 2;   //PS_25bar_ADCreading(PS64_pin) - offset_PS64;
   Data.PS71 = 3;   //PS_25bar_ADCreading(PS71_pin);
-  Data.PS81 = 8500;   //PS_25bar_ADCreading(PS81_pin);
+  Data.PS81 = 0;   //PS_25bar_ADCreading(PS81_pin);
 
   // Read 5V reference
   Data.ref5V = ref5V_reading(PSalim_pin);
