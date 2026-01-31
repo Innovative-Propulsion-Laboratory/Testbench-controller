@@ -106,6 +106,9 @@ int32_t PS_WATER_TLL = 3000, PS_WATER_UL = 14000;
 float TS62_UW = 850, TS62_TUL = 950;
 Adafruit_MCP9600 mcp_TS;
 TCA9548 MP(0x70);
+float TS11_TUL = 526;    //Temperature in Celsius
+
+
 
 // Pressure sensors:
 bool PS11_UL_active = 0, PS11_BBLW_active = 0, PS11_BBUW_active = 0;
@@ -123,6 +126,7 @@ bool PS_WATER_TLL_active = 0, PS_WATER_BBLW_active = 0, PS_WATER_BBUW_active = 0
 
 // Thermocouples:
 bool TS62_UW_active = 0, TS62_TUL_active = 0;
+bool TS11_TUL_active = 0;
 
 // Igniter:
 uint32_t IGN_CHECK_active;
@@ -143,6 +147,7 @@ uint32_t PS_WATER_TLL_time = 0, PS_WATER_BBLW_time = 0, PS_WATER_BBUW_time = 0, 
 
 // Thermocouples:
 uint32_t TS62_UW_time = 0, TS62_TUL_time = 0;
+uint32_t TS11_TUL_time = 0;
 
 // Igniter:
 uint32_t IGN_CHECK_time;
@@ -164,6 +169,7 @@ uint32_t last_PSWATER_UL_msg, last_PSWATER_BBUW_msg, last_PSWATER_BBLW_msg, last
 
 // Thermocouples:
 uint32_t last_TS62_UW_msg, last_TS62_TUL_msg;
+uint32_t last_TS11_TUL_msg;
 
 // Igniter:
 uint32_t last_IGN_CHECK_msg;
@@ -421,6 +427,22 @@ void valuesCheck() {
     }
   } else {
     PS11_BBLW_active = 0;
+  }
+
+    if (Data.state == 1 && Data.TS11 >= TS11_TUL) {
+    if (TS11_TUL_active == 1 && (millis() - TS11_TUL_time) >= PS_oob_max_delay) {
+      if ((millis() - last_TS11_TUL_msg) >= message_delay) {
+        send_string("error: TS11 over limit - test aborted",1);
+        Serial.println("error: TS11 over limit - test aborted");
+        last_TS11_TUL_msg = millis();
+      }
+      test_abort(1);
+    } else if (TS11_TUL_active == 0) {
+      TS11_TUL_active = 1;
+      TS11_TUL_time = millis();
+    }
+  } else {
+    TS11_TUL_active = 0;
   }
 
   if (Data.state == 1 && Data.test_step >= 12 && Data.test_step <= 22 && Data.PS12 >= PS12_TUW) {
