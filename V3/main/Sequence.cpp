@@ -160,7 +160,7 @@ void Sequence_allumeur() {
         break;
 
       case 9:
-        debug("[8] Fin de purge");
+        debug("[9] Fin de purge");
         if ((millis() - Igniter_burn_duration) >= static_cast<uint32_t>(Sequence_data.Igniter_burn_duration + Sequence_data.GOX_to_ETH + Sequence_data.Purge_after_duration)) {
           setValve(SV35, 0);          
           debug("→ Fermeture SV35 (purge)");
