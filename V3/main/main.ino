@@ -41,7 +41,6 @@ void setup() {
 
   Set_valve_position();
   setValve(SV21,0);
-  // setValve(SV25,1);
   setValve(SV32,0);
 
   setupSensors();
@@ -106,15 +105,15 @@ void loop() {
   // Update BB pressurization more often than sensorsLoop
   BBLoop();
 
-  if ((!UDPactive)&&(millis() - (time_last_reading) >= data_send_rate)){ // nouveau 
-    Ethernet.begin();
-    Ethernet.onLinkState([](bool state) {});  // No debug output
-    if (Ethernet.waitForLocalIP(kDHCPTimeout)) {
-      udp.begin(kPort);
-      fisrt_message = false;
-      UDPactive = true;
-    }
-  }
+  // if ((!UDPactive)&&(millis() - (time_last_reading) >= data_send_rate)){ // nouveau 
+  //   Ethernet.begin();
+  //   Ethernet.onLinkState([](bool state) {});  // No debug output
+  //   if (Ethernet.waitForLocalIP(kDHCPTimeout)) {
+  //     udp.begin(kPort);
+  //     fisrt_message = false;
+  //     UDPactive = true;
+  //   }
+  // }
 }
 
 bool check_BB_pressure() {
@@ -123,6 +122,7 @@ bool check_BB_pressure() {
   int32_t average_PS21_data[N];
   int32_t average_PS61_data[N];
   int32_t average_PS62_data[N];
+  int32_t average_PS71_data[N];
 
   for (int i = 0; i < N; i++) {
     BBLoop();
@@ -130,12 +130,14 @@ bool check_BB_pressure() {
     average_PS21_data[i] = Data.PS21;
     average_PS61_data[i] = Data.PS61;
     average_PS62_data[i] = Data.PS62;
+    average_PS71_data[i] = Data.PS71;
   }
   
   avg_PS11 = average(average_PS11_data, N);
   avg_PS21 = average(average_PS21_data, N);
   avg_PS61 = average(average_PS61_data, N);
   avg_PS62 = average(average_PS62_data, N);
+  avg_PS71 = average(average_PS71_data, N);
   // Serial.print(avg_PS11);
   // Serial.print(avg_PS21);
   // Serial.print(avg_PS61);
@@ -145,7 +147,8 @@ bool check_BB_pressure() {
     if (avg_PS11 > (PS11_BB_min - 400) && avg_PS11 < (PS11_BB_max + 400)
     && avg_PS21 > (PS21_BB_min - 400) && avg_PS21 < (PS21_BB_max + 400)
     && avg_PS61 > (WATER_BB_min - 400) && avg_PS61 < (WATER_BB_min + 400)
-    && avg_PS62 > (WATER_BB_min - 400) && avg_PS62 < (WATER_BB_min + 400)){
+    && avg_PS62 > (WATER_BB_min - 400) && avg_PS62 < (WATER_BB_min + 400)
+    && avg_PS71 > (PS71_TLW -  200) && avg_PS71 < (PS71_TUW + 400)){
       // Serial.println("pressure reached");
       return true;
   }

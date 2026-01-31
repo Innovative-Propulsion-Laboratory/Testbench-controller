@@ -108,7 +108,7 @@ void Sequence_allumeur() {
           debug("✓ Pressions allumeur OK");
           
           Data.test_step++;
-        } else if ((millis() - Igniter_open_duration) >= Sequence_data.Igniter_pressure_time) {  // changer pour Igniter_pressure_timemax
+        } else if ((millis() - Igniter_open_duration) >= Sequence_data.Igniter_pressure_timemax) {  // changer pour Igniter_pressure_timemaxmax
           debug("✖ Erreur: Pression trop basse (allumeur)");
           send_string("error: Pressure too low in igniter pressure chamber", 1);
           test_abort(0);
@@ -161,7 +161,7 @@ void Sequence_allumeur() {
 
       case 9:
         debug("[8] Fin de purge");
-        if ((millis() - Igniter_burn_duration) >= static_cast<uint32_t>(Sequence_data.Igniter_burn_duration + Sequence_data.GOX_to_ETH + Sequence_data.Purge_after_duration)) {
+        if ((millis() - Igniter_burn_duration) >= static_cast<uint32_t>(Sequence_data.Igniter_burn_duration + Sequence_data.GOX_to_ETH + Sequence_data.Purge_duration3)) {
           setValve(SV35, 0);          
           debug("→ Fermeture SV35 (purge)");
           Serial.println("Activation : ");
@@ -527,10 +527,13 @@ void set_offset_pressure() {  // set sensors at 0
   const int N = 10;
   int32_t average_PS12_data[N];
   int32_t average_PS22_data[N];
+  int32_t average_PS23_data[N];
   int32_t average_PS41_data[N];
   int32_t average_PS42_data[N];
   int32_t average_PS63_data[N];
   int32_t average_PS64_data[N];
+  int32_t average_PS71_data[N];
+  int32_t average_PS81_data[N];
 
   for (int i = 0; i < N; i++) {
     if (millis() - time_last_reading >= 50) {
@@ -548,16 +551,22 @@ void set_offset_pressure() {  // set sensors at 0
     }
     average_PS12_data[i] = Data.PS12;
     average_PS22_data[i] = Data.PS22;
+    average_PS23_data[i] = Data.PS23;
     average_PS41_data[i] = Data.PS41;
     average_PS42_data[i] = Data.PS42;
     average_PS63_data[i] = Data.PS63;
     average_PS64_data[i] = Data.PS64;
+    average_PS71_data[i] = Data.PS71;
+    average_PS81_data[i] = Data.PS81;
   }
 
   offset_PS12 = average(average_PS12_data, N);
   offset_PS22 = average(average_PS22_data, N);
+  offset_PS23 = average(average_PS23_data, N);
   offset_PS41 = average(average_PS41_data, N);
   offset_PS42 = average(average_PS42_data, N);
   offset_PS63 = average(average_PS63_data, N);
   offset_PS64 = average(average_PS64_data, N);
+  offset_PS71 = average(average_PS71_data, N);
+  offset_PS81 = average(average_PS81_data, N);
 }

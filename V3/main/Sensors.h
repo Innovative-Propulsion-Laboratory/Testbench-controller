@@ -37,12 +37,15 @@
 // PS offset
 extern int32_t offset_PS12;
 extern int32_t offset_PS22;
+extern int32_t offset_PS23;
 extern int32_t offset_PS41;
 extern int32_t offset_PS42;
 extern int32_t offset_PS63;
 extern int32_t offset_PS64;
+extern int32_t offset_PS71;
+extern int32_t offset_PS81;
 
-extern int32_t avg_PS11, avg_PS21, avg_PS61, avg_PS62;
+extern int32_t avg_PS11, avg_PS21, avg_PS61, avg_PS62, avg_PS71;
 
 // Load cell:
 #define LC01_pin A10
@@ -125,12 +128,11 @@ struct __attribute__((packed)) sequence_data {
   uint16_t Glowplug_heat_before_duration;
   uint16_t Current_raising;
   uint16_t ETH_to_GOX;
-  float Igniter_chamber_pressure;
-  uint16_t Igniter_pressure_time;
+  uint16_t Igniter_chamber_pressure;
+  uint16_t Igniter_pressure_timemax;
   uint16_t Igniter_Highpressure_time;
   uint16_t Igniter_burn_duration;
   uint16_t GOX_to_ETH;
-  uint16_t Purge_after_duration;
 };
 
 // External variable declarations
@@ -165,6 +167,8 @@ extern uint32_t Tchilldown;
 extern uint32_t Heat_start;
 extern uint32_t Igniter_burn_duration;
 extern uint32_t Igniter_open_duration;
+
+extern int32_t PS71_TLW , PS71_TUW;
 
 // Functions:
 void setupSensors();

@@ -1,7 +1,7 @@
 #include "Valves.h"
 
 uint32_t valvePositions =   0b01100100001000100001;    // read from right to left
-const uint32_t valveTypes = 0b01100100001010100001;  // read from right to left
+const uint32_t valveTypes = 0b01100100001000100001;  // read from right to left
 const int valvePins[NUM_VALVES] = {6, 7, 8, 9, 29, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
 Adafruit_MCP23X17 mcp;
 
@@ -40,11 +40,6 @@ void setupValves() {
     mcp.pinMode(i, OUTPUT);
   }
 
-  Serial.print("GPIOAB="); Serial.println(mcp.readGPIOAB(), HEX);
-  mcp.writeGPIOAB(0xFFFF); delay(20);
-  Serial.print("GPIOAB="); Serial.println(mcp.readGPIOAB(), HEX);
-  mcp.writeGPIOAB(0x0000); delay(20);
-  Serial.print("GPIOAB="); Serial.println(mcp.readGPIOAB(), HEX);
 }
 
 void setValve(uint8_t ID, bool command) {
@@ -79,6 +74,16 @@ void setValve(uint8_t ID, bool command) {
   // Serial.print(ID);
   // Serial.print(" set to ");
   // Serial.println(command ? "open" : "closed");
+
+  // bool isNO  = ((valveTypes >> ID) & 1u);
+  // bool state1 = isNO ? !command : command;
+  
+  // Serial.print("Vanne : ");
+  // Serial.print(name);
+  // Serial.print(" id : ");
+  // Serial.print(ID);
+  // Serial.print(" state : ");
+  // Serial.println(state1);
 }
 
 void Set_valve_position() {

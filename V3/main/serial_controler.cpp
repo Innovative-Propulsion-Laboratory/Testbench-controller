@@ -42,7 +42,7 @@
     Current_raising, 
     ETH_to_GOX, 
     Igniter_chamber_pressure, 
-    Igniter_pressure_timemax, 
+    Igniter_pressure_timemaxmax, 
     Igniter_Highpressure_time, 
     Igniter_burn_duration, 
     GOX_to_ETH, Purge_after_duration)
@@ -119,6 +119,7 @@ void serial_loop() {
   if (discharge_test!=0){
     if ((millis()-time_test_begin) >= duration_test){
       setValve(SV71,0);
+      setValve(SV25,0);
       BB_enable(2,0);
       discharge_test = 0;
       state_test_spe = 0;
@@ -131,7 +132,7 @@ void processCommand(String command) {
   Serial.print("Processing command: ");
   Serial.println(command);
 
-  if (command.startsWith("set valve")) {
+  if (command.startsWith("1")) {
     int openParen  = command.indexOf('(');  // position de '('
     int comma      = command.indexOf(',');  // position de ','
     int closeParen = command.indexOf(')');  // position de ')'
@@ -269,11 +270,11 @@ void processCommand(String command) {
     Sequence_data.Current_raising               = command.substring(comma5 + 1,  comma6).toInt();
     Sequence_data.ETH_to_GOX                    = command.substring(comma6 + 1,  comma7).toInt();
     Sequence_data.Igniter_chamber_pressure      = command.substring(comma7 + 1,  comma8).toInt();
-    Sequence_data.Igniter_pressure_time         = command.substring(comma8 + 1,  comma9).toInt();
+    Sequence_data.Igniter_pressure_timemax      = command.substring(comma8 + 1,  comma9).toInt();
     Sequence_data.Igniter_Highpressure_time     = command.substring(comma9 + 1,  comma10).toInt();
     Sequence_data.Igniter_burn_duration         = command.substring(comma10 + 1, comma11).toInt();
     Sequence_data.GOX_to_ETH                    = command.substring(comma11 + 1, comma12).toInt();
-    Sequence_data.Purge_after_duration          = command.substring(comma12 + 1, closeParen).toInt();
+    Sequence_data.Purge_duration3               = command.substring(comma12 + 1, closeParen).toInt();
 
     BB_param_set(2, pressure);
     BB_enable(2, 1);
@@ -297,10 +298,45 @@ void processCommand(String command) {
     Data.state = state;
     Sequence_allumeur();
   }
-  else if (command.startsWith("abort_test"))
-  {
+  else if (command.startsWith("abort_test")){
     Data.state = 0;
     test_abort(0);
+  }
+  else if (command.startsWith("timing")) { // launch(2,3000,10000)
+    int openParen  = command.indexOf('(');
+    int comma1     = command.indexOf(',', openParen + 1);
+    int comma2     = command.indexOf(',', comma1 + 1);
+    int closeParen = command.indexOf(')', comma2 + 1);
+
+    if (openParen < 0 || comma1 < 0 || comma2 < 0 || closeParen < 0) {
+      Serial.println("Bad launch format");
+      return;
+    }
+
+    int tank = command.substring(openParen + 1, comma1).toInt();
+    int pressure = command.substring(comma1 + 1, comma2).toInt();
+    duration_test = command.substring(comma2 + 1, closeParen).toInt();
+
+    if (tank < 1 || tank > 3) {
+      Serial.println("Invalid tank");
+      return;
+    }
+    if (pressure <= 0 || duration_test <= 0) {
+      Serial.println("Invalid pressure/duration");
+      return;
+    }
+
+    BB_param_set(tank, pressure);
+    BB_enable(tank, 1);
+
+    discharge_test = 1;           // ou state_test_spe, mais sois cohérent
+    time_test_begin = millis();
+    state_test_spe = 1;
+    bool_file = 0;
+    
+    setValve(SV25, 1);
+    setValve(SV71, 1);
+    
   }
 
   // Add more command parsing as needed
