@@ -4,7 +4,8 @@
 #include "Pressurization.h"
 #include <SdFat.h>
 #include <Arduino.h>
-#include <Adafruit_MAX31856.h>  // https://github.com/adafruit/Adafruit_MAX31856
+#include <TCA9548.h>
+#include <Adafruit_MCP9600.h>
 #include <MCP3208.h>
 #include <INA219.h>
 #include <Wire.h>
@@ -56,12 +57,15 @@ extern int32_t avg_PS11, avg_PS21, avg_PS61, avg_PS62, avg_PS71;
 #define FM61_pin A13  //Cooling flow
 
 // Thermocouples:
-// #define TS11_pin 28  // LOX temperature
-// #define TS12_pin 29  // GN2 50bar tank temperature
-// #define TS41_pin 30  // Main Combustion Chamber temperature 1
-// #define TS42_pin 35  // Main Combustion Chamber temperature 2
-// #define TS61_pin 36  // Water initial temperature
-// #define TS62_pin 37  // Water final temperature
+#define I2C_ADDRESS (0x67)
+extern Adafruit_MCP9600 mcp_TS;
+extern TCA9548 MP;
+#define TS11_pin 0
+#define TS12_pin 1
+#define TS41_pin 2
+#define TS42_pin 3
+#define TS61_pin 4
+#define TS62_pin 5
 
 extern uint32_t time_last_reading;
 extern bool bool_file;
@@ -123,7 +127,7 @@ struct __attribute__((packed)) sequence_data {
   uint16_t Purge_duration3;
   uint16_t Cooling_duration_after_end_burn;
 
-  // Ignter 
+  // Igniter 
   uint16_t GP_current;
   uint16_t Glowplug_heat_before_duration;
   uint16_t Current_raising;
