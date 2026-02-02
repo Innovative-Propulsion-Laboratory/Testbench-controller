@@ -3,13 +3,11 @@
 
 #include "Pressurization.h"
 #include <SdFat.h>
-#include <Arduino.h>
+#include <Wire.h>
 #include <TCA9548.h>
 #include <Adafruit_MCP9600.h>
 #include <MCP3208.h>
 #include <INA219.h>
-#include <Wire.h>
-
 
 // ------------------------ PIN CONFIGURATION ----------------------------------
 
@@ -58,7 +56,7 @@ extern int32_t avg_PS11, avg_PS21, avg_PS61, avg_PS62, avg_PS71;
 
 // Thermocouples:
 #define I2C_ADDRESS (0x67)
-extern Adafruit_MCP9600 mcp_TS;
+extern Adafruit_MCP9600 mcp_TS[6];
 extern TCA9548 MP;
 #define TS11_pin 0
 #define TS12_pin 1
@@ -71,6 +69,7 @@ extern uint32_t time_last_reading;
 extern bool bool_file;
 extern bool state_test_spe;
 extern unsigned long t_last_data_packet, data_send_rate, test_send_rate;
+extern int print;
 
 
 // Structure containing all the data sent from the Teensy to the computer
@@ -179,7 +178,6 @@ void setupSensors();
 void BBLoop();
 void sensorsLoop();
 void valuesCheck();
-void trigger_TS();
 void updateData();
 void serialSend();
 void test_abort(int type);
@@ -196,6 +194,8 @@ uint16_t FM21_reading(int pin);
 uint16_t FM61_reading(int pin);
 int32_t LC_reading(int pin);
 uint16_t ref5V_reading(int pin);
+int16_t read_TS(int TS_index);
+void disableAllChannels(TCA9548 &MP);
 
 // SD card functions
 void setupSaveData();

@@ -1,6 +1,6 @@
 #include "serial_controler.h"
 
- /*
+/*
  ==================================================
  📜 Commandes list 
  ==================================================
@@ -88,13 +88,13 @@
  */
 
 // ====== Buffer d'entrée ======
- String command;
+String command;
 
-// Discharges test variable 
+// Discharges test variable
 
 uint32_t duration_test;
 uint8_t tank;
-int pressure; 
+int pressure;
 uint32_t time_test_begin;
 bool discharge_test = 0;
 
@@ -116,11 +116,11 @@ void serial_loop() {
       command += c;
     }
   }
-  if (discharge_test!=0){
-    if ((millis()-time_test_begin) >= duration_test){
-      setValve(SV71,0);
-      setValve(SV25,0);
-      BB_enable(2,0);
+  if (discharge_test != 0) {
+    if ((millis() - time_test_begin) >= duration_test) {
+      setValve(SV71, 0);
+      setValve(SV25, 0);
+      BB_enable(2, 0);
       discharge_test = 0;
       state_test_spe = 0;
     }
@@ -132,15 +132,21 @@ void processCommand(String command) {
   Serial.print("Processing command: ");
   Serial.println(command);
 
-  if (command.startsWith("1")) {
-    int openParen  = command.indexOf('(');  // position de '('
-    int comma      = command.indexOf(',');  // position de ','
+  if (command.startsWith("set valve")) {
+    int openParen = command.indexOf('(');   // position de '('
+    int comma = command.indexOf(',');       // position de ','
     int closeParen = command.indexOf(')');  // position de ')'
-    uint8_t valve =  convertValve(command.substring(openParen + 1, comma));
-    int state = command.substring(comma + 1, closeParen).toInt(); 
+    uint8_t valve = convertValve(command.substring(openParen + 1, comma));
+    int state = command.substring(comma + 1, closeParen).toInt();
 
-    if (state!=0 && state !=1){Serial.println("Invalid valve state");return;}
-    if (valve == 255){Serial.println("Invalid valve ID ");return;}
+    if (state != 0 && state != 1) {
+      Serial.println("Invalid valve state");
+      return;
+    }
+    if (valve == 255) {
+      Serial.println("Invalid valve ID ");
+      return;
+    }
 
     setValve(valve, state);
     Serial.print("Set valve ");
@@ -148,26 +154,24 @@ void processCommand(String command) {
     Serial.print(" to ");
     Serial.println(state);
 
-  }
-  else if (command.startsWith("set bbpressure")) {
-    int openParen  = command.indexOf('(');  // position de '('
-    int comma      = command.indexOf(',');  // position de ','
+  } else if (command.startsWith("set bbpressure")) {
+    int openParen = command.indexOf('(');   // position de '('
+    int comma = command.indexOf(',');       // position de ','
     int closeParen = command.indexOf(')');  // position de ')'
     uint8_t tank = command.substring(openParen + 1, comma).toInt();
-    int pressure = command.substring(comma + 1, closeParen).toInt(); 
+    int pressure = command.substring(comma + 1, closeParen).toInt();
     BB_param_set(tank, pressure);
     Serial.print("Set tank ");
     Serial.print(tank);
     Serial.print(" set pressure to");
     Serial.println(pressure);
-  }
-  else if (command.startsWith("set bangbang")) {
-    int openParen  = command.indexOf('(');  // position de '('
-    int comma      = command.indexOf(',');  // position de ','
+  } else if (command.startsWith("set bangbang")) {
+    int openParen = command.indexOf('(');   // position de '('
+    int comma = command.indexOf(',');       // position de ','
     int closeParen = command.indexOf(')');  // position de ')'
     uint8_t tank = command.substring(openParen + 1, comma).toInt();
-    int state = command.substring(comma + 1, closeParen).toInt(); 
-    if(state!=0 && state !=1){
+    int state = command.substring(comma + 1, closeParen).toInt();
+    if (state != 0 && state != 1) {
       Serial.println("Invalid bangbang state");
       return;
     }
@@ -176,29 +180,27 @@ void processCommand(String command) {
     Serial.print(tank);
     Serial.print(" bangbang to ");
     Serial.println(state);
-  }
-  else if (command.startsWith("set savedata")) {
-    int openParen  = command.indexOf('(');  // position de '('
+  } else if (command.startsWith("set savedata")) {
+    int openParen = command.indexOf('(');   // position de '('
     int closeParen = command.indexOf(')');  // position de ')'
     int state = command.substring(openParen + 1, closeParen).toInt();
-    if(state!=0 && state !=1){
+    if (state != 0 && state != 1) {
       Serial.println("Invalid savedata state");
       return;
     }
-    if (state==0){
+    if (state == 0) {
       bool_file = 1;
-    }else{
+    } else {
       bool_file = 0;
     }
     state_test_spe = state;
     Serial.print("Set save sate to ");
     Serial.println(state);
-  }
-  else if (command.startsWith("set glowplug")) {
-    int openParen  = command.indexOf('(');  // position de '('
+  } else if (command.startsWith("set glowplug")) {
+    int openParen = command.indexOf('(');   // position de '('
     int closeParen = command.indexOf(')');  // position de ')'
     int state = command.substring(openParen + 1, closeParen).toInt();
-    if(state!=0 && state !=1){
+    if (state != 0 && state != 1) {
       Serial.println("Invalid savedata state");
       return;
     }
@@ -207,11 +209,10 @@ void processCommand(String command) {
 
     Serial.print("Set glowplug to ");
     Serial.println(state);
-  }
-  else if (command.startsWith("launch")) { // launch(2,3000,10000)
-    int openParen  = command.indexOf('(');
-    int comma1     = command.indexOf(',', openParen + 1);
-    int comma2     = command.indexOf(',', comma1 + 1);
+  } else if (command.startsWith("launch")) {  // launch(2,3000,10000)
+    int openParen = command.indexOf('(');
+    int comma1 = command.indexOf(',', openParen + 1);
+    int comma2 = command.indexOf(',', comma1 + 1);
     int closeParen = command.indexOf(')', comma2 + 1);
 
     if (openParen < 0 || comma1 < 0 || comma2 < 0 || closeParen < 0) {
@@ -235,77 +236,73 @@ void processCommand(String command) {
     BB_param_set(tank, pressure);
     BB_enable(tank, 1);
 
-    discharge_test = 1;           // ou state_test_spe, mais sois cohérent
+    discharge_test = 1;  // ou state_test_spe, mais sois cohérent
     time_test_begin = millis();
     state_test_spe = 1;
     bool_file = 0;
     setValve(SV71, 1);
-  }
-  else if (command.startsWith("ignitertest")) {
-    int openParen  = command.indexOf('(');
-    int comma1     = command.indexOf(',', openParen + 1);
-    int comma2     = command.indexOf(',', comma1 + 1);
-    int comma3     = command.indexOf(',', comma2 + 1);
-    int comma4     = command.indexOf(',', comma3 + 1);
-    int comma5     = command.indexOf(',', comma4 + 1);
-    int comma6     = command.indexOf(',', comma5 + 1);
-    int comma7     = command.indexOf(',', comma6 + 1);
-    int comma8     = command.indexOf(',', comma7 + 1);
-    int comma9     = command.indexOf(',', comma8 + 1);
-    int comma10     = command.indexOf(',', comma9 + 1);
-    int comma11     = command.indexOf(',', comma10 + 1);
-    int comma12     = command.indexOf(',', comma11 + 1);
-    int closeParen = command.indexOf(')', comma12 + 1);
+  } else if (command.startsWith("ignitertest")) {
+    // int openParen = command.indexOf('(');
+    // int comma1 = command.indexOf(',', openParen + 1);
+    // int comma2 = command.indexOf(',', comma1 + 1);
+    // int comma3 = command.indexOf(',', comma2 + 1);
+    // int comma4 = command.indexOf(',', comma3 + 1);
+    // int comma5 = command.indexOf(',', comma4 + 1);
+    // int comma6 = command.indexOf(',', comma5 + 1);
+    // int comma7 = command.indexOf(',', comma6 + 1);
+    // int comma8 = command.indexOf(',', comma7 + 1);
+    // int comma9 = command.indexOf(',', comma8 + 1);
+    // int comma10 = command.indexOf(',', comma9 + 1);
+    // int comma11 = command.indexOf(',', comma10 + 1);
+    // int comma12 = command.indexOf(',', comma11 + 1);
+    // int closeParen = command.indexOf(')', comma12 + 1);
 
-    if (openParen < 0 || comma1 < 0 || comma2 < 0 || comma3 < 0 || comma4 < 0 || comma5 < 0 || comma6 < 0 || comma7 < 0 || comma8 < 0 || comma9 < 0 || closeParen < 0) {
-      Serial.println("Bad command format");
-      return;
-    }
-  
-    int pressure                                = command.substring(openParen + 1, comma1).toInt();
-    Sequence_data.Confirm_to_purge_delay        = command.substring(comma1 + 1,  comma2).toInt();
-    Sequence_data.Purge_duration1               = command.substring(comma2 + 1,  comma3).toInt();
-    Sequence_data.Glowplug_heat_before_duration = command.substring(comma3 + 1,  comma4).toInt();
-    Sequence_data.GP_current                    = command.substring(comma4 + 1,  comma5).toInt();
-    Sequence_data.Current_raising               = command.substring(comma5 + 1,  comma6).toInt();
-    Sequence_data.ETH_to_GOX                    = command.substring(comma6 + 1,  comma7).toInt();
-    Sequence_data.Igniter_chamber_pressure      = command.substring(comma7 + 1,  comma8).toInt();
-    Sequence_data.Igniter_pressure_timemax      = command.substring(comma8 + 1,  comma9).toInt();
-    Sequence_data.Igniter_Highpressure_time     = command.substring(comma9 + 1,  comma10).toInt();
-    Sequence_data.Igniter_burn_duration         = command.substring(comma10 + 1, comma11).toInt();
-    Sequence_data.GOX_to_ETH                    = command.substring(comma11 + 1, comma12).toInt();
-    Sequence_data.Purge_duration3               = command.substring(comma12 + 1, closeParen).toInt();
+    // if (openParen < 0 || comma1 < 0 || comma2 < 0 || comma3 < 0 || comma4 < 0 || comma5 < 0 || comma6 < 0 || comma7 < 0 || comma8 < 0 || comma9 < 0 || closeParen < 0) {
+    //   Serial.println("Bad command format");
+    //   return;
+    // }
 
-    BB_param_set(2, pressure);
-    BB_enable(2, 1);
+    // int pressure = command.substring(openParen + 1, comma1).toInt();
+    // Sequence_data.Confirm_to_purge_delay = command.substring(comma1 + 1, comma2).toInt();
+    // Sequence_data.Purge_duration1 = command.substring(comma2 + 1, comma3).toInt();
+    // Sequence_data.Glowplug_heat_before_duration = command.substring(comma3 + 1, comma4).toInt();
+    // Sequence_data.GP_current = command.substring(comma4 + 1, comma5).toInt();
+    // Sequence_data.Current_raising = command.substring(comma5 + 1, comma6).toInt();
+    // Sequence_data.ETH_to_GOX = command.substring(comma6 + 1, comma7).toInt();
+    // Sequence_data.Igniter_chamber_pressure = command.substring(comma7 + 1, comma8).toInt();
+    // Sequence_data.Igniter_pressure_timemax = command.substring(comma8 + 1, comma9).toInt();
+    // Sequence_data.Igniter_Highpressure_time = command.substring(comma9 + 1, comma10).toInt();
+    // Sequence_data.Igniter_burn_duration = command.substring(comma10 + 1, comma11).toInt();
+    // Sequence_data.GOX_to_ETH = command.substring(comma11 + 1, comma12).toInt();
+    // Sequence_data.Purge_duration3 = command.substring(comma12 + 1, closeParen).toInt();
 
-    test_will_begin = true;
+    // BB_param_set(2, pressure);
+    // BB_enable(2, 1);
 
-    byte message[6] = { 0xEE, 0xEE, 0xAA, 0xAA, 0xAA, 0xAA };
-    reply(message, sizeof(message));
-  }
-  else if (command.startsWith("comfirm_test")) {
-    int openParen  = command.indexOf('(');  // position de '('
-    int closeParen = command.indexOf(')');  // position de ')'
-    int state = command.substring(openParen + 1, closeParen).toInt();
-    if(state!=0 && state !=1){
-      Serial.println("Invalid savedata state");
-      return;
-    }
+    // test_will_begin = true;
 
-    Serial.println("test comfirmé");
+    // byte message[6] = { 0xEE, 0xEE, 0xAA, 0xAA, 0xAA, 0xAA };
+    // reply(message, sizeof(message));
+  } else if (command.startsWith("comfirm_test")) {
+    // int openParen = command.indexOf('(');   // position de '('
+    // int closeParen = command.indexOf(')');  // position de ')'
+    // int state = command.substring(openParen + 1, closeParen).toInt();
+    // if (state != 0 && state != 1) {
+    //   Serial.println("Invalid savedata state");
+    //   return;
+    // }
 
-    Data.state = state;
-    Sequence_allumeur();
-  }
-  else if (command.startsWith("abort_test")){
+    // Serial.println("test comfirmé");
+
+    // Data.state = state;
+    // Sequence_allumeur();
+  } else if (command.startsWith("abort_test")) {
     Data.state = 0;
     test_abort(0);
-  }
-  else if (command.startsWith("timing")) { // launch(2,3000,10000)
-    int openParen  = command.indexOf('(');
-    int comma1     = command.indexOf(',', openParen + 1);
-    int comma2     = command.indexOf(',', comma1 + 1);
+  } else if (command.startsWith("timing")) {  // launch(2,3000,10000)
+    int openParen = command.indexOf('(');
+    int comma1 = command.indexOf(',', openParen + 1);
+    int comma2 = command.indexOf(',', comma1 + 1);
     int closeParen = command.indexOf(')', comma2 + 1);
 
     if (openParen < 0 || comma1 < 0 || comma2 < 0 || closeParen < 0) {
@@ -313,37 +310,46 @@ void processCommand(String command) {
       return;
     }
 
-    int tank = command.substring(openParen + 1, comma1).toInt();
-    int pressure = command.substring(comma1 + 1, comma2).toInt();
-    duration_test = command.substring(comma2 + 1, closeParen).toInt();
+    // int tank = command.substring(openParen + 1, comma1).toInt();
+    // int pressure = command.substring(comma1 + 1, comma2).toInt();
+    // duration_test = command.substring(comma2 + 1, closeParen).toInt();
 
-    if (tank < 1 || tank > 3) {
-      Serial.println("Invalid tank");
-      return;
-    }
-    if (pressure <= 0 || duration_test <= 0) {
-      Serial.println("Invalid pressure/duration");
-      return;
-    }
+    // if (tank < 1 || tank > 3) {
+    //   Serial.println("Invalid tank");
+    //   return;
+    // }
+    // if (pressure <= 0 || duration_test <= 0) {
+    //   Serial.println("Invalid pressure/duration");
+    //   return;
+    // }
 
-    BB_param_set(tank, pressure);
-    BB_enable(tank, 1);
+    // BB_param_set(tank, pressure);
+    // BB_enable(tank, 1);
 
-    discharge_test = 1;           // ou state_test_spe, mais sois cohérent
-    time_test_begin = millis();
-    state_test_spe = 1;
-    bool_file = 0;
-    
-    setValve(SV25, 1);
-    setValve(SV71, 1);
-    
+    // discharge_test = 1;  // ou state_test_spe, mais sois cohérent
+    // time_test_begin = millis();
+    // state_test_spe = 1;
+    // bool_file = 0;
+
+    // setValve(SV25, 1);
+    // setValve(SV71, 1);
+
+  } else if (command.startsWith("set print")) {  // launch(2,3000,10000)
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    int state_v = command.substring(openParen + 1, closeParen).toInt();
+
+    print = state_v;
+    Serial.print("set print to : ");
+    Serial.println(state_v);
+
   }
-
   // Add more command parsing as needed
 }
 
 uint8_t convertValve(const String& t) {
-  for (size_t i = 0; i < sizeof(valveMap)/sizeof(valveMap[0]); ++i) {
+  for (size_t i = 0; i < sizeof(valveMap) / sizeof(valveMap[0]); ++i) {
     if (t.equals(valveMap[i].name)) return valveMap[i].id;
   }
   Serial.println("Invalid valve name: " + t);

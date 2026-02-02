@@ -13,6 +13,8 @@ uint32_t BB_check_duration = 30000;
 void setup() {
   Serial.begin(9600);  //initialize Serial Port
   SPI.begin();         //initialize SPI
+  Wire.begin();
+
 
   if (CrashReport) {
     Serial.println("CrashReport:");
@@ -22,26 +24,9 @@ void setup() {
   pinMode(PL_pin, OUTPUT);
   digitalWrite(GP_ignite_pin, LOW);
 
-  // Disable all CS pins in the setup
-  pinMode(1, OUTPUT);
-  pinMode(10, OUTPUT);
-  pinMode(28, OUTPUT);
-  pinMode(35, OUTPUT);
-  pinMode(36, OUTPUT);
-  pinMode(37, OUTPUT);
-
-  digitalWrite(1, HIGH);
-  digitalWrite(10, HIGH);
-  digitalWrite(28, HIGH);
-  digitalWrite(35, HIGH);
-  digitalWrite(36, HIGH);
-  digitalWrite(37, HIGH);
-
   setupValves();
 
   Set_valve_position();
-  setValve(SV21,0);
-  setValve(SV32,0);
 
   setupSensors();
 
@@ -105,15 +90,15 @@ void loop() {
   // Update BB pressurization more often than sensorsLoop
   BBLoop();
 
-  // if ((!UDPactive)&&(millis() - (time_last_reading) >= data_send_rate)){ // nouveau 
-  //   Ethernet.begin();
-  //   Ethernet.onLinkState([](bool state) {});  // No debug output
-  //   if (Ethernet.waitForLocalIP(kDHCPTimeout)) {
-  //     udp.begin(kPort);
-  //     fisrt_message = false;
-  //     UDPactive = true;
-  //   }
-  // }
+  if ((!UDPactive)&&(millis() - (time_last_reading) >= data_send_rate)){ // nouveau 
+    Ethernet.begin();
+    Ethernet.onLinkState([](bool state) {});  // No debug output
+    if (Ethernet.waitForLocalIP(kDHCPTimeout)) {
+      udp.begin(kPort);
+      fisrt_message = false;
+      UDPactive = true;
+    }
+  }
 }
 
 bool check_BB_pressure() {

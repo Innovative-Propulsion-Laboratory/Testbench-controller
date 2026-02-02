@@ -64,8 +64,7 @@ void convert(const char* message, uint16_t length, int type) {
     }
     // Send via UDP
     udp.send(senderIP, senderPort, buffer, totalLength);
-  } 
-  else if (type == 1) {
+  } else if (type == 1) {
     uint16_t totalLength = 4 + length;
 
     // Create a buffer on the stack
@@ -81,6 +80,30 @@ void convert(const char* message, uint16_t length, int type) {
     for (uint16_t i = 0; i < length; i++) {
       buffer[4 + i] = static_cast<uint8_t>(message[i]);
     }
+
+    // ---- AFFICHAGE DU MESSAGE ENVOYÉ ----
+    Serial.print("UDP type=1 totalLength=");
+    Serial.print(totalLength);
+    Serial.print(" header=CC CC CC CC message=\"");
+
+    // affiche la partie message en ASCII
+    for (uint16_t i = 0; i < length; i++) {
+      char ch = (char)buffer[4 + i];
+      // option : remplace les non-imprimables
+      if (ch < 32 || ch > 126) ch = '.';
+      Serial.print(ch);
+    }
+    Serial.println("\"");
+
+    // affiche tout le buffer en HEX
+    Serial.print("Buffer HEX: ");
+    for (uint16_t i = 0; i < totalLength; i++) {
+      if (buffer[i] < 0x10) Serial.print('0');
+      Serial.print(buffer[i], HEX);
+      Serial.print(' ');
+    }
+    Serial.println();
+    // -------------------------------------
     // Send via UDP
     udp.send(senderIP, senderPort, buffer, totalLength);
   }

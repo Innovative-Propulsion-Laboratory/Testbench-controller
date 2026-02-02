@@ -2,6 +2,7 @@
 #include "Sequence.h"
 
 bool test_will_begin = false;
+int type_test = 0;
 
 uint16_t assembleUInt16(uint8_t lowByte, uint8_t highByte) {  // to assemble 2 byte
   return (static_cast<uint16_t>(highByte) << 8) | static_cast<uint16_t>(lowByte);
@@ -113,7 +114,11 @@ void decode(byte* instructions) {
     }
     */
     if (instructions[0] == 0xAA && instructions[1] == 0xAA && instructions[2] == 0xAA && instructions[3] == 0xAA) {  // Start test
-      if (assembleUInt16(instructions[5], instructions[4]) == 0) {
+      type_test = assembleUInt16(instructions[5], instructions[4]);
+      Serial.print("Type test : ");
+      Serial.println(type_test);
+
+      if (type_test == 0) {
 
         Serial.print("Allumeur :");
         Serial.println(instructions[4]);
@@ -290,7 +295,8 @@ void decode(byte* instructions) {
 
         byte message[6] = { 0xEE, 0xEE, 0xAA, 0xAA, 0xAA, 0xAA };
         reply(message, sizeof(message));
-      } else if (assembleUInt16(instructions[5], instructions[4]) == 1) {
+      }
+      else if (type_test ==  1) {
 
         Data.test_cooling = 0;
 
@@ -303,14 +309,13 @@ void decode(byte* instructions) {
         idx += 2;
         Serial.print("ETH pressure bangbang set : ");
         Serial.println(value);
-        BB_param_set(1, value);
+        BB_param_set(2, value);
 
         // GOX pressure set
         value = assembleUInt16(instructions[idx + 1], instructions[idx]);
         idx += 2;
         Serial.print("GOX pressure set : ");
         Serial.println(value);
-        BB_param_set(2, value);
 
         // Confirm to purge delay
         Sequence_data.Confirm_to_purge_delay = assembleUInt16(instructions[idx + 1], instructions[idx]);
@@ -397,7 +402,13 @@ void decode(byte* instructions) {
     }
     if (instructions[0] == 0xBB && instructions[1] == 0xBB && instructions[2] == 0xBB && instructions[3] == 0xBB) {  // Confirm test
       Data.state = 1;
-      Sequence();
+      if(type_test == 0){
+          Sequence();
+      }
+      else if (type_test == 1){
+        Sequence_allumeur();
+      }
+      
     }
     if (instructions[0] == 0xDC && instructions[1] == 0xBA && instructions[2] == 0xDC && instructions[3] == 0xBA) {  // Stop test
       test_will_begin = false;

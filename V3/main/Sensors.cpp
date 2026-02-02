@@ -7,7 +7,7 @@ uint8_t cr0, fault11, fault12, fault41, fault42, fault61, fault62;  // Thermocou
 
 
 uint32_t time_last_reading = 0;
-unsigned long t_last_data_packet = 0, data_send_rate = 50, test_send_rate = 2;
+unsigned long t_last_data_packet = 0, data_send_rate = 50, test_send_rate = 7;
 
 data Data;
 
@@ -75,6 +75,7 @@ bool bool_file = 0;
 bool state_file = false;
 uint32_t time_since_save = 0;
 uint32_t save_freq = 1000;  // example value in ms
+int print = 0;
 
 uint32_t save_freq_test = 50;
 bool state_test_spe = 0;
@@ -108,9 +109,9 @@ int32_t PS_WATER_TLL = 3000, PS_WATER_UL = 14000;
 
 // Thermocouples:
 float TS62_UW = 850, TS62_TUL = 950;
-Adafruit_MCP9600 mcp_TS;
+Adafruit_MCP9600 mcp_TS[6];
 TCA9548 MP(0x70);
-float TS11_TUL = 526;    //Temperature in Celsius
+float TS11_TUL = 526;  //Temperature in Celsius
 
 
 
@@ -193,11 +194,36 @@ void setupSensors() {
 
   setup_current_reading();
 
-  // Thermocouples setup
-  Serial.begin(115200);
-  Wire.begin();
-  MP.begin();
-  mcp_TS.setThermocoupleType(MCP9600_TYPE_K);
+  if (!MP.begin()) {
+    Serial.println("ERREUR: Mux (TCA9548A) non detecte");
+    return;  // ou while(1){}
+  }
+
+
+  for (int c = 0; c < 6; c++)  // 6 canaux utilises (sur 8)
+  {
+    disableAllChannels(MP);
+    delay(5);
+
+    MP.selectChannel(c);  // selectionne le canal c
+    delay(5);             // petit temps pour stabiliser le bus
+
+    // IMPORTANT: c'est le meme index que le canal
+    if (mcp_TS[c].begin(0x67)) {
+      mcp_TS[c].setThermocoupleType(MCP9600_TYPE_K);
+      mcp_TS[c].enable(true);
+
+      Serial.print("Canal ");
+      Serial.print(c);
+      Serial.print(": MCP detecte a l'adresse 0x");
+      Serial.println(0x67, HEX);
+    } else {
+      Serial.print("Canal ");
+      Serial.print(c);
+      Serial.print(": aucun MCP a l'adresse 0x");
+      Serial.println(0x67, HEX);
+    }
+  }
 }
 
 void BBLoop() {
@@ -223,20 +249,17 @@ void sensorsLoop() {
      - save the data to the SD during tests
      - trigger thermocouples reading */
 
-  updateData();                                                   //read the sensors
-  valuesCheck();                                                  //check if values are within limits
-  BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
-  Serial.println("-------------------------------------");
-  Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d\n", PS21_BB_max, PS11_BB_max, WATER_BB_max);
-  Serial.println("-------------------------------------");
-  Serial.printf("BB pressuriation state ETH : %d, pressuriation state LOX : %d  pressuriation state H20: %d\n", ETH_BB, LOX_BB, WATER_BB);
-  Serial.println("-------------------------------------");
-  Serial.print("Sortie analogique PS23 : ");
-  Serial.println(analogRead(A3));
-  Serial.print("Sortie analogique PS11 : ");
-  Serial.println(analogRead(A9));
-  Serial.println("-------------------------------------");
-  serialSend();
+  updateData();   //read the sensors
+  valuesCheck();  //check if values are within limits
+  if (print == 1) {
+    BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
+    Serial.println("-------------------------------------");
+    Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d\n", PS21_BB_max, PS11_BB_max, WATER_BB_max);
+    Serial.println("-------------------------------------");
+    Serial.printf("BB pressuriation state ETH : %d, pressuriation state LOX : %d  pressuriation state H20: %d\n", ETH_BB, LOX_BB, WATER_BB);
+    Serial.println("-------------------------------------");
+    serialSend();
+  }
   Data.valvesState = valvePositions;
 
   // Send data at 20Hz
@@ -251,17 +274,7 @@ void sensorsLoop() {
       bool_file = 1;
     }
     save_spe_Data();
-  }                              //save data to the SD card during tests
-}
-
-// Read thermocouples value
-int16_t read_TS(int TS_index) {
-  int16_t TS_value;
-
-  MP.enableChannel(TS_index);
-  TS_value = mcp_TS.readThermocouple();
-  MP.disableChannel(TS_index);
-  return TS_value;
+  }  //save data to the SD card during tests
 }
 
 void updateData() {
@@ -276,8 +289,7 @@ void updateData() {
   Data.PS12 = PS_25bar_reading(PS12_pin) - offset_PS12;
   Data.PS21 = PS_25bar_reading(PS21_pin);
   Data.PS22 = PS_25bar_reading(PS22_pin) - offset_PS22;
-  //Data.PS23 = PS_25bar_reading(PS23_pin);
-  Data.PS23 = PS_25bar_reading(PS23_pin); 
+  Data.PS23 = PS_25bar_reading(PS51_pin) - offset_PS23;
   Data.PS31 = PS_70bar_reading(PS31_pin);
   Data.PS41 = 0;  //PS_25bar_reading(PS41_pin) - offset_PS41;
   Data.PS42 = 0;  //PS_25bar_reading(PS42_pin) - offset_PS42;
@@ -306,14 +318,14 @@ void updateData() {
 
   // getting data from the thermocouples
   Data.TS11 = read_TS(TS11_pin);
-  Data.TS12 = read_TS(TS12_pin);
-  Data.TS41 = read_TS(TS41_pin);
-  Data.TS42 = read_TS(TS42_pin);
-  Data.TS61 = read_TS(TS61_pin);
-  Data.TS62 = read_TS(TS62_pin);
+  // Data.TS12 = read_TS(TS12_pin);
+  // Data.TS41 = read_TS(TS41_pin);
+  // Data.TS42 = read_TS(TS42_pin);
+  // Data.TS61 = read_TS(TS61_pin);
+  // Data.TS62 = read_TS(TS62_pin);
 }
 
-int16_t  PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
+int16_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
   return (int16_t)(31250.0 * ((float)analogRead(pin) / 1023.0 - 0.1));
 }
 
@@ -331,9 +343,9 @@ int32_t PS_350bar_reading(int pin) {  // For PS51
 }
 
 int16_t PS_25bar_ADCreading(int chan) {  // PS63 to PS81
-  Serial.printf("Chan : %d\t", chan);
-  Serial.print("tension : ");
-  Serial.println(adc.readADC(chan));
+  // Serial.printf("Chan : %d\t", chan);
+  // Serial.print("tension : ");
+  // Serial.println(adc.readADC(chan));
   return (int16_t)(31250.0 * ((float)adc.readADC(chan) / 1023.0 - 0.1));
 }
 
@@ -350,7 +362,7 @@ void reset_offset_pressure() {
 void read_atm_pressure() {
   Data.PS12 = PS_25bar_reading(PS12_pin);
   Data.PS22 = PS_25bar_reading(PS12_pin);
-  // Data.PS23 = PS_25bar_reading(PS23_pin);
+  Data.PS23 = PS_25bar_reading(PS23_pin);
   Data.PS41 = PS_25bar_reading(PS12_pin);
   Data.PS42 = PS_25bar_reading(PS12_pin);
   Data.PS63 = PS_25bar_ADCreading(PS12_pin);
@@ -442,14 +454,14 @@ void valuesCheck() {
     PS11_BBLW_active = 0;
   }
 
-    if (Data.state == 1 && Data.TS11 >= TS11_TUL) {
+  if (Data.state == 1 && Data.TS11 >= TS11_TUL) {
     if (TS11_TUL_active == 1 && (millis() - TS11_TUL_time) >= PS_oob_max_delay) {
       if ((millis() - last_TS11_TUL_msg) >= message_delay) {
-        send_string("error: TS11 over limit - test aborted",1);
+        send_string("error: TS11 over limit - test aborted", 1);
         Serial.println("error: TS11 over limit - test aborted");
         last_TS11_TUL_msg = millis();
       }
-      test_abort(1);
+      test_abort(0);
     } else if (TS11_TUL_active == 0) {
       TS11_TUL_active = 1;
       TS11_TUL_time = millis();
@@ -1342,7 +1354,6 @@ String generate_csv_line() {
 //////////////////////////////////////////////////////////////////////
 
 void setup_current_reading() {
-  Wire.begin();
 
   bool initialise = ina.begin();  // Initialisation du capteur + classe
 
@@ -1364,6 +1375,27 @@ void setup_current_reading() {
 // Lecture des mesures
 uint16_t GP_current_reading() {
   return ina.getCurrent_mA();
+}
+
+void disableAllChannels(TCA9548 &MP) {
+  for (uint8_t ch = 0; ch < 8; ch++) {
+    MP.disableChannel(ch);  // selon la lib
+  }
+}
+
+//Read thermocouples value
+int16_t read_TS(int ts_index) {
+  // Coupe tous les canaux, puis sélectionne celui voulu
+  MP.selectChannel(ts_index);
+
+  // Le MCP9600 renvoie généralement un float en °C
+  float tc = mcp_TS[ts_index].readThermocouple();
+
+  // Option : recouper le canal après lecture
+  disableAllChannels(MP);
+
+  // Conversion en int16 (arrondi)
+  return tc;
 }
 
 void testcapteur() {

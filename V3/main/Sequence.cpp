@@ -65,6 +65,13 @@ void Sequence_allumeur() {
           digitalWrite(GP_ignite_pin, HIGH);                // Commande allumage glowplug
 
           debug("→ Allumage glowplug");
+
+          count_down_time = -Sequence_data.Glowplug_heat_before_duration;
+
+          byte message[6] = { 0xAB, 0xAB, 0xAB, 0xAB, (byte)(count_down_time >> 8), (byte)(count_down_time & 0xFF)};
+          reply(message, sizeof(message));
+
+          Serial.println("envoie countdown");
           Serial.println("Activation : ");
           Serial.println(millis());
           Heat_start = millis();
@@ -86,6 +93,7 @@ void Sequence_allumeur() {
           send_string("error: Current not detected", 1);
           test_abort(0);
         }
+        count_down();
         break;
 
       case 4:
@@ -142,6 +150,7 @@ void Sequence_allumeur() {
           Serial.println(millis());
           Data.test_step++;
         }
+        count_down();
         break;
 
       case 8:
@@ -157,11 +166,12 @@ void Sequence_allumeur() {
           Serial.println(millis());
           Data.test_step++;
         }
+        count_down();
         break;
 
       case 9:
         debug("[9] Fin de purge");
-        if ((millis() - Igniter_burn_duration) >= static_cast<uint32_t>(Sequence_data.Igniter_burn_duration + Sequence_data.GOX_to_ETH + Sequence_data.Purge_after_duration)) {
+        if ((millis() - Igniter_burn_duration) >= static_cast<uint32_t>(Sequence_data.Igniter_burn_duration + Sequence_data.GOX_to_ETH + Sequence_data.Purge_duration3)) {
           setValve(SV35, 0);          
           debug("→ Fermeture SV35 (purge)");
           Serial.println("Activation : ");
@@ -532,7 +542,7 @@ void set_offset_pressure() {  // set sensors at 0
   int32_t average_PS42_data[N];
   int32_t average_PS63_data[N];
   int32_t average_PS64_data[N];
-  int32_t average_PS71_data[N];
+  // int32_t average_PS71_data[N];
   int32_t average_PS81_data[N];
 
   for (int i = 0; i < N; i++) {
@@ -556,7 +566,7 @@ void set_offset_pressure() {  // set sensors at 0
     average_PS42_data[i] = Data.PS42;
     average_PS63_data[i] = Data.PS63;
     average_PS64_data[i] = Data.PS64;
-    average_PS71_data[i] = Data.PS71;
+    // average_PS71_data[i] = Data.PS71;
     average_PS81_data[i] = Data.PS81;
   }
 
@@ -567,6 +577,6 @@ void set_offset_pressure() {  // set sensors at 0
   offset_PS42 = average(average_PS42_data, N);
   offset_PS63 = average(average_PS63_data, N);
   offset_PS64 = average(average_PS64_data, N);
-  offset_PS71 = average(average_PS71_data, N);
+  // offset_PS71 = average(average_PS71_data, N);
   offset_PS81 = average(average_PS81_data, N);
 }
