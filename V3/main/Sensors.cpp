@@ -1374,7 +1374,7 @@ void setup_current_reading() {
 
 // Lecture des mesures
 uint16_t GP_current_reading() {
-  return ina.getCurrent_mA()-0.1316*ina.getCurrent_mA();
+  return ina.getCurrent_mA()*0.8684;
 }
 
 void disableAllChannels(TCA9548 &MP) {
