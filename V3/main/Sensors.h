@@ -206,6 +206,7 @@ void closeFile();
 String generate_csv_line();
 
 // INA reading current
+extern INA219 ina; //pour l'utiliser dans serial_controller.h
 void setup_current_reading();
 uint16_t GP_current_reading();
 

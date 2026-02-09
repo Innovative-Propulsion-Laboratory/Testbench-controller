@@ -29,11 +29,14 @@
  4. Save data for a test 
     set savedata(<1|0>)
 
- 5. launch discharge test 
+ 5.Reboot ina (current reading)
+    reboot ina()
+
+ 6. launch discharge test 
     launch(<tank>,<pressure>,<time(ms)>)
     EX: launch(2,3000,10000) 
 
- 6. test igniter sequence
+ 7. test igniter sequence
     Ignitertest(pressure, 
     Confirm_to_purge_delay, 
     Purge_duration1, 
@@ -196,6 +199,10 @@ void processCommand(String command) {
     state_test_spe = state;
     Serial.print("Set save sate to ");
     Serial.println(state);
+  } else if (command.startsWith("reboot ina()")) {
+    ina.reset();
+    setup_current_reading();
+    Serial.println("INA rebooted");
   } else if (command.startsWith("set glowplug")) {
     int openParen = command.indexOf('(');   // position de '('
     int closeParen = command.indexOf(')');  // position de ')'
