@@ -29,7 +29,7 @@
  4. Save data for a test 
     set savedata(<1|0>)
 
- 5.Reboot ina (current reading)
+ 5.Reboot ina (current reading) (aborted)
     reboot ina()
 
  6. launch discharge test 
