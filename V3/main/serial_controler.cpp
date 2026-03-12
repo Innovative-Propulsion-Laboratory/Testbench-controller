@@ -199,11 +199,12 @@ void processCommand(String command) {
     state_test_spe = state;
     Serial.print("Set save sate to ");
     Serial.println(state);
-  } else if (command.startsWith("reboot ina()")) {
-    ina.reset();
-    setup_current_reading();
-    Serial.println("INA rebooted");
-  } else if (command.startsWith("set glowplug")) {
+  }// else if (command.startsWith("reboot ina()")) {
+  //   ina.reset();
+  //   setup_current_reading();
+  //   Serial.println("INA rebooted");
+  //} 
+  else if (command.startsWith("set glowplug")) {
     int openParen = command.indexOf('(');   // position de '('
     int closeParen = command.indexOf(')');  // position de ')'
     int state = command.substring(openParen + 1, closeParen).toInt();
