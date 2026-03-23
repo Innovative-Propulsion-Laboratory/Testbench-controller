@@ -17,7 +17,12 @@ void decode(byte* instructions) {
   if (Data.state == 1) {
     if (instructions[0] == 0xCC && instructions[1] == 0xCC && instructions[2] == 0xCC && instructions[3] == 0xCC) {
       Data.state = 0;
-      test_abort(1);
+      if(type_test == 0){
+        test_abort(1);
+      }
+      else if (type_test == 1){
+        test_abort(0);
+      }
     }
   } else {
     if (instructions[0] == 0xff && instructions[1] == 0xff && instructions[2] == 0xff && instructions[3] == 0xff) {  // Valve

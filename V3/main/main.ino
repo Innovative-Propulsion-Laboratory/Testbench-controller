@@ -152,7 +152,7 @@ void set_pilot_light(bool state){
 
 void test(){
   // testValves();
-  // set_pilot_light(false);
-  // digitalWrite(IGN_pin, LOW);
+  //set_pilot_light(true);
+  //digitalWrite(GP_ignite_pin, LOW);
   // testcapteur();
 }

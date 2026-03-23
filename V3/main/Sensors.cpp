@@ -7,7 +7,7 @@ uint8_t cr0, fault11, fault12, fault41, fault42, fault61, fault62;  // Thermocou
 
 
 uint32_t time_last_reading = 0;
-unsigned long t_last_data_packet = 0, data_send_rate = 50, test_send_rate = 7;
+unsigned long t_last_data_packet = 0, data_send_rate = 50, test_send_rate = 2;
 
 data Data;
 
@@ -189,8 +189,8 @@ void setupSensors() {
 
   Data.valvesState = valvePositions;
 
-  // ADC setup
-  // adc.begin(13, 11, 12, 37); //bool begin(sck, mosi, miso, cs);
+  //ADC setup
+  adc.begin(13, 11, 12, 37); //bool begin(sck, mosi, miso, cs);
 
   setup_current_reading();
 
@@ -251,15 +251,17 @@ void sensorsLoop() {
 
   updateData();   //read the sensors
   valuesCheck();  //check if values are within limits
-  // if (print == 1) {
+  if (print == 1) {
     BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
     Serial.println("-------------------------------------");
     Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d\n", PS21_BB_max, PS11_BB_max, WATER_BB_max);
     Serial.println("-------------------------------------");
     Serial.printf("BB pressuriation state ETH : %d, pressuriation state LOX : %d  pressuriation state H20: %d\n", ETH_BB, LOX_BB, WATER_BB);
     Serial.println("-------------------------------------");
+    Serial.printf("Current : %d\n",ina.getCurrent_mA());
+    Serial.println("-------------------------------------");
     serialSend();
-  // }
+  }
   Data.valvesState = valvePositions;
 
   // Send data at 20Hz
@@ -289,17 +291,17 @@ void updateData() {
   Data.PS12 = PS_25bar_reading(PS12_pin) - offset_PS12;
   Data.PS21 = PS_25bar_reading(PS21_pin);
   Data.PS22 = PS_25bar_reading(PS22_pin) - offset_PS22;
-  Data.PS23 = PS_25bar_reading(PS51_pin) - offset_PS23;
+  Data.PS23 = PS_25bar_reading(PS23_pin) - offset_PS23;
   Data.PS31 = PS_70bar_reading(PS31_pin);
-  Data.PS41 = 0;  //PS_25bar_reading(PS41_pin) - offset_PS41;
-  Data.PS42 = 0;  //PS_25bar_reading(PS42_pin) - offset_PS42;
-  Data.PS51 = 0;  //PS_350bar_reading(PS51_pin);
-  Data.PS61 = 0;  //PS_25bar_reading(PS61_pin);
-  Data.PS62 = 0;  //PS_25bar_reading(PS62_pin);
+  Data.PS41 = PS_25bar_reading(PS41_pin) - offset_PS41;
+  Data.PS42 = PS_25bar_reading(PS42_pin) - offset_PS42;
+  Data.PS51 = PS_350bar_reading(PS51_pin);
+  Data.PS61 = PS_25bar_reading(PS61_pin);
+  Data.PS62 = PS_25bar_reading(PS62_pin);
   Data.PS63 = PS_25bar_ADCreading(PS63_pin) - offset_PS63;
-  Data.PS64 = 0;  //PS_25bar_ADCreading(PS64_pin) - offset_PS64;
-  Data.PS71 = PS_25bar_reading(PS41_pin) - offset_PS71;
-  Data.PS81 = PS_25bar_reading(PS42_pin) - offset_PS81;
+  Data.PS64 = PS_25bar_ADCreading(PS64_pin) - offset_PS64;
+  Data.PS71 = 0.73711*PS_25bar_ADCreading(PS71_pin)-788.42;
+  Data.PS81 = 0.73945*PS_25bar_ADCreading(PS81_pin) - 868.71;
 
   // Read 5V reference
   Data.ref5V = ref5V_reading(PSalim_pin);
@@ -312,12 +314,12 @@ void updateData() {
   Data.LC = LC_reading(LC01_pin);
 
   // Read flow meters
-  Data.FM11 = 1;  //FM11_reading(FM11_pin);
-  Data.FM21 = 2;  //FM21_reading(FM21_pin);
-  Data.FM61 = 3;  //FM61_reading(FM61_pin);
+  Data.FM11 = 1;  FM11_reading(FM11_pin);
+  Data.FM21 = 2;  FM21_reading(FM21_pin);
+  Data.FM61 = 3;  FM61_reading(FM61_pin);
 
   // getting data from the thermocouples
-  // Data.TS11 = read_TS(TS11_pin);
+  Data.TS11 = read_TS(TS11_pin);
   // Data.TS12 = read_TS(TS12_pin);
   // Data.TS41 = read_TS(TS41_pin);
   // Data.TS42 = read_TS(TS42_pin);
@@ -1085,6 +1087,7 @@ void test_abort(int type) {
       digitalWrite(GP_ignite_pin, LOW);
 
       do {
+        sensorsLoop();
         switch (Data.test_step) {
           case 7:
             setValve(SV71, 0);
@@ -1374,7 +1377,7 @@ void setup_current_reading() {
 
 // Lecture des mesures
 uint16_t GP_current_reading() {
-  return ina.getCurrent_mA()-0.1316*ina.getCurrent_mA();
+  return ina.getCurrent_mA(); //-0.1316*ina.getCurrent_mA();
 }
 
 void disableAllChannels(TCA9548 &MP) {
@@ -1432,14 +1435,14 @@ void testcapteur() {
   Serial.print("ADC sensors PS81 :");
   Serial.println(PS_25bar_ADCreading(PS81_pin));
 
-  // ref 5V and load cell
-  // Serial.println(ref5V_reading(PSalim_pin));
-  // Serial.println(LC_reading(LC01_pin));
+  //ref 5V and load cell
+  Serial.println(ref5V_reading(PSalim_pin));
+  Serial.println(LC_reading(LC01_pin));
 
-  // // Read flow meters
-  // Serial.println(FM11_reading(FM11_pin));
-  // Serial.println(FM21_reading(FM21_pin));
-  // Serial.println(FM61_reading(FM61_pin));
+  // Read flow meters
+  Serial.println(FM11_reading(FM11_pin));
+  Serial.println(FM21_reading(FM21_pin));
+  Serial.println(FM61_reading(FM61_pin));
 
 
   Serial.println("Sensor test completed.");

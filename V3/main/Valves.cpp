@@ -2,7 +2,7 @@
 
 uint32_t valvePositions =   0b01100100001000100001;    // read from right to left
 const uint32_t valveTypes = 0b01100100001000100001;  // read from right to left
-const int valvePins[NUM_VALVES] = {6, 7, 8, 9, 29, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+const int valvePins[NUM_VALVES] = {6, 7, 8, 9, 30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
 Adafruit_MCP23X17 mcp;
 
 
@@ -123,7 +123,7 @@ void testValves() {
   digitalWrite(7, HIGH);
   digitalWrite(8, HIGH);
   digitalWrite(9, HIGH);
-  digitalWrite(29, HIGH);
+  digitalWrite(30, HIGH);
   for (int i = 0; i <= 14; i++) {
     mcp.digitalWrite(i, HIGH);
   }

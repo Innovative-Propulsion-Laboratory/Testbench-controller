@@ -8,7 +8,7 @@
 #define NUM_VALVES 20
 
 #define MCP_RESET 10
-#define MCP_CS    28
+#define MCP_CS    29
 
 #define SV11 0 // NO
 #define SV12 1 // NC

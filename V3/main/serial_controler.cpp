@@ -6,7 +6,8 @@
  ==================================================
 
  1. Open/Close valve 
-    set valve(<name valve>, <0|1>)
+    set 
+    valve(<name valve>, <0|1>)
     Ex: set valve(SV11, 1)  -> Open valve SV11
         c  -> Close valve SV11
 
