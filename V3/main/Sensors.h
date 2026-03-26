@@ -62,8 +62,8 @@ extern TCA9548 MP;
 #define TS12_pin 1
 #define TS41_pin 2
 #define TS42_pin 3
-#define TS61_pin 4
-#define TS62_pin 5
+#define TS61_pin 5
+#define TS62_pin 4
 
 extern uint32_t time_last_reading;
 extern bool bool_file;

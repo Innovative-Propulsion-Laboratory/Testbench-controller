@@ -319,12 +319,12 @@ void updateData() {
   Data.FM61 = 3;  FM61_reading(FM61_pin);
 
   // getting data from the thermocouples
-  Data.TS11 = read_TS(TS11_pin);
-  // Data.TS12 = read_TS(TS12_pin);
-  // Data.TS41 = read_TS(TS41_pin);
-  // Data.TS42 = read_TS(TS42_pin);
-  // Data.TS61 = read_TS(TS61_pin);
-  // Data.TS62 = read_TS(TS62_pin);
+  //Data.TS11 = read_TS(TS11_pin);
+  //Data.TS12 = read_TS(TS12_pin);
+  Data.TS41 = read_TS(TS41_pin);
+  Data.TS42 = read_TS(TS42_pin);
+  Data.TS61 = read_TS(TS61_pin);
+  Data.TS62 = read_TS(TS62_pin);
 }
 
 int16_t PS_25bar_reading(int pin) {  // For all pressure sensors except PS31 and PS51
@@ -1389,6 +1389,12 @@ void disableAllChannels(TCA9548 &MP) {
 
 //Read thermocouples value
 int16_t read_TS(int ts_index) {
+
+  // Vérifie si l'indice du MCP est dans la plage de 0 à 5
+  if (ts_index < 0 || ts_index >= 6) {
+    return 0;
+  }
+
   // Coupe tous les canaux, puis sélectionne celui voulu
   MP.selectChannel(ts_index);
 
@@ -1398,9 +1404,15 @@ int16_t read_TS(int ts_index) {
   // Option : recouper le canal après lecture
   disableAllChannels(MP);
 
+  // Gère l'erreur si le capteur renvoie NaN
+  if (isnan(tc)) {
+    return 0;
+  }
+
   // Conversion en int16 (arrondi)
-  return tc;
+  return (int16_t)round(tc);
 }
+
 
 void testcapteur() {
   Serial.println("Starting sensor test...");
