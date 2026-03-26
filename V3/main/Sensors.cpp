@@ -1004,7 +1004,7 @@ void test_abort(int type) {
   	cooling_duration_after_burn
   	SV63 closed*/
   Serial.println("abort");
-
+  Data.state=2;
 
 
   if (type == 1) {
@@ -1128,6 +1128,7 @@ void test_abort(int type) {
       Serial.println("sortie de boucle");
     }
   }
+  Data.state = 0;
 }
 
 void serialSend() {

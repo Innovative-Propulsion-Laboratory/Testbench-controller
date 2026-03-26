@@ -24,6 +24,7 @@ void Sequence_allumeur() {
   T_confirm = millis();
   Serial.println(millis());
   Data.test_step = 1;
+  Data.state = 1;
   // set_offset_pressure();
   debug("=== Debut de la sequence allumeur ===");
   do {
@@ -185,6 +186,7 @@ void Sequence_allumeur() {
   debug("=== Fin de sequence allumeur ===");
   // reset_offset_pressure();
   Data.test_cooling = 0;
+  Data.state = 0;
   BB_enable(1, 0);
   BB_enable(2, 0);
   BB_enable(6, 0);
