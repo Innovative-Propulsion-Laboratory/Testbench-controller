@@ -10,6 +10,8 @@ int message_size = 0;
 int t;
 bool fisrt_message;
 bool UDPactive = false;
+int timefreq;
+float freq;
 // Setup UDP
 
 void setupUDP() {
@@ -114,6 +116,8 @@ void send_string(const String& msg, int type) {
 }
 
 void send_data(void* payload, uint16_t size) {
+  freq = 1000000/(micros()-timefreq);
+  timefreq = micros();
   udp.send(senderIP, senderPort, (byte*)payload, size);
 }
 

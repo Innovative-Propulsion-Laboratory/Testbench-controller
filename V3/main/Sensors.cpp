@@ -7,7 +7,7 @@ uint8_t cr0, fault11, fault12, fault41, fault42, fault61, fault62;  // Thermocou
 
 
 uint32_t time_last_reading = 0;
-unsigned long t_last_data_packet = 0, data_send_rate = 50, test_send_rate = 2;
+unsigned long t_last_data_packet = 0, data_send_rate = 50, test_send_rate = 7;
 
 data Data;
 
@@ -251,17 +251,8 @@ void sensorsLoop() {
 
   updateData();   //read the sensors
   valuesCheck();  //check if values are within limits
-  if (print == 1) {
-    BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
-    Serial.println("-------------------------------------");
-    Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d\n", PS21_BB_max, PS11_BB_max, WATER_BB_max);
-    Serial.println("-------------------------------------");
-    Serial.printf("BB pressuriation state ETH : %d, pressuriation state LOX : %d  pressuriation state H20: %d\n", ETH_BB, LOX_BB, WATER_BB);
-    Serial.println("-------------------------------------");
-    Serial.printf("Current : %d\n",ina.getCurrent_mA());
-    Serial.println("-------------------------------------");
-    serialSend();
-  }
+  BB_pressurization(Data.PS11, Data.PS21, Data.PS61, Data.PS62);  //bang-bang pressurization of the tanks if enabled
+  if (print == 1) {serialSend();}
   Data.valvesState = valvePositions;
 
   // Send data at 20Hz
@@ -319,8 +310,8 @@ void updateData() {
   Data.FM61 = 3;  FM61_reading(FM61_pin);
 
   // getting data from the thermocouples
-  //Data.TS11 = read_TS(TS11_pin);
-  //Data.TS12 = read_TS(TS12_pin);
+  Data.TS11 = read_TS(TS11_pin);
+  Data.TS12 = read_TS(TS12_pin);
   Data.TS41 = read_TS(TS41_pin);
   Data.TS42 = read_TS(TS42_pin);
   Data.TS61 = read_TS(TS61_pin);
@@ -348,6 +339,7 @@ int16_t PS_25bar_ADCreading(int chan) {  // PS63 to PS81
   // Serial.printf("Chan : %d\t", chan);
   // Serial.print("tension : ");
   // Serial.println(adc.readADC(chan));
+  // // APRÈS (correct)
   return (int16_t)(31250.0 * ((float)adc.readADC(chan) / 1023.0 - 0.1));
 }
 
@@ -1132,6 +1124,11 @@ void test_abort(int type) {
 }
 
 void serialSend() {
+  Serial.println("-------------------------------------");
+  Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d\n", PS21_BB_max, PS11_BB_max, WATER_BB_max);
+  Serial.println("-------------------------------------");
+  Serial.printf("BB pressuriation state ETH : %d, pressuriation state LOX : %d  pressuriation state H20: %d\n", ETH_BB, LOX_BB, WATER_BB);
+
   Serial.println("------ Sensor Data ------");
 
   Serial.print("Packet ID: ");
@@ -1221,8 +1218,20 @@ void serialSend() {
   Serial.print("Current reading (mA) : ");
   Serial.println(Data.glowplug_current);
 
+  Serial.print("Current freq : ");
+  Serial.print(1000/data_send_rate);
+  Serial.println(" Hz");
+  Serial.print("Test freq : ");
+  Serial.print(1000/test_send_rate);
+  Serial.println(" Hz");
+
+  Serial.print("Real data flow : ");
+  Serial.print(freq);
+  Serial.println(" Hz");
+
   Serial.println("IP :");
   Serial.println(ip);
+
   // ===== AJOUT : affichage des paramètres de séquence (Ignitertest) =====
   Serial.println("------ Sequence Data (Ignitertest) ------");
 
@@ -1263,8 +1272,8 @@ void serialSend() {
   Serial.println(Sequence_data.Purge_duration3);
 
   Serial.println("----------------------------------------");
-  Serial.println("--------------------------");
   Serial.println();
+
 }
 
 // ----------------------------- SD CARD ---------------------------------------

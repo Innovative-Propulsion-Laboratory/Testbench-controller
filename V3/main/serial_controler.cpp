@@ -353,6 +353,27 @@ void processCommand(String command) {
     Serial.print("set print to : ");
     Serial.println(state_v);
 
+  }else if (command.startsWith("set test_freq")) {  // launch(2,3000,10000)
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    int state_v = command.substring(openParen + 1, closeParen).toInt();
+
+    test_send_rate = state_v;
+    Serial.print("set freq to : ");
+    Serial.println(state_v);
+
+  }
+  else if (command.startsWith("set current_freq")) {  // launch(2,3000,10000)
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    int state_v = command.substring(openParen + 1, closeParen).toInt();
+
+    data_send_rate = state_v;
+    Serial.print("set freq to : ");
+    Serial.println(state_v);
+
   }
   // Add more command parsing as needed
 }

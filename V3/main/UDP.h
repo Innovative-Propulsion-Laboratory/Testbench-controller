@@ -14,6 +14,7 @@ extern bool UDPactive;
 extern uint32_t kDHCPTimeout;
 extern uint16_t kPort;
 extern bool fisrt_message;
+extern float freq;
 
 struct Packet {
   byte* data;

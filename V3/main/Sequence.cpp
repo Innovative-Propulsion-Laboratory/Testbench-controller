@@ -113,7 +113,7 @@ void Sequence_allumeur() {
 
       case 5:
         debug("[5] Verification pression allumeur");
-        if ((Data.PS81 >= Sequence_data.Igniter_chamber_pressure)) {
+        if ((Data.PS81+100 >= Sequence_data.Igniter_chamber_pressure)) {
           debug("✓ Pressions allumeur OK");
           
           Data.test_step++;
@@ -127,7 +127,7 @@ void Sequence_allumeur() {
 
       case 6:
         debug("[6] Stabilisation pression allumeur");
-        if ((Data.PS81 >= Sequence_data.Igniter_chamber_pressure) && ((millis() - Igniter_open_duration) >= Sequence_data.Igniter_Highpressure_time)) {
+        if ((Data.PS81+100 >= Sequence_data.Igniter_chamber_pressure) && ((millis() - Igniter_open_duration) >= Sequence_data.Igniter_Highpressure_time)) {
           
           digitalWrite(GP_ignite_pin, LOW);
 
