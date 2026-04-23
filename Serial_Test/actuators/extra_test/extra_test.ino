@@ -9,22 +9,20 @@
 #define MCP_RESET 10
 #define MCP_CS    29
 #define ADC_CS    37
+#define SPI_SCK   13
+#define SPI_MOSI  11
+#define SPI_MISO  12
 
 const uint8_t MCP_CS_PIN   = 1;
 const uint8_t MCP_SHDN_PIN = 255;
-const uint16_t POT_RESET_VALUE = 128;
-const uint16_t POT_TCON_ALL_CONNECTED = 0x01FF;
+const uint32_t POT_SPI_SPEED = 4000000;
 const uint8_t SPI_CS_PINS[] = {MCP_CS_PIN, MCP_RESET, 28, MCP_CS, 30, 35, 36, ADC_CS};
 
 MCP4261 pot(MCP_CS_PIN, MCP_SHDN_PIN, &SPI);
 MCP3208 adc;
 Adafruit_MCP23X17 mcp;
 
-
-
 int valeur = 0;
-bool testWiper0High = false;
-bool testWiper1High = false;
 
 void deselectSpiDevices()
 {
@@ -34,72 +32,33 @@ void deselectSpiDevices()
   }
 }
 
-void resetPotRegisters()
+bool writePotRegister(uint8_t reg, uint16_t value)
 {
-  Serial.println("Reset registres MCP4261...");
+  if (reg > 0x0F || value > 0x01FF) return false;
+
+  uint8_t command = reg << 4;
+  if (value > 0xFF) command |= 0x01;
+  uint8_t data = value & 0xFF;
 
   deselectSpiDevices();
-  pot.setTCONMask(POT_TCON_ALL_CONNECTED);
-  Serial.println("TCON MCP4261 reconnecte");
+  pinMode(SPI_SCK, OUTPUT);
+  pinMode(SPI_MOSI, OUTPUT);
 
-  delay(2);
-  deselectSpiDevices();
-  pot.reset(POT_RESET_VALUE);
-  Serial.print("Wipers MCP4261 reset a ");
-  Serial.println(POT_RESET_VALUE);
+  digitalWrite(SPI_SCK, LOW);
+  digitalWrite(MCP_CS_PIN, LOW);
+  shiftOut(SPI_MOSI, SPI_SCK, MSBFIRST, command);
+  shiftOut(SPI_MOSI, SPI_SCK, MSBFIRST, data);
+  digitalWrite(MCP_CS_PIN, HIGH);
 
-  valeur = POT_RESET_VALUE;
+  return true;
 }
 
-void printPotState()
+bool writePotWiper(uint8_t wiper, uint16_t value)
 {
-  deselectSpiDevices();
-  Serial.println("Etat MCP4261:");
+  if (wiper > 1 || value > 255) return false;
 
-  Serial.print("  cache wiper 0 = ");
-  Serial.println(pot.getValue(0));
-  Serial.print("  cache wiper 1 = ");
-  Serial.println(pot.getValue(1));
-
-  deselectSpiDevices();
-  Serial.print("  device wiper 0 = ");
-  Serial.println(pot.getValueDevice(0));
-  deselectSpiDevices();
-  Serial.print("  device wiper 1 = ");
-  Serial.println(pot.getValueDevice(1));
-
-  deselectSpiDevices();
-  Serial.print("  TCON = 0x");
-  Serial.println(pot.getTCONMask(), HEX);
-
-  deselectSpiDevices();
-  uint16_t status = pot.getStatusMask();
-  Serial.print("  STATUS = 0x");
-  Serial.println(status, HEX);
-  Serial.print("  WP=");
-  Serial.print(status & 0x01);
-  Serial.print(" SHDN=");
-  Serial.print((status >> 1) & 0x01);
-  Serial.print(" WiperLock0=");
-  Serial.print((status >> 2) & 0x01);
-  Serial.print(" WiperLock1=");
-  Serial.print((status >> 3) & 0x01);
-  Serial.print(" EEPROM busy=");
-  Serial.println((status >> 4) & 0x01);
-
-  deselectSpiDevices();
-  Serial.print("  NV wiper 0 = ");
-  Serial.println(pot.getValueNV(0));
-  deselectSpiDevices();
-  Serial.print("  NV wiper 1 = ");
-  Serial.println(pot.getValueNV(1));
-}
-
-void printWiper1DeviceValue()
-{
-  deselectSpiDevices();
-  Serial.print("device wiper 1 = ");
-  Serial.println(pot.getValueDevice(1));
+  uint8_t reg = (wiper == 0) ? 0x00 : 0x01;
+  return writePotRegister(reg, value);
 }
 
 void applyValue()
@@ -107,11 +66,16 @@ void applyValue()
   if (valeur > 255) valeur = 255;
   if (valeur < 0)   valeur = 0;
 
-  deselectSpiDevices();
-  pot.setValue(0, (uint8_t)valeur);
+  if (!writePotWiper(0, (uint8_t)valeur)) {
+    Serial.println("MCP4261 wiper 0 write FAILED !");
+    return;
+  }
+
   delay(2);
-  deselectSpiDevices();
-  pot.setValue(1, (uint8_t)valeur);
+  if (!writePotWiper(1, (uint8_t)valeur)) {
+    Serial.println("MCP4261 wiper 1 write FAILED !");
+    return;
+  }
 
   Serial.print("valeur = ");
   Serial.println(valeur);
@@ -124,37 +88,37 @@ void setup()
 
   deselectSpiDevices();
   SPI.begin();
+  deselectSpiDevices();
 
-  // if (!mcp.begin_SPI(MCP_CS, 13, 12, 11, 0)) {// bool begin_SPI(cs_pin,sck_pin,miso_pin,mosi_pin, uint8_t _hw_addr = 0x00);         
-  // Serial.println("MCP23X17 init FAILED (SPI) !");
-  // }
-  // else{Serial.println("MCP23X17 init succeed (SPI) !");}
-
-  // // configure TOUS les pins 0..15 en sortie
-  // for (int i = 0; i < 15; i++) {
-  //   mcp.pinMode(i, OUTPUT);
-  // }
-
-  // adc.begin(13, 11, 12, 37); //bool begin(sck, mosi, miso, cs);
-
-  
   pot.begin();
+  pot.setSPIspeed(POT_SPI_SPEED);
   Serial.println("MCP4261 init succeed (SPI) !");
 
-  resetPotRegisters();
+  if (!mcp.begin_SPI(MCP_CS, SPI_SCK, SPI_MISO, SPI_MOSI, 0)) {
+    Serial.println("MCP23X17 init FAILED (SPI) !");
+  }
+  else {
+    Serial.println("MCP23X17 init succeed (SPI) !");
+  }
+
+  for (int i = 0; i < 15; i++) {
+    mcp.pinMode(i, OUTPUT);
+  }
+
+  deselectSpiDevices();
+  if (!adc.begin(SPI_SCK, SPI_MOSI, SPI_MISO, ADC_CS)) {
+    Serial.println("MCP3208 init FAILED (SPI) !");
+  }
+  else {
+    Serial.println("MCP3208 init succeed (SPI) !");
+  }
+
+  valeur = 128;
+  applyValue();
 
   Serial.println("Controle MCP4261");
   Serial.println("z : +20");
   Serial.println("s : -20");
-  Serial.println("r : reset registres volatiles");
-  Serial.println("p : afficher registres MCP4261");
-  Serial.println("0 : alterner wiper 0 entre 40 et 220");
-  Serial.println("1 : alterner wiper 1 entre 40 et 220");
-  Serial.println("a : wiper 1 = 40 sans lecture");
-  Serial.println("b : wiper 1 = 128 sans lecture");
-  Serial.println("c : wiper 1 = 220 sans lecture");
-  Serial.println("m : mesure w0=40 / w1=220");
-  Serial.println("n : mesure w0=220 / w1=40");
   Serial.println("------------------");
 }
 
@@ -173,98 +137,10 @@ void loop()
       valeur += 20;
       applyValue();
     }
-    else if (c == 's')   // ✅ correction ici
+    else if (c == 's')
     {
       valeur -= 20;
       applyValue();
-    }
-    else if (c == 'r')
-    {
-      resetPotRegisters();
-    }
-    else if (c == 'p')
-    {
-      printPotState();
-    }
-    else if (c == '0')
-    {
-      uint8_t testValue = testWiper0High ? 40 : 220;
-      testWiper0High = !testWiper0High;
-      deselectSpiDevices();
-      Serial.print("Test wiper 0 = ");
-      Serial.println(testValue);
-      Serial.flush();
-      bool ok = pot.setValue(0, testValue);
-      Serial.println(ok ? "wiper 0 OK" : "wiper 0 FAILED");
-      Serial.flush();
-      delay(100);
-      printPotState();
-    }
-    else if (c == '1')
-    {
-      uint8_t testValue = testWiper1High ? 40 : 220;
-      testWiper1High = !testWiper1High;
-      deselectSpiDevices();
-      Serial.print("Test wiper 1 = ");
-      Serial.println(testValue);
-      Serial.flush();
-      bool ok = pot.setValue(1, testValue);
-      Serial.println(ok ? "wiper 1 OK" : "wiper 1 FAILED");
-      Serial.flush();
-      delay(100);
-      Serial.println("Lecture etat apres wiper 1...");
-      Serial.flush();
-      printPotState();
-    }
-    else if (c == 'a')
-    {
-      deselectSpiDevices();
-      Serial.println("Test wiper 1 = 40");
-      Serial.flush();
-      bool ok = pot.setValue(1, 40);
-      Serial.println(ok ? "wiper 1 OK" : "wiper 1 FAILED");
-      printWiper1DeviceValue();
-      Serial.println("Fin test wiper 1 = 40");
-    }
-    else if (c == 'b')
-    {
-      deselectSpiDevices();
-      Serial.println("Test wiper 1 = 128");
-      Serial.flush();
-      bool ok = pot.setValue(1, 128);
-      Serial.println(ok ? "wiper 1 OK" : "wiper 1 FAILED");
-      printWiper1DeviceValue();
-      Serial.println("Fin test wiper 1 = 128");
-    }
-    else if (c == 'c')
-    {
-      deselectSpiDevices();
-      Serial.println("Test wiper 1 = 220");
-      Serial.flush();
-      bool ok = pot.setValue(1, 220);
-      Serial.println(ok ? "wiper 1 OK" : "wiper 1 FAILED");
-      printWiper1DeviceValue();
-      Serial.println("Fin test wiper 1 = 220");
-    }
-    else if (c == 'm')
-    {
-      Serial.println("Mesure: w0=40 / w1=220");
-      deselectSpiDevices();
-      Serial.println(pot.setValue(0, 40) ? "wiper 0 OK" : "wiper 0 FAILED");
-      delay(5);
-      deselectSpiDevices();
-      Serial.println(pot.setValue(1, 220) ? "wiper 1 OK" : "wiper 1 FAILED");
-      printPotState();
-    }
-    else if (c == 'n')
-    {
-      Serial.println("Mesure: w0=220 / w1=40");
-      deselectSpiDevices();
-      Serial.println(pot.setValue(0, 220) ? "wiper 0 OK" : "wiper 0 FAILED");
-      delay(5);
-      deselectSpiDevices();
-      Serial.println(pot.setValue(1, 40) ? "wiper 1 OK" : "wiper 1 FAILED");
-      printPotState();
     }
   }
 }
