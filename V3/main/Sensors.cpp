@@ -76,6 +76,9 @@ bool state_file = false;
 uint32_t time_since_save = 0;
 uint32_t save_freq = 1000;  // example value in ms
 int print = 0;
+bool ignite_sequence_serial = false;
+bool BB_serial = false;
+bool offset_serial = false;
 
 uint32_t save_freq_test = 50;
 bool state_test_spe = 0;
@@ -1124,10 +1127,14 @@ void test_abort(int type) {
 }
 
 void serialSend() {
-  Serial.println("-------------------------------------");
-  Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d\n", PS21_BB_max, PS11_BB_max, WATER_BB_max);
-  Serial.println("-------------------------------------");
-  Serial.printf("BB pressuriation state ETH : %d, pressuriation state LOX : %d  pressuriation state H20: %d\n", ETH_BB, LOX_BB, WATER_BB);
+  
+  if (BB_serial){
+    Serial.println("-------------------------------------");
+    Serial.printf("BB pressuriation ETH : %d, pressuriation LOX : %d  pressuriation H20: %d\n", PS21_BB_max, PS11_BB_max, WATER_BB_max);
+    Serial.println("-------------------------------------");
+    Serial.printf("BB pressuriation state ETH : %d, pressuriation state LOX : %d  pressuriation state H20: %d\n", ETH_BB, LOX_BB, WATER_BB);
+    Serial.println("-------------------------------------");
+  }
 
   Serial.println("------ Sensor Data ------");
 
@@ -1232,48 +1239,60 @@ void serialSend() {
   Serial.println("IP :");
   Serial.println(ip);
 
-  // ===== AJOUT : affichage des paramètres de séquence (Ignitertest) =====
-  Serial.println("------ Sequence Data (Ignitertest) ------");
+  if(ignite_sequence_serial){
 
-  Serial.print("Confirm_to_purge_delay (ms): ");
-  Serial.println(Sequence_data.Confirm_to_purge_delay);
+      // ===== AJOUT : affichage des paramètres de séquence (Ignitertest) =====
+    Serial.println("------ Sequence Data (Ignitertest) ------");
 
-  Serial.print("Purge_duration1 (ms): ");
-  Serial.println(Sequence_data.Purge_duration1);
+    Serial.print("Confirm_to_purge_delay (ms): ");
+    Serial.println(Sequence_data.Confirm_to_purge_delay);
 
-  Serial.print("GP_current: ");
-  Serial.println(Sequence_data.GP_current);
+    Serial.print("Purge_duration1 (ms): ");
+    Serial.println(Sequence_data.Purge_duration1);
 
-  Serial.print("Glowplug_heat_before_duration (ms): ");
-  Serial.println(Sequence_data.Glowplug_heat_before_duration);
+    Serial.print("GP_current: ");
+    Serial.println(Sequence_data.GP_current);
 
-  Serial.print("Current_raising (ms): ");
-  Serial.println(Sequence_data.Current_raising);
+    Serial.print("Glowplug_heat_before_duration (ms): ");
+    Serial.println(Sequence_data.Glowplug_heat_before_duration);
 
-  Serial.print("ETH_to_GOX (ms): ");
-  Serial.println(Sequence_data.ETH_to_GOX);
+    Serial.print("Current_raising (ms): ");
+    Serial.println(Sequence_data.Current_raising);
 
-  Serial.print("Igniter_chamber_pressure: ");
-  Serial.println(Sequence_data.Igniter_chamber_pressure);
+    Serial.print("ETH_to_GOX (ms): ");
+    Serial.println(Sequence_data.ETH_to_GOX);
 
-  Serial.print("Igniter_pressure_timemax (ms): ");
-  Serial.println(Sequence_data.Igniter_pressure_timemax);
+    Serial.print("Igniter_chamber_pressure: ");
+    Serial.println(Sequence_data.Igniter_chamber_pressure);
 
-  Serial.print("Igniter_Highpressure_time (ms): ");
-  Serial.println(Sequence_data.Igniter_Highpressure_time);
+    Serial.print("Igniter_pressure_timemax (ms): ");
+    Serial.println(Sequence_data.Igniter_pressure_timemax);
 
-  Serial.print("Igniter_burn_duration (ms): ");
-  Serial.println(Sequence_data.Igniter_burn_duration);
+    Serial.print("Igniter_Highpressure_time (ms): ");
+    Serial.println(Sequence_data.Igniter_Highpressure_time);
 
-  Serial.print("GOX_to_ETH (ms): ");
-  Serial.println(Sequence_data.GOX_to_ETH);
+    Serial.print("Igniter_burn_duration (ms): ");
+    Serial.println(Sequence_data.Igniter_burn_duration);
 
-  Serial.print("Purge_duration3 (ms): ");
-  Serial.println(Sequence_data.Purge_duration3);
+    Serial.print("GOX_to_ETH (ms): ");
+    Serial.println(Sequence_data.GOX_to_ETH);
+
+    Serial.print("Purge_duration3 (ms): ");
+    Serial.println(Sequence_data.Purge_duration3);
+  }
+
+  if(offset_serial){
+    Serial.print("offset PS12: "); Serial.println(offset_PS12);
+    Serial.print("offset PS22: "); Serial.println(offset_PS22);
+    Serial.print("offset PS23: "); Serial.println(offset_PS23);
+    Serial.print("offset PS41: "); Serial.println(offset_PS41);
+    Serial.print("offset PS42: "); Serial.println(offset_PS42);
+    Serial.print("offset PS63: "); Serial.println(offset_PS63);
+    Serial.print("offset PS64: "); Serial.println(offset_PS64);
+  }
 
   Serial.println("----------------------------------------");
   Serial.println();
-
 }
 
 // ----------------------------- SD CARD ---------------------------------------

@@ -339,6 +339,8 @@ void processCommand(String command) {
     BB_param_set(tank, pressure);
     BB_enable(tank, 1);
 
+    set_offset_pressure();
+
     discharge_test = 1;  
     time_test_begin = millis();
     state_test_spe = 1;
@@ -377,6 +379,39 @@ void processCommand(String command) {
     Serial.print("set freq to : ");
     Serial.println(state_v);
 
+  }
+  else if (command.startsWith("set ingnite_sequence")){
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    bool state_v = command.substring(openParen + 1, closeParen).toInt();
+
+    ignite_sequence_serial = state_v; 
+
+    Serial.print("set Print Sequence to : ");
+    Serial.println(state_v);
+  }
+  else if (command.startsWith("set BB_serial")){
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    bool state_v = command.substring(openParen + 1, closeParen).toInt();
+
+    BB_serial = state_v; 
+
+    Serial.print("set BB_serial to : ");
+    Serial.println(state_v);
+  }
+  else if (command.startsWith("set offset_serial")){
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    bool state_v = command.substring(openParen + 1, closeParen).toInt();
+
+    offset_serial = state_v; 
+
+    Serial.print("set offset_serial to : ");
+    Serial.println(state_v);
   }
   // Add more command parsing as needed
 }

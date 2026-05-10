@@ -71,6 +71,10 @@ extern bool state_test_spe;
 extern unsigned long t_last_data_packet, data_send_rate, test_send_rate;
 extern int print;
 
+extern bool ignite_sequence_serial;
+extern bool BB_serial;
+extern bool offset_serial;
+
 
 // Structure containing all the data sent from the Teensy to the computer
 struct __attribute__((packed)) data {
