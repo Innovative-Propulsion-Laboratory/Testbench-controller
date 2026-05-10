@@ -22,7 +22,7 @@
 #define PS42_pin A0   //Main Combustion Chamber pressure 2
 #define PS51_pin A17   //Air tank pressure
 #define PS61_pin A16   //Water tank pressure 1
-#define PS62_pin A17   //Water tank pressure 2
+#define PS62_pin A15   //Water tank pressure 2
 #define PS63_pin 0  //Water pressure before regen
 #define PS64_pin 1  //Water pressure after regen
 #define PS71_pin 2  //Water pressure after regen

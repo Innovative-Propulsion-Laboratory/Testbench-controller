@@ -1334,7 +1334,7 @@ void save_spe_Data() {
     return;
   }
 
-  String line = String(Data.n) + "," + String(Data.t) + "," + String(Data.PS21) + "," + String(Data.PS42) + "," + String(Data.PS31) + "," + String(Data.PS41);
+  String line = String(Data.n) + "," + String(Data.t) + "," + String(Data.PS61) + "," + String(Data.PS62) + "," + String(Data.PS63) + "," + String(Data.PS64);
   fp.println(line);
   fp.close();
 }
