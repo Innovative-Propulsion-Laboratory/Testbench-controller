@@ -22,7 +22,7 @@
 #define PS42_pin A0   //Main Combustion Chamber pressure 2
 #define PS51_pin A17   //Air tank pressure
 #define PS61_pin A16   //Water tank pressure 1
-#define PS62_pin A17   //Water tank pressure 2
+#define PS62_pin A15   //Water tank pressure 2
 #define PS63_pin 0  //Water pressure before regen
 #define PS64_pin 1  //Water pressure after regen
 #define PS71_pin 2  //Water pressure after regen
@@ -70,6 +70,10 @@ extern bool bool_file;
 extern bool state_test_spe;
 extern unsigned long t_last_data_packet, data_send_rate, test_send_rate;
 extern int print;
+
+extern bool ignite_sequence_serial;
+extern bool BB_serial;
+extern bool offset_serial;
 
 
 // Structure containing all the data sent from the Teensy to the computer

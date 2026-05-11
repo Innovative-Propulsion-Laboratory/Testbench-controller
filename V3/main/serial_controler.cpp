@@ -99,6 +99,7 @@ String command;
 uint32_t duration_test;
 uint8_t tank;
 int pressure;
+// uint8_t valve;
 uint32_t time_test_begin;
 bool discharge_test = 0;
 bool control = false;
@@ -123,9 +124,8 @@ void serial_loop() {
   }
   if (discharge_test != 0) {
     if ((millis() - time_test_begin) >= duration_test) {
-      setValve(SV71, 0);
-      setValve(SV25, 0);
-      BB_enable(2, 0);
+      // setValve(valve, 0);
+      BB_enable(tank, 0);
       discharge_test = 0;
       state_test_spe = 0;
     }
@@ -163,7 +163,7 @@ void processCommand(String command) {
     int openParen = command.indexOf('(');   // position de '('
     int comma = command.indexOf(',');       // position de ','
     int closeParen = command.indexOf(')');  // position de ')'
-    uint8_t tank = command.substring(openParen + 1, comma).toInt();
+    tank = command.substring(openParen + 1, comma).toInt();
     int pressure = command.substring(comma + 1, closeParen).toInt();
     BB_param_set(tank, pressure);
     Serial.print("Set tank ");
@@ -174,7 +174,7 @@ void processCommand(String command) {
     int openParen = command.indexOf('(');   // position de '('
     int comma = command.indexOf(',');       // position de ','
     int closeParen = command.indexOf(')');  // position de ')'
-    uint8_t tank = command.substring(openParen + 1, comma).toInt();
+    tank = command.substring(openParen + 1, comma).toInt();
     int state = command.substring(comma + 1, closeParen).toInt();
     if (state != 0 && state != 1) {
       Serial.println("Invalid bangbang state");
@@ -306,43 +306,48 @@ void processCommand(String command) {
 
     Data.state = state;
     Sequence_allumeur();
+    
   } else if (command.startsWith("abort_test")) {
     Data.state = 0;
     test_abort(0);
+
   } else if (command.startsWith("timing")) {  // launch(2,3000,10000)
     int openParen = command.indexOf('(');
     int comma1 = command.indexOf(',', openParen + 1);
     int comma2 = command.indexOf(',', comma1 + 1);
-    int closeParen = command.indexOf(')', comma2 + 1);
+    int comma3 = command.indexOf(',', comma2 + 1);
+    int closeParen = command.indexOf(')', comma3 + 1);
 
     if (openParen < 0 || comma1 < 0 || comma2 < 0 || closeParen < 0) {
       Serial.println("Bad launch format");
       return;
     }
 
-    // int tank = command.substring(openParen + 1, comma1).toInt();
-    // int pressure = command.substring(comma1 + 1, comma2).toInt();
-    // duration_test = command.substring(comma2 + 1, closeParen).toInt();
+    tank = command.substring(openParen + 1, comma1).toInt();
+    int pressure = command.substring(comma1 + 1, comma2).toInt();
+    duration_test = command.substring(comma2 + 1, comma3).toInt();
+    uint8_t valve = convertValve(command.substring(comma3 + 1, closeParen));
 
-    // if (tank < 1 || tank > 3) {
-    //   Serial.println("Invalid tank");
-    //   return;
-    // }
-    // if (pressure <= 0 || duration_test <= 0) {
-    //   Serial.println("Invalid pressure/duration");
-    //   return;
-    // }
+    if (tank < 1 || tank > 3) {
+      Serial.println("Invalid tank");
+      return;
+    }
+    if (pressure <= 0 || duration_test <= 0) {
+      Serial.println("Invalid pressure/duration");
+      return;
+    }
 
-    // BB_param_set(tank, pressure);
-    // BB_enable(tank, 1);
+    BB_param_set(tank, pressure);
+    BB_enable(tank, 1);
 
-    // discharge_test = 1;  // ou state_test_spe, mais sois cohérent
-    // time_test_begin = millis();
-    // state_test_spe = 1;
-    // bool_file = 0;
+    set_offset_pressure();
 
-    // setValve(SV25, 1);
-    // setValve(SV71, 1);
+    discharge_test = 1;  
+    time_test_begin = millis();
+    state_test_spe = 1;
+    bool_file = 0;
+
+    setValve(valve, 1);
 
   } else if (command.startsWith("set print")) {  // launch(2,3000,10000)
     int openParen = command.indexOf('(');
@@ -437,7 +442,39 @@ void processCommand(String command) {
 
     Serial.print("set act right : ");
     Serial.println(value);
-    
+  }
+  else if (command.startsWith("set ingnite_sequence")){
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    bool state_v = command.substring(openParen + 1, closeParen).toInt();
+
+    ignite_sequence_serial = state_v; 
+
+    Serial.print("set Print Sequence to : ");
+    Serial.println(state_v);
+  }
+  else if (command.startsWith("set BB_serial")){
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    bool state_v = command.substring(openParen + 1, closeParen).toInt();
+
+    BB_serial = state_v; 
+
+    Serial.print("set BB_serial to : ");
+    Serial.println(state_v);
+  }
+  else if (command.startsWith("set offset_serial")){
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    bool state_v = command.substring(openParen + 1, closeParen).toInt();
+
+    offset_serial = state_v; 
+
+    Serial.print("set offset_serial to : ");
+    Serial.println(state_v);
   }
   // Add more command parsing as needed
 }
