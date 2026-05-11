@@ -6,6 +6,7 @@
 uint32_t BB_check_time;
 uint32_t BB_check_duration = 30000;
 
+
 #define PL_pin 36  // pilot light pin 
 
 
@@ -24,6 +25,8 @@ void setup() {
   pinMode(PL_pin, OUTPUT);
   digitalWrite(GP_ignite_pin, LOW);
 
+  ActSetup();
+
   setupValves();
 
   Set_valve_position();
@@ -31,10 +34,10 @@ void setup() {
   setupSensors();
 
   delay(50);
-
+ 
   setupUDP();
   setupSaveData();
-
+  
   Data.test_cooling = 1;
 }
 

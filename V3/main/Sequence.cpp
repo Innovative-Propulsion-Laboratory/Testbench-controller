@@ -465,7 +465,8 @@ void Sequence() {
         break;
 
       case 20:
-        debug("[19] TVC (non implemente)");
+        debug("[19] TVC pattern en cours");
+        //shape(Sequence_data.TVC_pattern );
         Data.test_step++;
         count_down();
         break;

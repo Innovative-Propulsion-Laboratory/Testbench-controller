@@ -101,6 +101,7 @@ uint8_t tank;
 int pressure;
 uint32_t time_test_begin;
 bool discharge_test = 0;
+bool control = false;
 
 
 
@@ -374,6 +375,69 @@ void processCommand(String command) {
     Serial.print("set freq to : ");
     Serial.println(state_v);
 
+  }
+  else if (command.startsWith("set actl")) {  // launch(2,3000,10000)
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    uint8_t value = command.substring(openParen + 1, closeParen).toInt();
+
+    setActL(value);
+
+    Serial.print("set act left : ");
+    Serial.println(value);
+
+  }
+  else if (command.startsWith("set actr")) {
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    uint8_t value = command.substring(openParen + 1, closeParen).toInt();
+
+    setActR(value);
+
+    Serial.print("set act right : ");
+    Serial.println(value);
+    
+  }
+  else if (command.startsWith("set control")) {
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    int on = command.substring(openParen + 1, closeParen).toInt();
+    if (on == 1){
+      control = true;
+      Serial.println("control enabled");
+    }
+    else {
+      control = false;
+      Serial.println("control disabled");
+    }
+  }
+  else if (command == "z") {
+    if (control == true) {
+      valeur += 20;
+      applyValue();
+    }
+  }
+  else if (command == "s") 
+  {
+    if ( control == true) {
+      valeur -= 20;
+      applyValue();
+    }
+  }
+  else if (command.startsWith("tvc")) {
+    int openParen = command.indexOf('(');
+    int closeParen = command.indexOf(')');
+
+    uint8_t value = command.substring(openParen + 1, closeParen).toInt();
+
+    shape(value);
+
+    Serial.print("set act right : ");
+    Serial.println(value);
+    
   }
   // Add more command parsing as needed
 }

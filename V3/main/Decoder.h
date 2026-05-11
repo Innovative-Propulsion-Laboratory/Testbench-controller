@@ -2,6 +2,8 @@
 #define DECODER_H
 
 #include "Sensors.h"
+#include "TVC.h"
+#include "actuators.h"
 
 
 extern bool test_will_begin;

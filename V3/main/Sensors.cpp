@@ -190,7 +190,7 @@ void setupSensors() {
   Data.valvesState = valvePositions;
 
   //ADC setup
-  adc.begin(13, 11, 12, 37); //bool begin(sck, mosi, miso, cs);
+  //adc.begin(13, 11, 12, 37); //bool begin(sck, mosi, miso, cs);
 
   setup_current_reading();
 
