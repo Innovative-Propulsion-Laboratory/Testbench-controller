@@ -124,7 +124,7 @@ void serial_loop() {
   }
   if (discharge_test != 0) {
     if ((millis() - time_test_begin) >= duration_test) {
-      // setValve(valve, 0);
+      setValve(valve, 0);
       BB_enable(tank, 0);
       discharge_test = 0;
       state_test_spe = 0;
