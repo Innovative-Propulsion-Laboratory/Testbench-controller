@@ -91,33 +91,53 @@ void decode(byte* instructions) {
         Serial.println("Glowplug ON");
       }
     }
-    /* To be implemented when the digital potentiometers are ready
+    // To be implemented when the digital potentiometers are ready
     if (instructions[0] == 0xEE && instructions[1] == 0xEE && instructions[2] == 0xEE && instructions[3] == 0xEE) {  // Actuators
+      // the obcsur TVC name + instruction[5]
+
       if (instructions[4] == 0) {
-        // the obcsur TVC name + instruction[5]
+        setActR(instructions[5]);
+        Serial.print("Right actuator value = ");
+        Serial.println(instructions[5]);
       }
       if (instructions[4] == 1) {
-        // the obcsur TVC name + instruction[5]
+        setActL(instructions[5]);
+        Serial.print("Right actuator value = ");
+        Serial.println(instructions[5]); 
       }
     }
     if (instructions[0] == 0xEE && instructions[1] == 0xEE && instructions[2] == 0xDD && instructions[3] == 0xDD) {  // TVC pattern
+      
+      // int shape = instructions[4];
+      // shape(shape);
+      // Serial.print("TVC pattern : ");
+      
+      
       if (instructions[4] == 1) {
-        // the obcsur TVC name
+        Cross();
+        Serial.println("TVC pattern : Cross");
       }
       if (instructions[4] == 2) {
-        // the obcsur TVC name
+        Circle();
+        Serial.println("TVC pattern : Circle");
       }
       if (instructions[4] == 3) {
+        Square();
+        Serial.println("TVC pattern : Square");
         // the obcsur TVC name
       }
       if (instructions[4] == 4) {
+        UpandDown();
+        Serial.println("TVC pattern : Up and down");
         // the obcsur TVC name
       }
       if (instructions[4] == 5) {
+        LeftandRight();
+        Serial.println("TVC pattern : Left and right");
         // the obcsur TVC name
       }
     }
-    */
+    
     if (instructions[0] == 0xAA && instructions[1] == 0xAA && instructions[2] == 0xAA && instructions[3] == 0xAA) {  // Start test
       type_test = assembleUInt16(instructions[5], instructions[4]);
       Serial.print("Type test : ");
