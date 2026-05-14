@@ -14,6 +14,5 @@ void Circle();
 void Square();
 void UpandDown();
 void LeftandRight();
-void normalActuators();
 
 #endif

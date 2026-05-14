@@ -5,29 +5,30 @@
 // 1 = Cross
 // 2 = Circle
 // 3 = square
-// 4 = up-down
-// 5 = left right
+// 4 = triangle
+// 5 = up-down
+// 6 = left right
 
-int L1_cross[] = {129, 129, 249, 9, 129};
-int L2_cross[] = {9, 249, 129, 129, 9};
+int L1_cross[] = {214, 45, 124, 214, 45};
+int L2_cross[] = {45, 214, 124, 214, 45};
 
-int L1_circle[] = {45, 88, 109, 126, 141, 154, 
+int L1_circle[] = {45, 17, 11, 9, 10, 12, 
+  15, 20, 25, 31, 37, 45, 53, 61, 71, 81, 
+  92, 104, 118, 133, 150, 171, 214, 214, 242, 247, 
+  249, 249, 247, 243, 239, 234, 228, 221, 214, 206, 
+  197, 188, 177, 166, 154, 141, 126, 109, 88, 45};
+
+int L2_circle[] = {45, 88, 109, 126, 141, 154, 
   166, 177, 188, 197, 206, 214, 221, 228, 234, 239, 
   243, 247, 249, 249, 247, 242, 214, 214, 171, 150, 
   133, 118, 104, 92, 81, 71, 61, 53, 45, 37, 
   31, 25, 20, 15, 12, 10, 9, 11, 17, 45};
 
-int L2_circle[] = {214, 242, 247, 249, 249, 247, 
-  243, 239, 234, 228, 221, 214, 206, 197, 188, 177, 
-  166, 154, 141, 126, 109, 88, 45, 45, 17, 11, 
-  9, 10, 12, 15, 20, 25, 31, 37, 45, 53, 
-  61, 71, 81, 92, 104, 118, 133, 150, 171, 214};
+int L1_square[] = {187, 249, 129, 9, 129, 187};
+int L2_square[] = {187, 129, 9, 129, 249, 187};
 
-int L1_square[] = {187, 129, 9, 129, 249, 187};
-int L2_square[] = {67, 9, 129, 249, 129, 67};
-
-int L1_triangle[] = {187, 11, 109, 187};
-int L2_triangle[] = {67, 150, 247, 67};
+int L1_triangle[] = {187, 109, 11, 187};
+int L2_triangle[] = {187, 11, 109, 187};
 
 int L1_updown[] = {214, 45};
 int L2_updown[] = {45, 214};
@@ -42,73 +43,79 @@ int taille = 0;
 bool state_tvc = false;
 unsigned long last_time = 0;
 int i = 0;
+uint32_t in_between_time = 100;
 
+// si burn fini -> finir tvc (break loop)
 void loopTVC(int shape) {
-  shapeTVC(shape);
-
-  if (millis() - last_time >= 100) {
-    last_time = millis();
-    i++;
-    writePotWiper(0, (uint8_t)L1[i]);
-    writePotWiper(1, (uint8_t)L2[i]);
-    if (i >= taille) {
-      state_tvc = false;
-      normalActuators();
+  if (state_tvc) {
+    if (millis() - last_time >= in_between_time) {
+      last_time = millis();
+      i++;
+      if (i >= taille) {
+        state_tvc = false;
+        normalActuators();
+      }
+      writePotWiper(0, (uint8_t)L1[i]);
+      writePotWiper(1, (uint8_t)L2[i]);
     }
   }
 }
-  // attendre le temps , 
-  // temps ,
-  // listes de positions ,
-  // evolution du temps 
-  // fini : bool = false ,
-  // normalactuators() ,
-  // while (!fini) ,
-  // si burn fini -> finir tvc (break loop)
 
 void shapeTVC(int shape) {
   switch (shape) {
     case 1:
-      state_tvc = true;
       L1 = L1_cross;
       L2 = L2_cross;
       taille = sizeof(L1_cross) / sizeof(L1_cross[0]);
+      in_between_time = 100;
       break;
     case 2:
-      state_tvc = true;
       L1 = L1_circle;
       L2 = L2_circle;
       taille = sizeof(L1_circle) / sizeof(L1_circle[0]);
+      in_between_time = 50;
       break;
     case 3:
-      state_tvc = true;
       L1 = L1_square;
       L2 = L2_square;
       taille = sizeof(L1_square) / sizeof(L1_square[0]);
+      in_between_time = 100;
       break;
     case 4:
-      state_tvc = true;
       L1 = L1_triangle;
       L2 = L2_triangle;
       taille = sizeof(L1_triangle) / sizeof(L1_triangle[0]);
+      in_between_time = 100;
       break;
     case 5:
-      state_tvc = true;
       L1 = L1_updown;
       L2 = L2_updown;
       taille = sizeof(L1_updown) / sizeof(L1_updown[0]);
+      in_between_time = 100;
       break;
     case 6:
-      state_tvc = true;
       L1 = L1_leftright;
       L2 = L2_leftright;
       taille = sizeof(L1_leftright) / sizeof(L1_leftright[0]);
+      in_between_time = 100;
       break;
     default:
       state_tvc = false;
       normalActuators();
   }
 }
+
+void confirmTVCstate(bool state) {
+  if (state){
+    state_tvc = true;
+  } else {
+    state_tvc = false;
+  }
+}
+
+// =============================================================
+// =============================================================
+
 
 void shape(int shape) {
   switch (shape) {
