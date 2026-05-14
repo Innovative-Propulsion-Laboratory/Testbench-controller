@@ -5,12 +5,14 @@
 #include <SPI.h>
 #include <Arduino.h>
 
+void loopTVC(int shape);
+void shapeTVC(int shape);
 void shape(int shape);
+void Triangle();
 void Cross();
 void Circle();
 void Square();
 void UpandDown();
 void LeftandRight();
-void normalActuators();
 
 #endif

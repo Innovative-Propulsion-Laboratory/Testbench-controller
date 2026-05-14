@@ -385,6 +385,7 @@ void processCommand(String command) {
 
   }
   else if (command.startsWith("set actl")) {  // launch(2,3000,10000)
+    Serial.println("ici");
     int openParen = command.indexOf('(');
     int closeParen = command.indexOf(')');
 
