@@ -99,7 +99,7 @@ String command;
 uint32_t duration_test;
 uint8_t tank;
 int pressure;
-// uint8_t valve;
+uint8_t valve;
 uint32_t time_test_begin;
 bool discharge_test = 0;
 bool control = false;
@@ -128,6 +128,7 @@ void serial_loop() {
       BB_enable(tank, 0);
       discharge_test = 0;
       state_test_spe = 0;
+      Serial.println("finish");
     }
   }
 }
@@ -326,9 +327,9 @@ void processCommand(String command) {
     tank = command.substring(openParen + 1, comma1).toInt();
     int pressure = command.substring(comma1 + 1, comma2).toInt();
     duration_test = command.substring(comma2 + 1, comma3).toInt();
-    uint8_t valve = convertValve(command.substring(comma3 + 1, closeParen));
+    valve = convertValve(command.substring(comma3 + 1, closeParen));
 
-    if (tank < 1 || tank > 3) {
+    if (tank < 1 || tank > 6) {
       Serial.println("Invalid tank");
       return;
     }
@@ -341,6 +342,8 @@ void processCommand(String command) {
     BB_enable(tank, 1);
 
     set_offset_pressure();
+
+    Serial.println("Starting timing test with tank " + String(tank) + ", pressure " + String(pressure) + " mbar, duration " + String(duration_test) + " ms, valve " + String(valve));
 
     discharge_test = 1;  
     time_test_begin = millis();
@@ -425,8 +428,7 @@ void processCommand(String command) {
       applyValue();
     }
   }
-  else if (command == "s") 
-  {
+  else if (command == "s") {
     if ( control == true) {
       valeur -= 20;
       applyValue();

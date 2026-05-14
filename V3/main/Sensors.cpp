@@ -1353,7 +1353,7 @@ void save_spe_Data() {
     return;
   }
 
-  String line = String(Data.n) + "," + String(Data.t) + "," + String(Data.PS61) + "," + String(Data.PS62) + "," + String(Data.PS63) + "," + String(Data.PS64);
+  String line = String(Data.n) + "," + String(Data.t) + "," + String(Data.PS61) + "," + String(Data.PS62) + "," + String(Data.PS22);
   fp.println(line);
   fp.close();
 }
