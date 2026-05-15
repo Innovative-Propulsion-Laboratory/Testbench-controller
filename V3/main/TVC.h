@@ -5,8 +5,10 @@
 #include <SPI.h>
 #include <Arduino.h>
 
-void loopTVC(int shape);
+void loopTVC();
 void shapeTVC(int shape);
+void confirmTVCstate(bool state);
+
 void shape(int shape);
 void Triangle();
 void Cross();

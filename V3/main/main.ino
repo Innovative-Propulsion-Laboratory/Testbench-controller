@@ -45,6 +45,7 @@ void loop() {
   // Listen to commands
   Packet p = receivePacket();
   serial_loop();
+  loopTVC();
   if (p.length >= 4 && p.data != nullptr) {
     decode(p.data);
   }

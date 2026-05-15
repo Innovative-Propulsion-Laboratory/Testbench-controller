@@ -409,6 +409,22 @@ void processCommand(String command) {
     Serial.println(value);
     
   }
+  else if (command.startsWith("set act")) {
+    int openParen = command.indexOf('(');
+    int comma = command.indexOf(',');
+    int closeParen = command.indexOf(')');
+
+    int value1 = command.substring(openParen + 1, comma).toInt();
+    int value2 = command.substring(comma + 1, closeParen).toInt();
+
+    setActuators(value1, value2);
+
+    Serial.print("set act right : ");
+    Serial.println(value1);
+    Serial.print("set act left : ");
+    Serial.println(value2);
+    
+  }
   else if (command.startsWith("set control")) {
     int openParen = command.indexOf('(');
     int closeParen = command.indexOf(')');
@@ -441,7 +457,8 @@ void processCommand(String command) {
 
     uint8_t value = command.substring(openParen + 1, closeParen).toInt();
 
-    shape(value);
+    shapeTVC(value);
+    confirmTVCstate(1);
 
     Serial.print("set act right : ");
     Serial.println(value);

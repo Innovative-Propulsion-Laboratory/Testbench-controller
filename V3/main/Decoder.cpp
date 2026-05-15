@@ -108,33 +108,35 @@ void decode(byte* instructions) {
     }
     if (instructions[0] == 0xEE && instructions[1] == 0xEE && instructions[2] == 0xDD && instructions[3] == 0xDD) {  // TVC pattern
       
-      // int shape = instructions[4];
-      // shape(shape);
-      // Serial.print("TVC pattern : ");
-      
-      
       if (instructions[4] == 1) {
-        Cross();
+        shapeTVC(1);
+        confirmTVCstate(1);
         Serial.println("TVC pattern : Cross");
       }
       if (instructions[4] == 2) {
-        Circle();
+        shapeTVC(2);
+        confirmTVCstate(1);
         Serial.println("TVC pattern : Circle");
       }
       if (instructions[4] == 3) {
-        Square();
+        shapeTVC(3);
+        confirmTVCstate(1);
         Serial.println("TVC pattern : Square");
-        // the obcsur TVC name
       }
       if (instructions[4] == 4) {
-        UpandDown();
-        Serial.println("TVC pattern : Up and down");
-        // the obcsur TVC name
+        shapeTVC(4);
+        confirmTVCstate(1);
+        Serial.println("TVC pattern : Triangle");
       }
       if (instructions[4] == 5) {
-        LeftandRight();
+        shapeTVC(5);
+        confirmTVCstate(1);
+        Serial.println("TVC pattern : Up and down");
+      }
+      if (instructions[4] == 6) {
+        shapeTVC(6);
+        confirmTVCstate(1);
         Serial.println("TVC pattern : Left and right");
-        // the obcsur TVC name
       }
     }
     
